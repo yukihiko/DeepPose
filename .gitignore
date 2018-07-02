@@ -1,0 +1,5 @@
+*.pyc
+orig_data
+data
+cover
+result

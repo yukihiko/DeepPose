@@ -1,0 +1,22 @@
+machine:
+  timezone:
+    Asia/Tokyo
+  python:
+    version: 2.7
+
+general:
+  artifacts:
+    - docs/_build/html
+    - cover
+
+dependencies:
+  pre:
+    - pip install pyflakes pycodestyle
+    - pip install sphinx
+
+test:
+  pre:
+    - pyflakes modules
+    - pycodestyle modules tests
+  post:
+    - cd docs && make html
