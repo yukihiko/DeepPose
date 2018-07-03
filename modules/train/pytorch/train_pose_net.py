@@ -32,13 +32,14 @@ class TrainLogger(object):
         self.file = open(os.path.join(out, 'log'), 'w')
         self.logs = []
 
-    def write(self, log):
+    def write(self, log, colab=False):
         """ Write log. """
         tqdm.write(log)
         tqdm.write(log, file=self.file)
         self.file.flush()
         self.logs.append(log)
-        subprocess.run(["cp", "./result/pytorch/log", "../drive/result/pytorch/log.txt"])
+        if colab == True:
+            subprocess.run(["cp", "./result/pytorch/log", "../drive/result/pytorch/log.txt"])
 
     def state_dict(self):
         """ Returns the state of the logger. """
@@ -94,6 +95,7 @@ class TrainPoseNet(object):
         self.resume = kwargs['resume']
         self.resume_model = kwargs['resume_model']
         self.resume_opt = kwargs['resume_opt']
+        self.colab = kwargs['colab']
         # validate arguments.
         self._validate_arguments()
 
@@ -135,7 +137,7 @@ class TrainPoseNet(object):
             optimizer.step()
             if iteration % log_interval == 0:
                 log = 'elapsed_time: {0}, loss: {1}'.format(time.time() - start_time, loss.data[0])
-                logger.write(log)
+                logger.write(log, self.colab)
                 """
                 if loss.data[0] < 0.15 and lr > 0.001:
                     lr = 0.001
@@ -161,13 +163,16 @@ class TrainPoseNet(object):
             test_loss += mean_squared_error(output.view(-1, self.Nj, 2), pose, visibility, self.use_visibility).data[0]
         test_loss /= len(test_iter)
         log = 'elapsed_time: {0}, validation/loss: {1}'.format(time.time() - start_time, test_loss)
-        logger.write(log)
+        logger.write(log, self.colab)
 
     def _checkpoint(self, epoch, model, optimizer, logger):
         filename = os.path.join(self.out, 'pytorch', 'epoch-{0}'.format(epoch + 1))
         torch.save({'epoch': epoch + 1, 'logger': logger.state_dict()}, filename + '.iter')
         torch.save(model.state_dict(), filename + '.model')
         torch.save(optimizer.state_dict(), filename + '.state')
+        if self.colab == True:
+            subprocess.run(["cp", "./result/pytorch/epoch-{0}.model".format(epoch + 1), "../drive/result/pytorch/epoch-{0}.model".format(epoch + 1)])
+
 
     def start(self):
         """ Train pose net. """
