@@ -59,7 +59,7 @@
                 "-g0",
                 "--NN=ResNet",
                 "--batchsize=32",
-                "--resume-model=D:/work/DeepPose/pytorch/epoch-320.model",
+                "--resume-model=D:/work/DeepPose/pytorch/epoch-20.model",
                 "--out=D:/work/DeepPose",
                 "--data-augmentation",
                 "-e5000"
