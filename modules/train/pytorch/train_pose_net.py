@@ -38,7 +38,7 @@ class TrainLogger(object):
         tqdm.write(log, file=self.file)
         self.file.flush()
         self.logs.append(log)
-        subprocess.call("!cp result/pytorch/log ../drive/result/pytorch/log.txt")
+        subprocess.call("cp result/pytorch/log ../drive/result/pytorch/log.txt")
 
     def state_dict(self):
         """ Returns the state of the logger. """
