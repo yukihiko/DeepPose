@@ -13,7 +13,7 @@ import torch.nn as nn
 import subprocess
 
 from modules.errors import FileNotFoundError, GPUNotFoundError, UnknownOptimizationMethodError, NotSupportedError
-from modules.models.pytorch import AlexNet, VGG19Net, Inceptionv3, Resnet
+from modules.models.pytorch import AlexNet, VGG19Net, Inceptionv3, Resnet, MobileNet, MobileNetV2
 from modules.dataset_indexing.pytorch import PoseDataset, Crop, RandomNoise, Scale
 from modules.functions.pytorch import mean_squared_error
 
@@ -117,7 +117,7 @@ class TrainPoseNet(object):
 
     def _get_optimizer(self, model):
         if self.opt == 'MomentumSGD':
-            optimizer = optim.SGD(model.parameters(), lr=0.0001, momentum=0.9)
+            optimizer = optim.SGD(model.parameters(), lr=0.001, momentum=0.9)
         elif self.opt == "Adam":
             optimizer = optim.Adam(model.parameters())
         return optimizer
@@ -201,6 +201,10 @@ class TrainPoseNet(object):
             # model.fc= m3
         elif self.NN == "ResNet":
             model = Resnet( )
+        elif self.NN == "MobileNet":
+            model = MobileNet( )
+        elif self.NN == "MobileNetV2":
+            model = MobileNetV2( )
         else :
              model = AlexNet(self.Nj)
            

@@ -14,7 +14,7 @@ class Crop(object):
         crop_size (int): Size of cropping.
     """
 
-    def __init__(self, data_augmentation=True, crop_size=227):
+    def __init__(self, data_augmentation=True, crop_size=224):
         self.data_augmentation = data_augmentation
         self.crop_size = crop_size
 
@@ -68,7 +68,7 @@ class Scale(object):
         value (int): Divide value.
     """
 
-    def __init__(self, value=227):
+    def __init__(self, value=224):
         self.value = value
 
     def __call__(self, pose):
