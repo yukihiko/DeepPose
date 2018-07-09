@@ -21,7 +21,7 @@
             "args": [
                 "10000",
                 "\"plot_estimating_time\"",
-                "--pytorch-model-file=D:/work/DeepPose/pytorch/epoch-260.model",
+                "--pytorch-model-file=D:/work/DeepPose/pytorch/epoch-560.model",
                 "-g0"
             ]
         },              {
@@ -58,8 +58,8 @@
                 "pytorch",
                 "-g0",
                 "--NN=MobileNet",
-                "--batchsize=32",
-                "--resume-model=D:/work/DeepPose/pytorch/epoch-260.model",
+                "--batchsize=64",
+                "--resume-model=D:/work/DeepPose/pytorch/epoch-560.model",
                 "--out=D:/work/DeepPose",
                 "--data-augmentation",
                 "-e5000"

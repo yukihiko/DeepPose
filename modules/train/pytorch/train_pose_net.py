@@ -117,7 +117,7 @@ class TrainPoseNet(object):
 
     def _get_optimizer(self, model):
         if self.opt == 'MomentumSGD':
-            optimizer = optim.SGD(model.parameters(), lr=0.001, momentum=0.9)
+            optimizer = optim.SGD(model.parameters(), lr=0.00001, momentum=0.9)
         elif self.opt == "Adam":
             optimizer = optim.Adam(model.parameters())
         return optimizer

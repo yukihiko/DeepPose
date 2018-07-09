@@ -7,7 +7,7 @@ from torchvision import transforms
 
 from modules.errors import GPUNotFoundError
 from modules.dataset_indexing.pytorch import PoseDataset, Crop, RandomNoise, Scale
-from modules.models.pytorch import AlexNet, VGG19Net, Inceptionv3, Resnet
+from modules.models.pytorch import AlexNet, VGG19Net, Inceptionv3, Resnet, MobileNet
 
 
 class PoseEstimator(object):
@@ -27,7 +27,8 @@ class PoseEstimator(object):
             raise GPUNotFoundError('GPU is not found.')
         # initialize model to estimate.
         #self.model = AlexNet(Nj)
-        self.model = Resnet()
+        #self.model = Resnet()
+        self.model = MobileNet()
         self.model.load_state_dict(torch.load(model_file))
         if isEval == True:
             self.model.eval()
