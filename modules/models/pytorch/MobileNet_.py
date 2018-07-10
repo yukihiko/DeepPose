@@ -41,7 +41,8 @@ class MobileNet_(nn.Module):
             conv_dw(512, 1024, 1),
             conv_dw(1024, 1024, 1),
         )
-        self.fc = nn.Linear(1024, 14*2)
+        self.heatmap = nn.Conv2d(1024, 14, 1)
+        self.output = nn.Conv2d(1024, 28, 1)
 
     def forward(self, x):
         x = self.model(x)
