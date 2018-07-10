@@ -3,15 +3,15 @@
 import torch.nn as nn
 import torch.nn.functional as F
 
-class MobileNet(nn.Module):
+class MobileNet_(nn.Module):
     def __init__(self):
-        super(MobileNet, self).__init__()
+        super(MobileNet_, self).__init__()
 
         def conv_bn(inp, oup, stride):
             return nn.Sequential(
                 nn.Conv2d(inp, oup, 3, stride, 1, bias=False),
                 nn.BatchNorm2d(oup),
-                nn.ReLU(inplace=True)
+                nn.ReLU6(inplace=True)
             )
 
         def conv_dw(inp, oup, stride):
@@ -38,11 +38,8 @@ class MobileNet(nn.Module):
             conv_dw(512, 512, 1),
             conv_dw(512, 512, 1),
             conv_dw(512, 512, 1),
-            #conv_dw(512, 1024, 2),
             conv_dw(512, 1024, 1),
             conv_dw(1024, 1024, 1),
-            #nn.AvgPool2d(7),
-            nn.AvgPool2d(14),
         )
         self.fc = nn.Linear(1024, 14*2)
 
