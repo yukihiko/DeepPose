@@ -60,8 +60,8 @@ class MobileNet_(nn.Module):
         _, argmax = reshaped.max(-1)
         yCoords = argmax/self.col
         xCoords = argmax - yCoords*self.col
-        xc =  xCoords.cpu().data[0].numpy()
-        yc =  yCoords.cpu().data[0].numpy()
+        xc =  xCoords.cpu().data.numpy()
+        yc =  yCoords.cpu().data.numpy()
         op = o.cpu().data.numpy()
         #px = (op[:, 0, xc, yc] + xc * self.col)/227.0
         #py = (op[:, 1, xc, yc] + yc * self.col)/227.0
