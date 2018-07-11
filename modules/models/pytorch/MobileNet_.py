@@ -63,8 +63,10 @@ class MobileNet_(nn.Module):
         xc =  xCoords.cpu().data[0].numpy()
         yc =  yCoords.cpu().data[0].numpy()
         op = o.cpu().data.numpy()
-        px = (op[:, 0, xc, yc] + xc * self.col)/227.0
-        py = (op[:, 1, xc, yc] + yc * self.col)/227.0
+        #px = (op[:, 0, xc, yc] + xc * self.col)/227.0
+        #py = (op[:, 1, xc, yc] + yc * self.col)/227.0
+        px = xc * self.col/227.0
+        py = yc * self.col/227.0
         
         res = np.hstack([px, py])
         p=Variable(torch.from_numpy(res), requires_grad=True).float()
