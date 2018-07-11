@@ -129,12 +129,13 @@ class TrainPoseNet(object):
             image, pose, visibility = Variable(batch[0]), Variable(batch[1]), Variable(batch[2])
             if self.gpu:
                 image, pose, visibility = image.cuda(), pose.cuda(), visibility.cuda()
+            
             optimizer.zero_grad()
             output = model(image)
             loss = mean_squared_error(output.view(-1, self.Nj, 2), pose, visibility, self.use_visibility)
-            #loss = Variable.norm(output - pose)
             loss.backward()
             optimizer.step()
+               
             if iteration % log_interval == 0:
                 log = 'elapsed_time: {0}, loss: {1}'.format(time.time() - start_time, loss.data[0])
                 logger.write(log, self.colab)

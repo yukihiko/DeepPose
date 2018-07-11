@@ -11,7 +11,7 @@ class MobileNet(nn.Module):
             return nn.Sequential(
                 nn.Conv2d(inp, oup, 3, stride, 1, bias=False),
                 nn.BatchNorm2d(oup),
-                nn.ReLU(inplace=True)
+                nn.ReLU6(inplace=True)
             )
 
         def conv_dw(inp, oup, stride):
