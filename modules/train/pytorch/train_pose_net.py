@@ -15,7 +15,7 @@ import subprocess
 from modules.errors import FileNotFoundError, GPUNotFoundError, UnknownOptimizationMethodError, NotSupportedError
 from modules.models.pytorch import AlexNet, VGG19Net, Inceptionv3, Resnet, MobileNet, MobileNetV2, MobileNet_
 from modules.dataset_indexing.pytorch import PoseDataset, Crop, RandomNoise, Scale
-from modules.functions.pytorch import mean_squared_error
+from modules.functions.pytorch import mean_squared_error, mean_squared_error2,mean_squared_error3
 
 class TrainLogger(object):
     """ Logger of training pose net.
@@ -131,9 +131,20 @@ class TrainPoseNet(object):
                 image, pose, visibility = image.cuda(), pose.cuda(), visibility.cuda()
             
             optimizer.zero_grad()
-            output = model(image)
-            loss = mean_squared_error(output.view(-1, self.Nj, 2), pose, visibility, self.use_visibility)
-            loss.backward()
+
+            if self.NN == "MobileNet_":
+                offset, heatmap = model(image)
+                loss = mean_squared_error2(offset, heatmap, pose, visibility, self.use_visibility)
+                loss.backward()
+            elif self.NN == "MobileNet":
+                output = model(image)
+                loss = mean_squared_error3(output, pose, visibility, self.use_visibility)
+                loss.backward()
+            else :
+                output = model(image)
+                loss = mean_squared_error(output.view(-1, self.Nj, 2), pose, visibility, self.use_visibility)
+                loss.backward()
+
             optimizer.step()
                
             if iteration % log_interval == 0:
@@ -160,8 +171,17 @@ class TrainPoseNet(object):
             image, pose, visibility = Variable(batch[0]), Variable(batch[1]), Variable(batch[2])
             if self.gpu:
                 image, pose, visibility = image.cuda(), pose.cuda(), visibility.cuda()
-            output = model(image)
-            test_loss += mean_squared_error(output.view(-1, self.Nj, 2), pose, visibility, self.use_visibility).data[0]
+            
+            if self.NN == "MobileNet_":
+                offset, heatmap = model(image)
+                test_loss += mean_squared_error2(offset, heatmap, pose, visibility, self.use_visibility).data[0]
+            elif self.NN == "MobileNet":
+                output = model(image)
+                test_loss += mean_squared_error3(output, pose, visibility, self.use_visibility).data[0]
+            else :
+                output = model(image)
+                test_loss += mean_squared_error(output.view(-1, self.Nj, 2), pose, visibility, self.use_visibility).data[0]
+
         test_loss /= len(test_iter)
         log = 'elapsed_time: {0}, validation/loss: {1}'.format(time.time() - start_time, test_loss)
         logger.write(log, self.colab)
@@ -241,7 +261,7 @@ class TrainPoseNet(object):
         # set intervals.
         val_interval = 10
         #resume_interval = self.epoch/10
-        resume_interval = 20
+        resume_interval = 10
         log_interval = 10
         # set logger and start epoch.
         logger = TrainLogger(os.path.join(self.out, 'pytorch'))

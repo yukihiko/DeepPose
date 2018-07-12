@@ -20,7 +20,7 @@ class TestCrop(unittest.TestCase):
         # crop on a pose center
         pose = torch.Tensor([[108, 50], [148, 180]])
         transformed_image, transformed_pose, transformed_visibility = self.transform(image, pose, visibility)
-        eq_(transformed_image.size(), (3, 227, 227))
+        eq_(transformed_image.size(), (3, 224, 224))
         ok_((transformed_image == image[:, 1:228, 14:241]).all())
         eq_(type(transformed_pose), torch.FloatTensor)
         correct = torch.Tensor([[94, 49], [134, 179]])
@@ -29,7 +29,7 @@ class TestCrop(unittest.TestCase):
         # left side is too tight
         pose = torch.Tensor([[40, 50], [160, 180]])
         transformed_image, transformed_pose, transformed_visibility = self.transform(image, pose, visibility)
-        eq_(transformed_image.size(), (3, 227, 227))
+        eq_(transformed_image.size(), (3, 224, 224))
         ok_((transformed_image == image[:, 1:228, :227]).all())
         eq_(type(transformed_pose), torch.FloatTensor)
         correct = torch.Tensor([[40, 49], [160, 179]])
@@ -38,7 +38,7 @@ class TestCrop(unittest.TestCase):
         # right side is too tight
         pose = torch.Tensor([[100, 50], [200, 180]])
         transformed_image, transformed_pose, transformed_visibility = self.transform(image, pose, visibility)
-        eq_(transformed_image.size(), (3, 227, 227))
+        eq_(transformed_image.size(), (3, 224, 224))
         ok_((transformed_image == image[:, 1:228, 29:]).all())
         eq_(type(transformed_pose), torch.FloatTensor)
         correct = torch.Tensor([[71, 49], [171, 179]])
@@ -49,7 +49,7 @@ class TestCrop(unittest.TestCase):
         visibility[2] = 0
         pose = torch.Tensor([[108, 50], [148, 180], [250, 250]])
         transformed_image, transformed_pose, transformed_visibility = self.transform(image, pose, visibility)
-        eq_(transformed_image.size(), (3, 227, 227))
+        eq_(transformed_image.size(), (3, 224, 224))
         ok_((transformed_image == image[:, 1:228, 14:241]).all())
         eq_(type(transformed_pose), torch.FloatTensor)
         correct = torch.Tensor([[94, 49], [134, 179], [236, 249]])
@@ -61,12 +61,12 @@ class TestCrop(unittest.TestCase):
         image = torch.zeros(3, 256, 256)
         visibility = torch.ones(2, 2)
         for i in range(20):
-            pose = torch.rand(2, 2)*227
+            pose = torch.rand(2, 2)*224
             transformed_image, transformed_pose, transformed_visibility = self.transform(image, pose, visibility)
-            eq_(transformed_image.size(), (3, 227, 227))
+            eq_(transformed_image.size(), (3, 224, 224))
             eq_(type(transformed_pose), torch.Tensor)
             ok_((transformed_pose >= 0).all())
-            ok_((transformed_pose <= 227).all())
+            ok_((transformed_pose <= 224).all())
             ok_((transformed_visibility == visibility).all())
 
 
@@ -99,7 +99,7 @@ class TestRandomNoise(unittest.TestCase):
 class TestScale(unittest.TestCase):
 
     def setUp(self):
-        self.value = 227
+        self.value = 224
         self.transform = Scale(self.value)
 
     def test_call(self):

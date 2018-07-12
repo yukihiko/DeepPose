@@ -56,7 +56,7 @@ class TestPoseDataset(unittest.TestCase):
         pose = np.array([[108, 50], [148, 180]], dtype=np.float32)
         cropped_image, moved_pose = self.dataset._crop_image(image, pose, visibility)
         eq_(cropped_image.dtype, np.float32)
-        eq_(cropped_image.shape, (3, 227, 227))
+        eq_(cropped_image.shape, (3, 224, 224))
         ok_((cropped_image == image[:, 1:228, 14:241]).all())
         eq_(moved_pose.dtype, np.float32)
         correct = np.array([[94, 49], [134, 179]])
@@ -65,7 +65,7 @@ class TestPoseDataset(unittest.TestCase):
         pose = np.array([[40, 50], [160, 180]], dtype=np.float32)
         cropped_image, moved_pose = self.dataset._crop_image(image, pose, visibility)
         eq_(cropped_image.dtype, np.float32)
-        eq_(cropped_image.shape, (3, 227, 227))
+        eq_(cropped_image.shape, (3, 224, 224))
         ok_((cropped_image == image[:, 1:228, :227]).all())
         eq_(moved_pose.dtype, np.float32)
         correct = np.array([[40, 49], [160, 179]])
@@ -74,7 +74,7 @@ class TestPoseDataset(unittest.TestCase):
         pose = np.array([[100, 50], [200, 180]], dtype=np.float32)
         cropped_image, moved_pose = self.dataset._crop_image(image, pose, visibility)
         eq_(cropped_image.dtype, np.float32)
-        eq_(cropped_image.shape, (3, 227, 227))
+        eq_(cropped_image.shape, (3, 224, 224))
         ok_((cropped_image == image[:, 1:228, 29:]).all())
         eq_(moved_pose.dtype, np.float32)
         correct = np.array([[71, 49], [171, 179]])
@@ -85,13 +85,13 @@ class TestPoseDataset(unittest.TestCase):
         image = np.zeros((3, 256, 256), dtype=np.float32)
         visibility = np.ones((2, 1), dtype=np.int32)
         for i in range(20):
-            pose = np.random.rand(2, 2).astype(np.float32)*227
+            pose = np.random.rand(2, 2).astype(np.float32)*224
             cropped_image, moved_pose = self.dataset._crop_image(image, pose, visibility)
             eq_(cropped_image.dtype, np.float32)
-            eq_(cropped_image.shape, (3, 227, 227))
+            eq_(cropped_image.shape, (3, 224, 224))
             eq_(moved_pose.dtype, np.float32)
             ok_((moved_pose >= 0).all())
-            ok_((moved_pose <= 227).all())
+            ok_((moved_pose <= 224).all())
 
     def _calculate_image_eigen(self, image):
         C = np.cov(np.reshape(image, (3, -1)))
@@ -130,7 +130,7 @@ class TestPoseDataset(unittest.TestCase):
                 image, pose, visibility = self.dataset.get_example(i)
                 # test for image.
                 eq_(image.dtype, np.float32)
-                eq_(image.shape, (3, 227, 227))
+                eq_(image.shape, (3, 224, 224))
                 self.assertGreaterEqual(np.min(image), 0)
                 self.assertLessEqual(np.max(image), 1)
                 # test for pose.

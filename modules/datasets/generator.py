@@ -21,7 +21,7 @@ class DatasetGenerator(object):
         output (str): An output path for generated datasets.
     """
 
-    def __init__(self, image_size=256, crop_size=227, path='orig_data', output='data'):
+    def __init__(self, image_size=256, crop_size=224, path='orig_data', output='data'):
         try:
             os.makedirs(os.path.join(output, 'images'))
         except OSError:

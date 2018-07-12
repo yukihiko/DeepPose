@@ -37,6 +37,19 @@ class Crop(object):
         transformed_image = image[:, crop_shape[2]:crop_shape[3], crop_shape[0]:crop_shape[1]]
         p_0 = torch.Tensor((crop_shape[0], crop_shape[2])).view(1, 2).expand_as(pose)
         transformed_pose = pose - p_0
+
+        #for i in range(14):
+        #    xi = int(transformed_pose[i, 0])
+        #    yi = int(transformed_pose[i, 1])
+        #    if xi < 0:
+        #        xi = 0
+        #    if xi > 224:
+        #        xi = 14
+        #    if yi < 0:
+        #        yi = 0
+        #    if yi > 224:
+        #        yi = 14
+
         return transformed_image, transformed_pose, visibility
 
 

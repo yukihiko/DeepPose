@@ -17,7 +17,7 @@ def main():
     parser.add_argument(
         "--image_size", "-S", type=int, default=256, help="Size of output image.")
     parser.add_argument(
-        "--crop_size", "-C", type=int, default=227, help="Size of cropping for DNN training.")
+        "--crop_size", "-C", type=int, default=224, help="Size of cropping for DNN training.")
     parser.add_argument(
         "--path", "-p", type=str, default="orig_data", help="A path to download datasets.")
     parser.add_argument(

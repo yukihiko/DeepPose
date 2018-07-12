@@ -16,7 +16,7 @@ class PoseDataset(dataset.DatasetMixin):
         crop_size (int): Size of cropping for DNN training.
     """
 
-    def __init__(self, path, data_augmentation=True, crop_size=227):
+    def __init__(self, path, data_augmentation=True, crop_size=224):
         self.path = path
         self.data_augmentation = data_augmentation
         self.crop_size = crop_size

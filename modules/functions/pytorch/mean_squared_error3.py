@@ -2,18 +2,23 @@
 """ Mean squared error function. """
 
 import torch.nn as nn
+import torch
 
 
-class MeanSquaredError(nn.Module):
+class MeanSquaredError3(nn.Module):
     """ Mean squared error (a.k.a. Euclidean loss) function. """
 
     def __init__(self, use_visibility=False):
-        super(MeanSquaredError, self).__init__()
+        super(MeanSquaredError3, self).__init__()
         self.use_visibility = use_visibility
 
     def forward(self, *inputs):
         x, t, v = inputs
-        t = t*v
+        #s = (s + 0.5).int()
+        #s =torch.cat([s, s], dim=1).float()
+        #x = x * s
+        #t = t*v
+        x = x.view(-1, 14, 2)
         diff = x - t
         if self.use_visibility:
             N = (v.sum()/2).data[0]
@@ -24,7 +29,7 @@ class MeanSquaredError(nn.Module):
         return diff.dot(diff)/N
 
 
-def mean_squared_error(x, t, v, use_visibility=False):
+def mean_squared_error3(x, t, v, use_visibility=False):
     """ Computes mean squared error over the minibatch.
 
     Args:
@@ -37,4 +42,4 @@ def mean_squared_error(x, t, v, use_visibility=False):
     Returns:
         Variable: A variable holding a scalar of the mean squared error loss.
     """
-    return MeanSquaredError(use_visibility)(x, t, v)
+    return MeanSquaredError3(use_visibility)(x, t, v)

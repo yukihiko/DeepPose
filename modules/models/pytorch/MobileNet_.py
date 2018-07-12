@@ -1,10 +1,7 @@
 # -*- coding: utf-8 -*-
 
-import torch
 import torch.nn as nn
 import torch.nn.functional as F
-import numpy as np
-from torch.autograd import Variable
 
 class MobileNet_(nn.Module):
     def __init__(self):
@@ -56,18 +53,4 @@ class MobileNet_(nn.Module):
         h = F.sigmoid(h)
         o = self.offset(x)
 
-        reshaped = h.view(-1, self.Nj, self.col*self.col)
-        _, argmax = reshaped.max(-1)
-        yCoords = argmax/self.col
-        xCoords = argmax - yCoords*self.col
-        xc =  xCoords.cpu().data.numpy()
-        yc =  yCoords.cpu().data.numpy()
-        op = o.cpu().data.numpy()
-        #px = (op[:, 0, xc, yc] + xc * self.col)/227.0
-        #py = (op[:, 1, xc, yc] + yc * self.col)/227.0
-        px = xc * self.col/227.0
-        py = yc * self.col/227.0
-        
-        res = np.hstack([px, py])
-        p=Variable(torch.from_numpy(res), requires_grad=True).float()
-        return p.cuda()
+        return o, h

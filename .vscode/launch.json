@@ -10,7 +10,7 @@
             "request": "launch",
             "program": "${workspaceFolder}/scripts/plot_dataset.py",
             "args": [
-                "${workspaceFolder}/data/test"
+                "${workspaceFolder}/data/train"
             ]
         },        
         {
@@ -42,7 +42,7 @@
             "args": [
                 "pytorch",
                 "-g0",
-                "--NN=MobileNet_",
+                "--NN=MobileNet",
                 "--batchsize=64",
                 "--out=D:/work/DeepPose",
                 "--data-augmentation",
@@ -60,9 +60,10 @@
                 "-g0",
                 "--NN=MobileNet",
                 "--batchsize=64",
-                "--resume-model=D:/work/DeepPose/pytorch/epoch-80.model",
+                "--resume-model=D:/work/DeepPose/pytorch/epoch-20.model",
                 "--out=D:/work/DeepPose",
                 "--data-augmentation",
+                "--use-visibility",
                 "--opt=Adam",
                 "-e5000"
             ]

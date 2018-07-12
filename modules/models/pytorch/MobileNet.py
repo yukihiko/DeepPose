@@ -45,9 +45,11 @@ class MobileNet(nn.Module):
             nn.AvgPool2d(14),
         )
         self.fc = nn.Linear(1024, 14*2)
+        self.fc2 = nn.Linear(1024, 14)
 
     def forward(self, x):
         x = self.model(x)
         x = x.view(-1, 1024)
-        x = self.fc(x)
-        return x
+        o = self.fc(x)
+        #s = F.sigmoid(self.fc2(x))
+        return o
