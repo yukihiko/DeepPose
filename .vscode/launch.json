@@ -42,9 +42,8 @@
             "args": [
                 "pytorch",
                 "-g0",
-                "--NN=MobileNet",
+                "--NN=MobileNet_",
                 "--batchsize=64",
-                "--out=D:/work/DeepPose",
                 "--data-augmentation",
                 "--use-visibility",
                 "--opt=Adam",

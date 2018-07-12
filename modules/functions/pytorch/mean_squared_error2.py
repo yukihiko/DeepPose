@@ -20,20 +20,24 @@ class MeanSquaredError2(nn.Module):
 
         s = h.size()
         tt = torch.zeros(s).float()
+        pp = torch.zeros(o.size()).float()
         ti = t*self.col
         for i in range(s[0]):
             for j in range(self.Nj):
-                xi = int(ti[i, j, 0])
-                yi = int(ti[i, j, 1])
-                if xi < 0:
-                    xi = 0
-                if xi > 14:
-                    xi = 14
-                if yi < 0:
-                    yi = 0
-                if yi > 14:
-                    yi = 14
-                tt[ i, j, xi, yi]  = 1
+                if int(v[i, j, 0]) == 1:
+                    xi = int(ti[i, j, 0])
+                    yi = int(ti[i, j, 1])
+                    if xi < 0:
+                        xi = 0
+                    if xi > 13:
+                        xi = 13
+                    if yi < 0:
+                        yi = 0
+                    if yi > 13:
+                        yi = 13
+                    tt[ i, j, xi, yi]  = 1
+                    pp[ i, 0, xi, yi]  = float((t[i, j, 0] - 14*xi) / 224.0)
+                    pp[ i, 1, xi, yi]  = float((t[i, j, 1] - 14*yi) / 224.0)
 
         reshaped = h.view(-1, self.Nj, self.col*self.col)
         _, argmax = reshaped.max(-1)
@@ -61,13 +65,16 @@ class MeanSquaredError2(nn.Module):
         py = yc * self.col/224.0
         p = np.hstack([px, py])
         x=Variable(torch.from_numpy(p), requires_grad=True).float().cuda().view(-1, self.Nj, 2)
+        
+        #torch.masked_select
 
-        diff = x - t
-        if self.use_visibility:
-            N = (v.sum()/2).data[0]
-            diff = diff*v
-        else:
-            N = diff.numel()/2
+        diff = h - Variable(tt).cuda()
+        #if self.use_visibility:
+        #    N = (v.sum()/2).data[0]
+        #    diff = diff*v
+        #else:
+        #    N = diff.numel()/2
+        N = diff.numel()/2
         diff = diff.view(-1)
         return diff.dot(diff)/N
 
