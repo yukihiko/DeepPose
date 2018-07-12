@@ -46,6 +46,7 @@
                 "--batchsize=64",
                 "--out=D:/work/DeepPose",
                 "--data-augmentation",
+                "--use-visibility",
                 "--opt=Adam",
                 "-e5000"
             ]
