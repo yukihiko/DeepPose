@@ -97,6 +97,28 @@ class PoseDataset(data.Dataset):
             poses.append(p4)
             visibilities.append(visibility.clone())
             image_types.append("T")
+
+            # 画像の転置の上下反転
+            images.append(line_split[0])
+            p5 = torch.stack([p[:,0], 256-p[:,1]], dim=1)
+            poses.append(p5)
+            visibilities.append(visibility.clone())
+            image_types.append("L")
+
+            # 画像の転置の上下反転の反転
+            images.append(line_split[0])
+            p6 = torch.stack([256-p5[:,0], p5[:,1]], dim=1)
+            poses.append(p6[[5, 4, 3, 2, 1, 0, 11, 10, 9, 8, 7, 6, 12, 13]])
+            visibilities.append(v[[5, 4, 3, 2, 1, 0, 11, 10, 9, 8, 7, 6, 12, 13]])
+            image_types.append("W")
+            
+            # 画像の上下反転の反転
+            images.append(line_split[0])
+            p7 = torch.stack([256-p3[:,0], p3[:,1]], dim=1)
+            poses.append(p7)
+            visibilities.append(visibility.clone())
+            image_types.append("K")
+
         return images, poses, visibilities, image_types
 
     @staticmethod
@@ -121,5 +143,25 @@ class PoseDataset(data.Dataset):
             B = imgArray[:,:,2].T
             image = numpy.stack([R, G, B], axis=2)
             img =Image.fromarray(numpy.uint8(image))
+            img =ImageOps.mirror(img)
+        elif image_type == "L":
+            imgArray = numpy.asarray(img)
+            R = imgArray[:,:,0].T
+            G = imgArray[:,:,1].T
+            B = imgArray[:,:,2].T
+            image = numpy.stack([R, G, B], axis=2)
+            img =Image.fromarray(numpy.uint8(image))
+            img =ImageOps.flip(img)
+        elif image_type == "W":
+            imgArray = numpy.asarray(img)
+            R = imgArray[:,:,0].T
+            G = imgArray[:,:,1].T
+            B = imgArray[:,:,2].T
+            image = numpy.stack([R, G, B], axis=2)
+            img =Image.fromarray(numpy.uint8(image))
+            img =ImageOps.flip(img)
+            img =ImageOps.mirror(img)
+        elif image_type == "K":
+            img =ImageOps.flip(img)
             img =ImageOps.mirror(img)
         return img
