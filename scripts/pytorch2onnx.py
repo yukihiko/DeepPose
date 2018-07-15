@@ -9,7 +9,7 @@ import sys
 sys.path.append("./")
 from modules.errors import FileNotFoundError, GPUNotFoundError, UnknownOptimizationMethodError, NotSupportedError
 from modules.models.pytorch import AlexNet, VGG19Net, Inceptionv3, Resnet, MobileNet, MobileNetV2, MobileNet_
-import onnx_coreml
+from onnx_coreml.converter import convert
 
 parser = argparse.ArgumentParser(description='Convert PyTorch model to ONNX')
 parser.add_argument('--input', '-i', required=True, type=str)
