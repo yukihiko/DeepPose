@@ -21,10 +21,11 @@
             "args": [
                 "10000",
                 "\"plot_estimating_time\"",
-                "--pytorch-model-file=D:/work/DeepPose/pytorch/epoch-20.model",
+                "--pytorch-model-file=${workspaceFolder}/result/pytorch/epoch-10.model",
                 "-g0"
             ]
-        },              {
+        },              
+        {
             "name": "Python: plot_training_time",
             "type": "python",
             "request": "launch",
@@ -74,6 +75,16 @@
             "request": "launch",
             "program": "${workspaceFolder}/scripts/dataset.py"
         },
+        {
+            "name": "Python: pytorch2onnx",
+            "type": "python",
+            "request": "launch",
+            "program": "${workspaceFolder}/scripts/pytorch2onnx.py",
+            "args": [
+                "--input=result/pytorch/epoch-10.model",
+                "--output=test.onnx",
+            ]
+        },        
         {
             "name": "Python: Attach",
             "type": "python",
