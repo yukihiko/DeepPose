@@ -228,6 +228,7 @@ def _convert_pool(builder, node, graph, err):  # type: (NeuralNetworkBuilder, No
 
         pads = node.attrs.get('pads', [0,0,0,0])
         print(pads)
+        print(pads.len)
         pad_t = pads[0]
         pad_l = pads[1]
         pad_b = pads[2]
