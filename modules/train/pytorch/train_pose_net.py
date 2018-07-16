@@ -164,6 +164,9 @@ class TrainPoseNet(object):
                     lr = 0.00001
                     optimizer = optim.SGD(model.parameters(), lr=lr, momentum=0.9)
                 """
+                torch.save(model, 'output.model')
+                torch.save(optimizer.state_dict(), 'output.state')
+                
     def _test(self, model, test_iter, logger, start_time):
         model.eval()
         test_loss = 0
