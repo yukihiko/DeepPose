@@ -30,7 +30,7 @@ torch.onnx.export(model, dummy_input, args.output)
 
 print('checking converted model')
 onnx_model = onnx.load(args.output)
-mlmodel = convert(onnx_model, input_names = 'image', image_input_names=['image'], image_output_names=['output'])
+mlmodel = convert(onnx_model, image_input_names=['image'], image_output_names=['output'])
 #mlmodel = convert(onnx_model, image_input_names=['0'], image_output_names=['186'])
 mlmodel.save('coreml_model.mlmodel')
 
