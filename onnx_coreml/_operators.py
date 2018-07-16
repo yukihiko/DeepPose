@@ -227,12 +227,14 @@ def _convert_pool(builder, node, graph, err):  # type: (NeuralNetworkBuilder, No
         width = kernel_shape[1]
 
         pads = node.attrs.get('pads', [0,0,0,0])
-        print(pads)
-        print(pads.len())
-        pad_t = pads[0]
-        pad_l = pads[1]
-        pad_b = pads[2]
-        pad_r = pads[3]
+        #pad_t = pads[0]
+        #pad_l = pads[1]
+        #pad_b = pads[2]
+        #pad_r = pads[3]
+        pad_t = 0
+        pad_l = 0
+        pad_b = 0
+        pad_r = 0
 
         strides = node.attrs.get('strides', [1,1])
         stride_height = strides[0]
