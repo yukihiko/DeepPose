@@ -23,7 +23,7 @@ model.load_state_dict(torch.load(args.input))
 #model = models.vgg16_bn(pretrained=True)
 
 # export to ONNF
-dummy_input = Variable(torch.randn(1, 3, 224, 224))
+dummy_input = Variable(torch.randn(1, 224, 224, 3))
 
 print('converting to ONNX')
 torch.onnx.export(model, dummy_input, args.output)
