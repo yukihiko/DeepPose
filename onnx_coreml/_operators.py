@@ -211,6 +211,7 @@ def _convert_pool(builder, node, graph, err):  # type: (NeuralNetworkBuilder, No
         layer_type = "AVERAGE"
     else:
         return err.unsupported_op_configuration(builder, node, graph, "Unsupported pool type")
+    print(layer_type)
 
     pad_b, pad_l, pad_r, pad_t = 0, 0, 0, 0
     stride_height, stride_width = 1, 1
@@ -226,6 +227,7 @@ def _convert_pool(builder, node, graph, err):  # type: (NeuralNetworkBuilder, No
         width = kernel_shape[1]
 
         pads = node.attrs.get('pads', [0,0,0,0])
+        print(pads)
         pad_t = pads[0]
         pad_l = pads[1]
         pad_b = pads[2]
