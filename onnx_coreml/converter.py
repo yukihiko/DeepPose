@@ -488,9 +488,11 @@ def main(input_model,  # type: Union[onnx.ModelProto, Text]
         "--output", "-o", type=str, default="data", help="An output path for generated datasets.")
     # main process
     args = parser.parse_args()
-    mlmodel = convert(onnx_model)
-    mlmodel.save('coreml_model.mlmodel')
-
+    model_file = open('test.onnx', 'rb')
+    model_proto = onnx_pb.ModelProto()
+    model_proto.ParseFromString(model_file.read())
+    coreml_model = convert(model_proto, image_input_names=['0'], image_output_names=['186'])    
+    scoreml_model.save(model_out)
 
 if __name__ == '__main__':
     main()
