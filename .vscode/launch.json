@@ -61,7 +61,7 @@
                 "-g0",
                 "--NN=MobileNet",
                 "--batchsize=64",
-                "--resume-model=${workspaceFolder}/result/pytorch/del.model",
+                "--resume-model=${workspaceFolder}/result/pytorch/epoch-30.model",
                 "--out=${workspaceFolder}/result",
                 "--data-augmentation",
                 "--use-visibility",
