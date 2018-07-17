@@ -234,6 +234,9 @@ class TrainPoseNet(object):
            
         if self.resume_model:
             model.load_state_dict(torch.load(self.resume_model))
+            #model.fc2 = None
+            #torch.save(model.state_dict(), 'del.model')
+
         # prepare gpu.
         if self.gpu:
             model.cuda()
