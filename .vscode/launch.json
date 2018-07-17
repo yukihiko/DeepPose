@@ -21,7 +21,7 @@
             "args": [
                 "10000",
                 "\"plot_estimating_time\"",
-                "--pytorch-model-file=${workspaceFolder}/result/pytorch/epoch-10.model",
+                "--pytorch-model-file=${workspaceFolder}/result/pytorch/epoch-410.model",
                 "-g0"
             ]
         },              
@@ -61,7 +61,7 @@
                 "-g0",
                 "--NN=MobileNet",
                 "--batchsize=64",
-                "--resume-model=${workspaceFolder}/result/pytorch/epoch-10.model",
+                "--resume-model=${workspaceFolder}/result/pytorch/epoch-410.model",
                 "--out=${workspaceFolder}/result",
                 "--data-augmentation",
                 "--use-visibility",
