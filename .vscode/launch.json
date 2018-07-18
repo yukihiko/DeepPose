@@ -43,7 +43,7 @@
             "args": [
                 "pytorch",
                 "-g0",
-                "--NN=MobileNet_",
+                "--NN=MobileNet",
                 "--batchsize=64",
                 "--data-augmentation",
                 "--use-visibility",
@@ -81,9 +81,15 @@
             "request": "launch",
             "program": "${workspaceFolder}/scripts/pytorch2onnx.py",
             "args": [
-                "--input=result/pytorch/epoch-10.model",
+                "--input=result/pytorch/epoch-30.model",
                 "--output=test.onnx",
             ]
+        },        
+        {
+            "name": "Python: onnx_check",
+            "type": "python",
+            "request": "launch",
+            "program": "${workspaceFolder}/scripts/onnx_check.py",
         },        
         {
             "name": "Python: Attach",
