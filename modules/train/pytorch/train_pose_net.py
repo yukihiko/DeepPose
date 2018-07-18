@@ -13,7 +13,7 @@ import torch.nn as nn
 import subprocess
 
 from modules.errors import FileNotFoundError, GPUNotFoundError, UnknownOptimizationMethodError, NotSupportedError
-from modules.models.pytorch import AlexNet, VGG19Net, Inceptionv3, Resnet, MobileNet, MobileNetV2, MobileNet_
+from modules.models.pytorch import AlexNet, VGG19Net, Inceptionv3, Resnet, MobileNet, MobileNetV2, MobileNet_, MobileNet_2
 from modules.dataset_indexing.pytorch import PoseDataset, Crop, RandomNoise, Scale
 from modules.functions.pytorch import mean_squared_error, mean_squared_error2,mean_squared_error3
 
@@ -227,6 +227,8 @@ class TrainPoseNet(object):
             model = MobileNet( )
         elif self.NN == "MobileNet_":
             model = MobileNet_( )
+        elif self.NN == "MobileNet_2":
+            model = MobileNet_2( )
         elif self.NN == "MobileNetV2":
             model = MobileNetV2( )
         else :

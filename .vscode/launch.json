@@ -21,7 +21,7 @@
             "args": [
                 "10000",
                 "\"plot_estimating_time\"",
-                "--pytorch-model-file=${workspaceFolder}/result/pytorch/epoch-20.model",
+                "--pytorch-model-file=${workspaceFolder}/result/pytorch/epoch-120.model",
                 "-g0"
             ]
         },              

@@ -36,8 +36,8 @@ class MeanSquaredError2(nn.Module):
                     if yi > 13:
                         yi = 13
                     tt[ i, j, xi, yi]  = 1
-                    pp[ i, 0, xi, yi]  = float((t[i, j, 0] - 14*xi) / 224.0)
-                    pp[ i, 1, xi, yi]  = float((t[i, j, 1] - 14*yi) / 224.0)
+                    pp[ i, j, xi, yi]  = float((t[i, j, 0] - 14*xi) / 224.0)
+                    pp[ i, j + self.Nj, xi, yi]  = float((t[i, j, 1] - 14*yi) / 224.0)
 
         reshaped = h.view(-1, self.Nj, self.col*self.col)
         _, argmax = reshaped.max(-1)
@@ -68,15 +68,21 @@ class MeanSquaredError2(nn.Module):
         
         #torch.masked_select
 
-        diff = h - Variable(tt).cuda()
+        #heatmapのみの学習の時
+        diff1 = h - Variable(tt).cuda()
+        diff2 = o - Variable(pp).cuda()
+        #diff = x - t
         #if self.use_visibility:
-        #    N = (v.sum()/2).data[0]
-        #    diff = diff*v
+        N = (v.sum()/2).data[0]
+        #diff1 = diff1*v
+        #diff2 = diff2*v
         #else:
         #    N = diff.numel()/2
-        N = diff.numel()/2
-        diff = diff.view(-1)
-        return diff.dot(diff)/N
+        diff1 = diff1.view(-1)
+        diff2 = diff2.view(-1)
+        d1 = diff1.dot(diff1)
+        d2 = diff2.dot(diff2)
+        return (d1 + d2)/N
 
 
 def mean_squared_error2(o, h, t, v, use_visibility=False):

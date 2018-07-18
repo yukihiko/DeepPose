@@ -8,6 +8,7 @@ from modules.models.pytorch.resnet_finetune import Resnet
 from modules.models.pytorch.MobileNet import MobileNet
 from modules.models.pytorch.MobileNetV2 import MobileNetV2
 from modules.models.pytorch.MobileNet_ import MobileNet_
+from modules.models.pytorch.MobileNet_2 import MobileNet_2
 
 
-__all__ = ['AlexNet', 'VGG19Net', 'Inceptionv3', 'Resnet', 'MobileNet', 'MobileNetV2', 'MobileNet_']
+__all__ = ['AlexNet', 'VGG19Net', 'Inceptionv3', 'Resnet', 'MobileNet', 'MobileNetV2', 'MobileNet_', 'MobileNet_']
