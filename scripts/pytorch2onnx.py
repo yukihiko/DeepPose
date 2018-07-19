@@ -9,7 +9,7 @@ import sys
 sys.path.append("./")
 from modules.errors import FileNotFoundError, GPUNotFoundError, UnknownOptimizationMethodError, NotSupportedError
 from modules.models.pytorch import AlexNet, VGG19Net, Inceptionv3, Resnet, MobileNet, MobileNetV2, MobileNet_
-from onnx_coreml.converter import convert
+#from onnx_coreml.converter import convert
 
 parser = argparse.ArgumentParser(description='Convert PyTorch model to ONNX')
 parser.add_argument('--input', '-i', required=True, type=str)
@@ -30,8 +30,8 @@ torch.onnx.export(model, dummy_input, args.output)
 
 print('checking converted model')
 onnx_model = onnx.load(args.output)
-mlmodel = convert(onnx_model, image_input_names=['image'], image_output_names=['output'])
+#mlmodel = convert(onnx_model, image_input_names=['image'], image_output_names=['output'])
 #mlmodel = convert(onnx_model, image_input_names=['0'], image_output_names=['186'])
-mlmodel.save('coreml_model.mlmodel')
+#mlmodel.save('coreml_model.mlmodel')
 
 onnx.checker.check_model(onnx_model)

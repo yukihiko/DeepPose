@@ -21,7 +21,11 @@ class MeanSquaredError2(nn.Module):
         s = h.size()
         tt = torch.zeros(s).float()
         pp = torch.zeros(o.size()).float()
+        xxx = torch.zeros(o.size()).float()
+        xxx = xxx[:,:,-1,-1]
         ti = t*self.col
+        one = np.ones(self.col).reshape(-1,1) # 縦ベクトルに変換
+        arg = (torch.arange(self.col) * self.col)
         for i in range(s[0]):
             for j in range(self.Nj):
                 if int(v[i, j, 0]) == 1:
@@ -36,15 +40,25 @@ class MeanSquaredError2(nn.Module):
                     if yi > 13:
                         yi = 13
                     tt[ i, j, xi, yi]  = 1
-                    pp[ i, j, xi, yi]  = float((t[i, j, 0] - 14*xi) / 224.0)
-                    pp[ i, j + self.Nj, xi, yi]  = float((t[i, j, 1] - 14*yi) / 224.0)
 
-        reshaped = h.view(-1, self.Nj, self.col*self.col)
-        _, argmax = reshaped.max(-1)
-        yCoords = argmax/self.col
-        xCoords = argmax - yCoords*self.col
-        xc =  xCoords.cpu().data.numpy()
-        yc =  yCoords.cpu().data.numpy()
+                x = one*(ti[i, j, 0].cpu().data  - arg)
+                y = one*(ti[i, j, 1].cpu().data  - arg)
+                pp[ i, j, :, :]  = x
+                pp[ i, j + self.Nj, :, :]  = y
+
+                #for x in range(14):
+                #    for y in range(14):
+                #        pp[ i, j, x, y]  = float(t[i, j, 0] - 14*x / 224.0)
+                #        pp[ i, j + self.Nj, x, y]  = float(t[i, j, 1] - 14*y / 224.0)
+        #for x in range(14):
+        #    for y in range(14):
+
+        #reshaped = h.view(-1, self.Nj, self.col*self.col)
+        #_, argmax = reshaped.max(-1)
+        #yCoords = argmax/self.col
+        #xCoords = argmax - yCoords*self.col
+        #xc =  xCoords.cpu().data.numpy()
+        #yc =  yCoords.cpu().data.numpy()
         
         #xxx = o[:, 0, xc, yc]
         #xc =  xCoords.cpu().data[0].numpy()
@@ -61,10 +75,10 @@ class MeanSquaredError2(nn.Module):
         #res = torch.cat([px, py], dim=1).float()
         #x = res.view(-1, self.Nj, 2)
 
-        px = xc * self.col/224.0
-        py = yc * self.col/224.0
-        p = np.hstack([px, py])
-        x=Variable(torch.from_numpy(p), requires_grad=True).float().cuda().view(-1, self.Nj, 2)
+        #px = xc * self.col/224.0
+        #py = yc * self.col/224.0
+        #p = np.hstack([px, py])
+        #x=Variable(torch.from_numpy(p), requires_grad=True).float().cuda().view(-1, self.Nj, 2)
         
         #torch.masked_select
 
@@ -82,6 +96,7 @@ class MeanSquaredError2(nn.Module):
         diff2 = diff2.view(-1)
         d1 = diff1.dot(diff1)
         d2 = diff2.dot(diff2)
+        #return (d1)/N
         return (d1 + d2)/N
 
 

@@ -27,6 +27,8 @@ class EstimatingTimeEvaluator(object):
     def __init__(self, **kwargs):
         self.output = kwargs['output']
         self.Nj = kwargs['Nj']
+        self.NN = kwargs['NN']
+        self.col = 14
         try:
             os.makedirs(self.output)
         except OSError:
@@ -35,7 +37,7 @@ class EstimatingTimeEvaluator(object):
             #'chainer': chainer.PoseEstimator(
             #    kwargs['Nj'], kwargs['gpu'], kwargs['chainer_model_file'], kwargs['filename']),
             'pytorch': pytorch.PoseEstimator(
-                kwargs['Nj'], kwargs['gpu'], kwargs['pytorch_model_file'], kwargs['filename'])}
+                kwargs['Nj'], kwargs['NN'], kwargs['gpu'], kwargs['pytorch_model_file'], kwargs['filename'])}
         self.debug = kwargs['debug']
 
     def plot(self, samples, title):
@@ -50,17 +52,39 @@ class EstimatingTimeEvaluator(object):
             #for index in tqdm(random_index, desc='samples'):
             for index in tqdm(range(dataset_size), desc='samples'):
                 start = time.time()
-                image, pose, testPose = estimator.estimate(index)
-                pose = pose.view(-1, self.Nj, 2)
-                _, size, _ = image.shape
+
+
+                if self.NN == "MobileNet_":
+                    image, offset, heatmap, testPose = estimator.estimate_(index)
+                    _, size, _ = image.shape
+
+                    reshaped = heatmap.view(-1, self.Nj, 14*14)
+                    _, argmax = reshaped.max(-1)
+                    yCoords = argmax/self.col
+                    xCoords = argmax - yCoords*self.col
+                    xc =  np.squeeze(xCoords.cpu().data.numpy())
+                    yc =  np.squeeze(yCoords.cpu().data.numpy())
+        
+                    offset_reshaped = offset.view(-1, self.Nj * 2, 14*14)
+                    op = np.squeeze(offset_reshaped.cpu().data.numpy())
+                    px = op[:14, :]
+                    py = op[14:, :]
+                    arg = np.squeeze(argmax.cpu().data.numpy())
+                    dat_x = px[:, arg[0]] + xc * self.col
+                    dat_y = py[:, arg[0]] + yc * self.col
+
+                else:
+                    image, pose, testPose = estimator.estimate(index)
+                    _, size, _ = image.shape
+               
+                    pose = pose.view(-1, self.Nj, 2)
+                    dat = pose.data[0].cpu().numpy()
+                    dat *= size
+                    dat_x, dat_y = zip(*dat)
 
                 testdat = testPose.cpu().numpy()
                 testdat *= size
                 testdat_x, testdat_y = zip(*testdat)
-
-                dat = pose.data[0].cpu().numpy()
-                dat *= size
-                dat_x, dat_y = zip(*dat)
 
                 # pose *= size
                 # pose_x, pose_y = zip(*pose)

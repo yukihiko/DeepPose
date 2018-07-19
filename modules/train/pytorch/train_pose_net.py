@@ -29,14 +29,16 @@ class TrainLogger(object):
             os.makedirs(out)
         except OSError:
             pass
-        self.file = open(os.path.join(out, 'log'), 'w')
+        self.out = out
         self.logs = []
 
     def write(self, log, colab=False):
         """ Write log. """
+        self.file = open(os.path.join(self.out, 'log.txt'), 'a')
         tqdm.write(log)
         tqdm.write(log, file=self.file)
         self.file.flush()
+        self.file.close()
         self.logs.append(log)
         if colab == True:
             subprocess.run(["cp", "./result/pytorch/log", "../drive/result/pytorch/log.txt"])
@@ -136,7 +138,7 @@ class TrainPoseNet(object):
                 offset, heatmap = model(image)
                 loss = mean_squared_error2(offset, heatmap, pose, visibility, self.use_visibility)
                 loss.backward()
-            elif self.NN == "MobileNet":
+            elif self.NN == "MobileNet" or self.NN == "MobileNet_2":
                 output = model(image)
                 loss = mean_squared_error3(output, pose, visibility, self.use_visibility)
                 loss.backward()
@@ -164,7 +166,7 @@ class TrainPoseNet(object):
                     lr = 0.00001
                     optimizer = optim.SGD(model.parameters(), lr=lr, momentum=0.9)
                 """
-                torch.save(model.state_dict(), 'lastest.model')
+                torch.save(model.state_dict(), 'D:/github/DeepPose/result/pytorch/OneDrive/lastest.model')
 
     def _test(self, model, test_iter, logger, start_time):
         model.eval()
@@ -271,7 +273,8 @@ class TrainPoseNet(object):
         resume_interval = 10
         log_interval = 10
         # set logger and start epoch.
-        logger = TrainLogger(os.path.join(self.out, 'pytorch'))
+        #logger = TrainLogger(os.path.join(self.out, 'pytorch'))
+        logger = TrainLogger(self.out)
         start_epoch = 0
         if self.resume:
             resume = torch.load(self.resume)

@@ -7,7 +7,7 @@ from torchvision import transforms
 
 from modules.errors import GPUNotFoundError
 from modules.dataset_indexing.pytorch import PoseDataset, Crop, RandomNoise, Scale
-from modules.models.pytorch import AlexNet, VGG19Net, Inceptionv3, Resnet, MobileNet
+from modules.models.pytorch import AlexNet, VGG19Net, Inceptionv3, Resnet, MobileNet, MobileNet_
 
 
 class PoseEstimator(object):
@@ -20,15 +20,22 @@ class PoseEstimator(object):
         filename (str): Image-pose list file.
     """
 
-    def __init__(self, Nj, gpu, model_file, filename, isEval=True):
+    def __init__(self, Nj, NN, gpu, model_file, filename, isEval=True):
         # validate arguments.
         self.gpu = (gpu >= 0)
+        self.NN = NN
         if self.gpu and not torch.cuda.is_available():
             raise GPUNotFoundError('GPU is not found.')
         # initialize model to estimate.
-        #self.model = AlexNet(Nj)
-        #self.model = Resnet()
-        self.model = MobileNet()
+        if self.NN == "MobileNet_":
+            self.model = MobileNet_()
+        elif self.NN == "MobileNet":
+            self.model = MobileNet()
+        elif self.NN == "AlexNet":
+            self.model = AlexNet(Nj)
+        else:
+            self.model = Resnet()
+
         self.model.load_state_dict(torch.load(model_file))
         if isEval == True:
             self.model.eval()
@@ -55,4 +62,13 @@ class PoseEstimator(object):
         if self.gpu:
             v_image = v_image.cuda()
         return image, self.model.forward(v_image), pose
+
+    def estimate_(self, index):
+        """ Estimate pose of i-th image. """
+        image, pose, _, _ = self.dataset[index]
+        v_image = Variable(image.unsqueeze(0))
+        if self.gpu:
+            v_image = v_image.cuda()
+            offset, heatmap = self.model.forward(v_image)
+        return image, offset, heatmap, pose
         

@@ -18,6 +18,8 @@ def main():
     parser.add_argument(
         'title', type=str, help='Title of comparison graph.')
     parser.add_argument(
+        '--NN', '-n', type=str, default='Alex', help='NN Model.')
+    parser.add_argument(
         '--Nj', '-j', type=int, default=14, help='Number of joints.')
     parser.add_argument(
         '--gpu', '-g', type=int, default=-1, help='GPU ID (negative value indicates CPU).')
