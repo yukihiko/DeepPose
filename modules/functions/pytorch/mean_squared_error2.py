@@ -22,9 +22,9 @@ class MeanSquaredError2(nn.Module):
         tt = torch.zeros(s).float()
         pp = torch.zeros(o.size()).float()
         ti = t*self.col
-        #tpos = t*224
-        #one = np.ones(self.col).reshape(-1,1) # 縦ベクトルに変換
-        #arg = (torch.arange(self.col) * self.col)
+        tpos = t*224
+        one = np.ones(self.col).reshape(-1,1) # 縦ベクトルに変換
+        arg = (torch.arange(self.col) * self.col)
         for i in range(s[0]):
             for j in range(self.Nj):
                 if int(v[i, j, 0]) == 1:
@@ -40,28 +40,28 @@ class MeanSquaredError2(nn.Module):
                         yi = 13
                     tt[ i, j, xi, yi]  = 1
 
-                #x = one*(tpos[i, j, 0].cpu().data  - arg)
-                #y = one*(tpos[i, j, 1].cpu().data  - arg)
-                #pp[ i, j, :, :]  = x
-                #pp[ i, j + self.Nj, :, :]  = y.t()
+                x = one*(tpos[i, j, 0].cpu().data  - arg)
+                y = one*(tpos[i, j, 1].cpu().data  - arg)
+                pp[ i, j, :, :]  = x
+                pp[ i, j + self.Nj, :, :]  = y.t()
 
-
+        '''
         reshaped = h.view(-1, self.Nj, self.col*self.col)
         _, argmax = reshaped.max(-1)
         yCoords = argmax/self.col
         xCoords = argmax - yCoords*self.col
         xc =  xCoords.cpu().data.numpy()
         yc =  yCoords.cpu().data.numpy()
-        
-        #xxx = o[:, 0, xc, yc]
-        #xc =  xCoords.cpu().data[0].numpy()
-        #yc =  yCoords.cpu().data[0].numpy()
         point = Variable(torch.zeros(t.size()).float(), requires_grad=True).float().cuda()
         op = o.cpu().data.numpy()
         for i in range(s[0]):
             for j in range(self.Nj):
                 point[i, j, 0] = (op[i, j, xc[i, j], yc[i, j]] + xc[i, j] * self.col)/224.0
                 point[i, j, 1] = (op[i, j + self.Nj, xc[i, j], yc[i, j]] + yc[i, j] * self.col)/224.0
+        '''
+        #xxx = o[:, 0, xc, yc]
+        #xc =  xCoords.cpu().data[0].numpy()
+        #yc =  yCoords.cpu().data[0].numpy()
         #x = op[:, :, xc, yc]
         #px = (op[:, 0, xc, yc] + xc * self.col)/224.0
         #py = (op[:, 1, xc, yc] + yc * self.col)/224.0
@@ -83,8 +83,8 @@ class MeanSquaredError2(nn.Module):
 
         #heatmapのみの学習の時
         diff1 = h - Variable(tt).cuda()
-        #diff2 = o - Variable(pp).cuda()
-        diff2 = point - t
+        diff2 = o - Variable(pp).cuda()
+        #diff2 = point - t
         #if self.use_visibility:
         N = (v.sum()/2).data[0]
         #diff1 = diff1*v
