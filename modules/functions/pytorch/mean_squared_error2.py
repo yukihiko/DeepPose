@@ -21,8 +21,6 @@ class MeanSquaredError2(nn.Module):
         s = h.size()
         tt = torch.zeros(s).float()
         pp = torch.zeros(o.size()).float()
-        xxx = torch.zeros(o.size()).float()
-        xxx = xxx[:,:,-1,-1]
         ti = t*self.col
         one = np.ones(self.col).reshape(-1,1) # 縦ベクトルに変換
         arg = (torch.arange(self.col) * self.col)
@@ -44,7 +42,7 @@ class MeanSquaredError2(nn.Module):
                 x = one*(ti[i, j, 0].cpu().data  - arg)
                 y = one*(ti[i, j, 1].cpu().data  - arg)
                 pp[ i, j, :, :]  = x
-                pp[ i, j + self.Nj, :, :]  = y
+                pp[ i, j + self.Nj, :, :]  = y.t()
 
                 #for x in range(14):
                 #    for y in range(14):
