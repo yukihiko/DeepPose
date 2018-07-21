@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+print('Start')
 
 import argparse
 from torch.autograd import Variable
