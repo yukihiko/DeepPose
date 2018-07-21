@@ -4,12 +4,12 @@ import argparse
 from torch.autograd import Variable
 import torch.onnx
 import torchvision.models as models
-print('ArgumentParser')
-from onnx_coreml.converter import convert
-print('ArgumentParser')
 
 import sys
 sys.path.append("./")
+print('ArgumentParser')
+from onnx_coreml.converter import convert
+print('ArgumentParser')
 from modules.errors import FileNotFoundError, GPUNotFoundError, UnknownOptimizationMethodError, NotSupportedError
 from modules.models.pytorch import AlexNet, VGG19Net, Inceptionv3, Resnet, MobileNet, MobileNetV2, MobileNet_
 
