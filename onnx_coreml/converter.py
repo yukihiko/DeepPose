@@ -39,8 +39,10 @@ def _make_coreml_input_features(graph): # type: (...) -> Sequence[Tuple[Text, da
     inputs = graph.inputs
     op_types = graph.blob_to_op_type
     features = []
+    print("ONNX input shapes")
     for input_ in inputs:
         shape = input_[2]
+        print(shape)
         if len(shape) == 0:
             shape = [1, 1, 1]
         elif len(shape) == 1:
