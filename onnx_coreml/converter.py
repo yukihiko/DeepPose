@@ -75,15 +75,20 @@ def _make_coreml_output_features(graph):  # type: (...) -> Sequence[Tuple[Text, 
     op_types = graph.blob_from_op_type
     for output_ in outputs:
         shape = output_[2]
+        print(shape)
         if len(shape) == 0:
             shape = [1, 1, 1]
         elif len(shape) == 1:
             pass
+        #elif len(shape) == 2:
+        #    shape = shape[1:]
         elif len(shape) == 3:
             if output_[0] in op_types and \
                 str(op_types[output_[0]]) in _SEQUENCE_LAYERS_REGISTRY:
                 # onnx shape: (Seq,B,C)
                 shape = [shape[2]]
+            else:
+                shape = shape[1:]
         elif len(shape) == 4:  # (B,C,H,W) --> (C,H,W)
             shape = shape[1:]
         else:
@@ -463,38 +468,3 @@ def convert(model,  # type: Union[onnx.ModelProto, Text]
                   format(i+1, len(err.custom_layer_nodes), node.op_type, str(input_info), str(output_info)))
 
     return mlmodel
-
-def main(input_model,  # type: Union[onnx.ModelProto, Text]
-            mode=None,  # type: Optional[Text]
-            image_input_names=[],  # type: Sequence[Text]
-            preprocessing_args={},  # type: Dict[Text, Any]
-            image_output_names=[],  # type: Sequence[Text]
-            deprocessing_args={},  # type: Dict[Text, Any]
-            class_labels=None,  # type: Union[Text, Iterable[Text], None]
-            predicted_feature_name='classLabel',  # type: Text
-            add_custom_layers = False,  # type: bool
-            custom_conversion_functions = {}, #type: Dict[Text, Any]
-            ):
-    """ Main function. """
-    # arg definition
-    parser = argparse.ArgumentParser(
-        description="Generating LSP dataset for comparison \
-        between chainer and pytorch about implementing DeepPose.")
-    parser.input_model(
-        "--image_size", type=str, default=256, help="Size of output image.")
-    parser.add_argument(
-        "--crop_size", "-C", type=int, default=224, help="Size of cropping for DNN training.")
-    parser.add_argument(
-        "--path", "-p", type=str, default="orig_data", help="A path to download datasets.")
-    parser.add_argument(
-        "--output", "-o", type=str, default="data", help="An output path for generated datasets.")
-    # main process
-    args = parser.parse_args()
-    model_file = open('test.onnx', 'rb')
-    model_proto = onnx_pb.ModelProto()
-    model_proto.ParseFromString(model_file.read())
-    coreml_model = convert(model_proto, image_input_names=['0'], image_output_names=['186'])    
-    scoreml_model.save(model_out)
-
-if __name__ == '__main__':
-    main()

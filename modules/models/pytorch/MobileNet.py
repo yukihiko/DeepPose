@@ -50,6 +50,7 @@ class MobileNet(nn.Module):
     def forward(self, x):
         x = self.model(x)
         x = x.view(-1, 1024)
-        o = self.fc(x)
+        x = self.fc(x)
+        #o = o.view(28)
         #s = F.sigmoid(self.fc2(x))
-        return o
+        return x
