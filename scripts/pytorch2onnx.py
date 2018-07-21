@@ -16,11 +16,9 @@ parser.add_argument('--input', '-i', required=True, type=str)
 parser.add_argument('--output', '-o', required=True, type=str)
 args = parser.parse_args()
 
+print('Set up model')
 model = MobileNet( )
 model.load_state_dict(torch.load(args.input))
-
-# obtain PyTorch model
-#model = models.vgg16_bn(pretrained=True)
 
 # export to ONNF
 dummy_input = Variable(torch.randn(1, 3, 224, 224))
