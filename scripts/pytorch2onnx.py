@@ -7,8 +7,8 @@ import torchvision.models as models
 import sys
 sys.path.append("./")
 from modules.errors import FileNotFoundError, GPUNotFoundError, UnknownOptimizationMethodError, NotSupportedError
-print('Start')
 from modules.models.pytorch import AlexNet, VGG19Net, Inceptionv3, Resnet, MobileNet, MobileNetV2, MobileNet_
+print('Start')
 from onnx_coreml.converter import convert
 
 print('ArgumentParser')
