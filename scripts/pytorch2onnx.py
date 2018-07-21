@@ -2,9 +2,9 @@
 
 import argparse
 from torch.autograd import Variable
+import torch.onnx
 print('Start')
 
-import torch.onnx
 import torchvision.models as models
 import onnx
 
