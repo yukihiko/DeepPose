@@ -3,6 +3,6 @@ from __future__ import division
 from __future__ import print_function
 from __future__ import unicode_literals
 
-from .converter import convert
+from onnx_coreml.converter import convert
 
 __all__ = ['convert']
