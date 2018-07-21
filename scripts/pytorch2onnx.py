@@ -4,11 +4,8 @@ import argparse
 from torch.autograd import Variable
 import torch.onnx
 import torchvision.models as models
-print('Start')
-
-
 import sys
-
+print('Start')
 sys.path.append("./")
 from modules.errors import FileNotFoundError, GPUNotFoundError, UnknownOptimizationMethodError, NotSupportedError
 from modules.models.pytorch import AlexNet, VGG19Net, Inceptionv3, Resnet, MobileNet, MobileNetV2, MobileNet_
