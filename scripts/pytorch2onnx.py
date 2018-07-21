@@ -11,6 +11,7 @@ from modules.errors import FileNotFoundError, GPUNotFoundError, UnknownOptimizat
 from modules.models.pytorch import AlexNet, VGG19Net, Inceptionv3, Resnet, MobileNet, MobileNetV2, MobileNet_
 from onnx_coreml.converter import convert
 
+print('ArgumentParser')
 parser = argparse.ArgumentParser(description='Convert PyTorch model to ONNX')
 parser.add_argument('--input', '-i', required=True, type=str)
 parser.add_argument('--output', '-o', required=True, type=str)
