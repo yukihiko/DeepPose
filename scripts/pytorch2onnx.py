@@ -1,3 +1,5 @@
+# -*- coding: utf-8 -*-
+
 import argparse
 from torch.autograd import Variable
 import torch.onnx
