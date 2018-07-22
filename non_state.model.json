@@ -1,0 +1,4269 @@
+{
+  "node": [
+    {
+      "name": "MobileNetnSequentialnmodelnnSequentialn0nnConv2dn0n138",
+      "op": "Conv",
+      "input": [
+        "input"
+      ],
+      "attr": {
+        "kernel_shape": {
+          "list": {
+            "i": [
+              "3",
+              "3",
+              "3",
+              "32"
+            ]
+          }
+        },
+        "strides": {
+          "list": {
+            "i": [
+              "1",
+              "2",
+              "2",
+              "1"
+            ]
+          }
+        },
+        "dilations": {
+          "list": {
+            "i": [
+              "1",
+              "1",
+              "1",
+              "1"
+            ]
+          }
+        },
+        "pads": {
+          "list": {
+            "i": [
+              "0",
+              "1",
+              "1",
+              "0",
+              "0",
+              "1",
+              "1",
+              "0"
+            ]
+          }
+        },
+        "use_bias": {
+          "b": false
+        },
+        "group": {
+          "i": "1"
+        },
+        "_output_shapes": {
+          "list": {
+            "shape": [
+              {
+                "dim": [
+                  {
+                    "size": "-1"
+                  },
+                  {
+                    "size": "112"
+                  },
+                  {
+                    "size": "112"
+                  },
+                  {
+                    "size": "32"
+                  }
+                ]
+              }
+            ]
+          }
+        }
+      }
+    },
+    {
+      "name": "MobileNetnLinearnfcn222",
+      "op": "FullyConnected",
+      "input": [
+        "input"
+      ],
+      "attr": {
+        "use_bias": {
+          "b": true
+        },
+        "_output_shapes": {
+          "list": {
+            "shape": [
+              {
+                "dim": [
+                  {
+                    "size": "-1"
+                  },
+                  {
+                    "size": "1"
+                  },
+                  {
+                    "size": "1"
+                  },
+                  {
+                    "size": "28"
+                  }
+                ]
+              }
+            ]
+          }
+        },
+        "units": {
+          "i": "28"
+        }
+      }
+    },
+    {
+      "name": "MobileNetnSequentialnmodelnnSequentialn0nnBatchNorm2dn1n139",
+      "op": "BatchNorm",
+      "input": [
+        "MobileNetnSequentialnmodelnnSequentialn0nnConv2dn0n138"
+      ],
+      "attr": {
+        "scale": {
+          "b": true
+        },
+        "bias": {
+          "b": true
+        },
+        "_output_shapes": {
+          "list": {
+            "shape": [
+              {
+                "dim": [
+                  {
+                    "size": "-1"
+                  },
+                  {
+                    "size": "112"
+                  },
+                  {
+                    "size": "112"
+                  },
+                  {
+                    "size": "32"
+                  }
+                ]
+              }
+            ]
+          }
+        },
+        "epsilon": {
+          "f": 9.999999747378752e-06
+        }
+      }
+    },
+    {
+      "name": "MobileNetnSequentialnmodelnnSequentialn0nnReLUn2n140",
+      "op": "Relu",
+      "input": [
+        "MobileNetnSequentialnmodelnnSequentialn0nnBatchNorm2dn1n139"
+      ],
+      "attr": {
+        "_output_shapes": {
+          "list": {
+            "shape": [
+              {
+                "dim": [
+                  {
+                    "size": "-1"
+                  },
+                  {
+                    "size": "112"
+                  },
+                  {
+                    "size": "112"
+                  },
+                  {
+                    "size": "32"
+                  }
+                ]
+              }
+            ]
+          }
+        }
+      }
+    },
+    {
+      "name": "MobileNetnSequentialnmodelnnSequentialn1nnConv2dn0n141",
+      "op": "Conv",
+      "input": [
+        "MobileNetnSequentialnmodelnnSequentialn0nnReLUn2n140"
+      ],
+      "attr": {
+        "kernel_shape": {
+          "list": {
+            "i": [
+              "3",
+              "3",
+              "1",
+              "32"
+            ]
+          }
+        },
+        "strides": {
+          "list": {
+            "i": [
+              "1",
+              "1",
+              "1",
+              "1"
+            ]
+          }
+        },
+        "dilations": {
+          "list": {
+            "i": [
+              "1",
+              "1",
+              "1",
+              "1"
+            ]
+          }
+        },
+        "pads": {
+          "list": {
+            "i": [
+              "0",
+              "1",
+              "1",
+              "0",
+              "0",
+              "1",
+              "1",
+              "0"
+            ]
+          }
+        },
+        "use_bias": {
+          "b": false
+        },
+        "group": {
+          "i": "32"
+        },
+        "_output_shapes": {
+          "list": {
+            "shape": [
+              {
+                "dim": [
+                  {
+                    "size": "-1"
+                  },
+                  {
+                    "size": "112"
+                  },
+                  {
+                    "size": "112"
+                  },
+                  {
+                    "size": "32"
+                  }
+                ]
+              }
+            ]
+          }
+        }
+      }
+    },
+    {
+      "name": "MobileNetnSequentialnmodelnnSequentialn1nnBatchNorm2dn1n142",
+      "op": "BatchNorm",
+      "input": [
+        "MobileNetnSequentialnmodelnnSequentialn1nnConv2dn0n141"
+      ],
+      "attr": {
+        "scale": {
+          "b": true
+        },
+        "bias": {
+          "b": true
+        },
+        "_output_shapes": {
+          "list": {
+            "shape": [
+              {
+                "dim": [
+                  {
+                    "size": "-1"
+                  },
+                  {
+                    "size": "112"
+                  },
+                  {
+                    "size": "112"
+                  },
+                  {
+                    "size": "32"
+                  }
+                ]
+              }
+            ]
+          }
+        },
+        "epsilon": {
+          "f": 9.999999747378752e-06
+        }
+      }
+    },
+    {
+      "name": "MobileNetnSequentialnmodelnnSequentialn1nnReLUn2n143",
+      "op": "Relu",
+      "input": [
+        "MobileNetnSequentialnmodelnnSequentialn1nnBatchNorm2dn1n142"
+      ],
+      "attr": {
+        "_output_shapes": {
+          "list": {
+            "shape": [
+              {
+                "dim": [
+                  {
+                    "size": "-1"
+                  },
+                  {
+                    "size": "112"
+                  },
+                  {
+                    "size": "112"
+                  },
+                  {
+                    "size": "32"
+                  }
+                ]
+              }
+            ]
+          }
+        }
+      }
+    },
+    {
+      "name": "MobileNetnSequentialnmodelnnSequentialn1nnConv2dn3n144",
+      "op": "Conv",
+      "input": [
+        "MobileNetnSequentialnmodelnnSequentialn1nnReLUn2n143"
+      ],
+      "attr": {
+        "kernel_shape": {
+          "list": {
+            "i": [
+              "1",
+              "1",
+              "32",
+              "64"
+            ]
+          }
+        },
+        "strides": {
+          "list": {
+            "i": [
+              "1",
+              "1",
+              "1",
+              "1"
+            ]
+          }
+        },
+        "dilations": {
+          "list": {
+            "i": [
+              "1",
+              "1",
+              "1",
+              "1"
+            ]
+          }
+        },
+        "pads": {
+          "list": {
+            "i": [
+              "0",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0"
+            ]
+          }
+        },
+        "use_bias": {
+          "b": false
+        },
+        "group": {
+          "i": "1"
+        },
+        "_output_shapes": {
+          "list": {
+            "shape": [
+              {
+                "dim": [
+                  {
+                    "size": "-1"
+                  },
+                  {
+                    "size": "112"
+                  },
+                  {
+                    "size": "112"
+                  },
+                  {
+                    "size": "64"
+                  }
+                ]
+              }
+            ]
+          }
+        }
+      }
+    },
+    {
+      "name": "MobileNetnSequentialnmodelnnSequentialn1nnBatchNorm2dn4n145",
+      "op": "BatchNorm",
+      "input": [
+        "MobileNetnSequentialnmodelnnSequentialn1nnConv2dn3n144"
+      ],
+      "attr": {
+        "scale": {
+          "b": true
+        },
+        "bias": {
+          "b": true
+        },
+        "_output_shapes": {
+          "list": {
+            "shape": [
+              {
+                "dim": [
+                  {
+                    "size": "-1"
+                  },
+                  {
+                    "size": "112"
+                  },
+                  {
+                    "size": "112"
+                  },
+                  {
+                    "size": "64"
+                  }
+                ]
+              }
+            ]
+          }
+        },
+        "epsilon": {
+          "f": 9.999999747378752e-06
+        }
+      }
+    },
+    {
+      "name": "MobileNetnSequentialnmodelnnSequentialn1nnReLUn5n146",
+      "op": "Relu",
+      "input": [
+        "MobileNetnSequentialnmodelnnSequentialn1nnBatchNorm2dn4n145"
+      ],
+      "attr": {
+        "_output_shapes": {
+          "list": {
+            "shape": [
+              {
+                "dim": [
+                  {
+                    "size": "-1"
+                  },
+                  {
+                    "size": "112"
+                  },
+                  {
+                    "size": "112"
+                  },
+                  {
+                    "size": "64"
+                  }
+                ]
+              }
+            ]
+          }
+        }
+      }
+    },
+    {
+      "name": "MobileNetnSequentialnmodelnnSequentialn2nnConv2dn0n147",
+      "op": "Conv",
+      "input": [
+        "MobileNetnSequentialnmodelnnSequentialn1nnReLUn5n146"
+      ],
+      "attr": {
+        "kernel_shape": {
+          "list": {
+            "i": [
+              "3",
+              "3",
+              "1",
+              "64"
+            ]
+          }
+        },
+        "strides": {
+          "list": {
+            "i": [
+              "1",
+              "2",
+              "2",
+              "1"
+            ]
+          }
+        },
+        "dilations": {
+          "list": {
+            "i": [
+              "1",
+              "1",
+              "1",
+              "1"
+            ]
+          }
+        },
+        "pads": {
+          "list": {
+            "i": [
+              "0",
+              "1",
+              "1",
+              "0",
+              "0",
+              "1",
+              "1",
+              "0"
+            ]
+          }
+        },
+        "use_bias": {
+          "b": false
+        },
+        "group": {
+          "i": "64"
+        },
+        "_output_shapes": {
+          "list": {
+            "shape": [
+              {
+                "dim": [
+                  {
+                    "size": "-1"
+                  },
+                  {
+                    "size": "56"
+                  },
+                  {
+                    "size": "56"
+                  },
+                  {
+                    "size": "64"
+                  }
+                ]
+              }
+            ]
+          }
+        }
+      }
+    },
+    {
+      "name": "MobileNetnSequentialnmodelnnSequentialn2nnBatchNorm2dn1n148",
+      "op": "BatchNorm",
+      "input": [
+        "MobileNetnSequentialnmodelnnSequentialn2nnConv2dn0n147"
+      ],
+      "attr": {
+        "scale": {
+          "b": true
+        },
+        "bias": {
+          "b": true
+        },
+        "_output_shapes": {
+          "list": {
+            "shape": [
+              {
+                "dim": [
+                  {
+                    "size": "-1"
+                  },
+                  {
+                    "size": "56"
+                  },
+                  {
+                    "size": "56"
+                  },
+                  {
+                    "size": "64"
+                  }
+                ]
+              }
+            ]
+          }
+        },
+        "epsilon": {
+          "f": 9.999999747378752e-06
+        }
+      }
+    },
+    {
+      "name": "MobileNetnSequentialnmodelnnSequentialn2nnReLUn2n149",
+      "op": "Relu",
+      "input": [
+        "MobileNetnSequentialnmodelnnSequentialn2nnBatchNorm2dn1n148"
+      ],
+      "attr": {
+        "_output_shapes": {
+          "list": {
+            "shape": [
+              {
+                "dim": [
+                  {
+                    "size": "-1"
+                  },
+                  {
+                    "size": "56"
+                  },
+                  {
+                    "size": "56"
+                  },
+                  {
+                    "size": "64"
+                  }
+                ]
+              }
+            ]
+          }
+        }
+      }
+    },
+    {
+      "name": "MobileNetnSequentialnmodelnnSequentialn2nnConv2dn3n150",
+      "op": "Conv",
+      "input": [
+        "MobileNetnSequentialnmodelnnSequentialn2nnReLUn2n149"
+      ],
+      "attr": {
+        "kernel_shape": {
+          "list": {
+            "i": [
+              "1",
+              "1",
+              "64",
+              "128"
+            ]
+          }
+        },
+        "strides": {
+          "list": {
+            "i": [
+              "1",
+              "1",
+              "1",
+              "1"
+            ]
+          }
+        },
+        "dilations": {
+          "list": {
+            "i": [
+              "1",
+              "1",
+              "1",
+              "1"
+            ]
+          }
+        },
+        "pads": {
+          "list": {
+            "i": [
+              "0",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0"
+            ]
+          }
+        },
+        "use_bias": {
+          "b": false
+        },
+        "group": {
+          "i": "1"
+        },
+        "_output_shapes": {
+          "list": {
+            "shape": [
+              {
+                "dim": [
+                  {
+                    "size": "-1"
+                  },
+                  {
+                    "size": "56"
+                  },
+                  {
+                    "size": "56"
+                  },
+                  {
+                    "size": "128"
+                  }
+                ]
+              }
+            ]
+          }
+        }
+      }
+    },
+    {
+      "name": "MobileNetnSequentialnmodelnnSequentialn2nnBatchNorm2dn4n151",
+      "op": "BatchNorm",
+      "input": [
+        "MobileNetnSequentialnmodelnnSequentialn2nnConv2dn3n150"
+      ],
+      "attr": {
+        "scale": {
+          "b": true
+        },
+        "bias": {
+          "b": true
+        },
+        "_output_shapes": {
+          "list": {
+            "shape": [
+              {
+                "dim": [
+                  {
+                    "size": "-1"
+                  },
+                  {
+                    "size": "56"
+                  },
+                  {
+                    "size": "56"
+                  },
+                  {
+                    "size": "128"
+                  }
+                ]
+              }
+            ]
+          }
+        },
+        "epsilon": {
+          "f": 9.999999747378752e-06
+        }
+      }
+    },
+    {
+      "name": "MobileNetnSequentialnmodelnnSequentialn2nnReLUn5n152",
+      "op": "Relu",
+      "input": [
+        "MobileNetnSequentialnmodelnnSequentialn2nnBatchNorm2dn4n151"
+      ],
+      "attr": {
+        "_output_shapes": {
+          "list": {
+            "shape": [
+              {
+                "dim": [
+                  {
+                    "size": "-1"
+                  },
+                  {
+                    "size": "56"
+                  },
+                  {
+                    "size": "56"
+                  },
+                  {
+                    "size": "128"
+                  }
+                ]
+              }
+            ]
+          }
+        }
+      }
+    },
+    {
+      "name": "MobileNetnSequentialnmodelnnSequentialn3nnConv2dn0n153",
+      "op": "Conv",
+      "input": [
+        "MobileNetnSequentialnmodelnnSequentialn2nnReLUn5n152"
+      ],
+      "attr": {
+        "kernel_shape": {
+          "list": {
+            "i": [
+              "3",
+              "3",
+              "1",
+              "128"
+            ]
+          }
+        },
+        "strides": {
+          "list": {
+            "i": [
+              "1",
+              "1",
+              "1",
+              "1"
+            ]
+          }
+        },
+        "dilations": {
+          "list": {
+            "i": [
+              "1",
+              "1",
+              "1",
+              "1"
+            ]
+          }
+        },
+        "pads": {
+          "list": {
+            "i": [
+              "0",
+              "1",
+              "1",
+              "0",
+              "0",
+              "1",
+              "1",
+              "0"
+            ]
+          }
+        },
+        "use_bias": {
+          "b": false
+        },
+        "group": {
+          "i": "128"
+        },
+        "_output_shapes": {
+          "list": {
+            "shape": [
+              {
+                "dim": [
+                  {
+                    "size": "-1"
+                  },
+                  {
+                    "size": "56"
+                  },
+                  {
+                    "size": "56"
+                  },
+                  {
+                    "size": "128"
+                  }
+                ]
+              }
+            ]
+          }
+        }
+      }
+    },
+    {
+      "name": "MobileNetnSequentialnmodelnnSequentialn3nnBatchNorm2dn1n154",
+      "op": "BatchNorm",
+      "input": [
+        "MobileNetnSequentialnmodelnnSequentialn3nnConv2dn0n153"
+      ],
+      "attr": {
+        "scale": {
+          "b": true
+        },
+        "bias": {
+          "b": true
+        },
+        "_output_shapes": {
+          "list": {
+            "shape": [
+              {
+                "dim": [
+                  {
+                    "size": "-1"
+                  },
+                  {
+                    "size": "56"
+                  },
+                  {
+                    "size": "56"
+                  },
+                  {
+                    "size": "128"
+                  }
+                ]
+              }
+            ]
+          }
+        },
+        "epsilon": {
+          "f": 9.999999747378752e-06
+        }
+      }
+    },
+    {
+      "name": "MobileNetnSequentialnmodelnnSequentialn3nnReLUn2n155",
+      "op": "Relu",
+      "input": [
+        "MobileNetnSequentialnmodelnnSequentialn3nnBatchNorm2dn1n154"
+      ],
+      "attr": {
+        "_output_shapes": {
+          "list": {
+            "shape": [
+              {
+                "dim": [
+                  {
+                    "size": "-1"
+                  },
+                  {
+                    "size": "56"
+                  },
+                  {
+                    "size": "56"
+                  },
+                  {
+                    "size": "128"
+                  }
+                ]
+              }
+            ]
+          }
+        }
+      }
+    },
+    {
+      "name": "MobileNetnSequentialnmodelnnSequentialn3nnConv2dn3n156",
+      "op": "Conv",
+      "input": [
+        "MobileNetnSequentialnmodelnnSequentialn3nnReLUn2n155"
+      ],
+      "attr": {
+        "kernel_shape": {
+          "list": {
+            "i": [
+              "1",
+              "1",
+              "128",
+              "128"
+            ]
+          }
+        },
+        "strides": {
+          "list": {
+            "i": [
+              "1",
+              "1",
+              "1",
+              "1"
+            ]
+          }
+        },
+        "dilations": {
+          "list": {
+            "i": [
+              "1",
+              "1",
+              "1",
+              "1"
+            ]
+          }
+        },
+        "pads": {
+          "list": {
+            "i": [
+              "0",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0"
+            ]
+          }
+        },
+        "use_bias": {
+          "b": false
+        },
+        "group": {
+          "i": "1"
+        },
+        "_output_shapes": {
+          "list": {
+            "shape": [
+              {
+                "dim": [
+                  {
+                    "size": "-1"
+                  },
+                  {
+                    "size": "56"
+                  },
+                  {
+                    "size": "56"
+                  },
+                  {
+                    "size": "128"
+                  }
+                ]
+              }
+            ]
+          }
+        }
+      }
+    },
+    {
+      "name": "MobileNetnSequentialnmodelnnSequentialn3nnBatchNorm2dn4n157",
+      "op": "BatchNorm",
+      "input": [
+        "MobileNetnSequentialnmodelnnSequentialn3nnConv2dn3n156"
+      ],
+      "attr": {
+        "scale": {
+          "b": true
+        },
+        "bias": {
+          "b": true
+        },
+        "_output_shapes": {
+          "list": {
+            "shape": [
+              {
+                "dim": [
+                  {
+                    "size": "-1"
+                  },
+                  {
+                    "size": "56"
+                  },
+                  {
+                    "size": "56"
+                  },
+                  {
+                    "size": "128"
+                  }
+                ]
+              }
+            ]
+          }
+        },
+        "epsilon": {
+          "f": 9.999999747378752e-06
+        }
+      }
+    },
+    {
+      "name": "MobileNetnSequentialnmodelnnSequentialn3nnReLUn5n158",
+      "op": "Relu",
+      "input": [
+        "MobileNetnSequentialnmodelnnSequentialn3nnBatchNorm2dn4n157"
+      ],
+      "attr": {
+        "_output_shapes": {
+          "list": {
+            "shape": [
+              {
+                "dim": [
+                  {
+                    "size": "-1"
+                  },
+                  {
+                    "size": "56"
+                  },
+                  {
+                    "size": "56"
+                  },
+                  {
+                    "size": "128"
+                  }
+                ]
+              }
+            ]
+          }
+        }
+      }
+    },
+    {
+      "name": "MobileNetnSequentialnmodelnnSequentialn4nnConv2dn0n159",
+      "op": "Conv",
+      "input": [
+        "MobileNetnSequentialnmodelnnSequentialn3nnReLUn5n158"
+      ],
+      "attr": {
+        "kernel_shape": {
+          "list": {
+            "i": [
+              "3",
+              "3",
+              "1",
+              "128"
+            ]
+          }
+        },
+        "strides": {
+          "list": {
+            "i": [
+              "1",
+              "2",
+              "2",
+              "1"
+            ]
+          }
+        },
+        "dilations": {
+          "list": {
+            "i": [
+              "1",
+              "1",
+              "1",
+              "1"
+            ]
+          }
+        },
+        "pads": {
+          "list": {
+            "i": [
+              "0",
+              "1",
+              "1",
+              "0",
+              "0",
+              "1",
+              "1",
+              "0"
+            ]
+          }
+        },
+        "use_bias": {
+          "b": false
+        },
+        "group": {
+          "i": "128"
+        },
+        "_output_shapes": {
+          "list": {
+            "shape": [
+              {
+                "dim": [
+                  {
+                    "size": "-1"
+                  },
+                  {
+                    "size": "28"
+                  },
+                  {
+                    "size": "28"
+                  },
+                  {
+                    "size": "128"
+                  }
+                ]
+              }
+            ]
+          }
+        }
+      }
+    },
+    {
+      "name": "MobileNetnSequentialnmodelnnSequentialn4nnBatchNorm2dn1n160",
+      "op": "BatchNorm",
+      "input": [
+        "MobileNetnSequentialnmodelnnSequentialn4nnConv2dn0n159"
+      ],
+      "attr": {
+        "scale": {
+          "b": true
+        },
+        "bias": {
+          "b": true
+        },
+        "_output_shapes": {
+          "list": {
+            "shape": [
+              {
+                "dim": [
+                  {
+                    "size": "-1"
+                  },
+                  {
+                    "size": "28"
+                  },
+                  {
+                    "size": "28"
+                  },
+                  {
+                    "size": "128"
+                  }
+                ]
+              }
+            ]
+          }
+        },
+        "epsilon": {
+          "f": 9.999999747378752e-06
+        }
+      }
+    },
+    {
+      "name": "MobileNetnSequentialnmodelnnSequentialn4nnReLUn2n161",
+      "op": "Relu",
+      "input": [
+        "MobileNetnSequentialnmodelnnSequentialn4nnBatchNorm2dn1n160"
+      ],
+      "attr": {
+        "_output_shapes": {
+          "list": {
+            "shape": [
+              {
+                "dim": [
+                  {
+                    "size": "-1"
+                  },
+                  {
+                    "size": "28"
+                  },
+                  {
+                    "size": "28"
+                  },
+                  {
+                    "size": "128"
+                  }
+                ]
+              }
+            ]
+          }
+        }
+      }
+    },
+    {
+      "name": "MobileNetnSequentialnmodelnnSequentialn4nnConv2dn3n162",
+      "op": "Conv",
+      "input": [
+        "MobileNetnSequentialnmodelnnSequentialn4nnReLUn2n161"
+      ],
+      "attr": {
+        "kernel_shape": {
+          "list": {
+            "i": [
+              "1",
+              "1",
+              "128",
+              "256"
+            ]
+          }
+        },
+        "strides": {
+          "list": {
+            "i": [
+              "1",
+              "1",
+              "1",
+              "1"
+            ]
+          }
+        },
+        "dilations": {
+          "list": {
+            "i": [
+              "1",
+              "1",
+              "1",
+              "1"
+            ]
+          }
+        },
+        "pads": {
+          "list": {
+            "i": [
+              "0",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0"
+            ]
+          }
+        },
+        "use_bias": {
+          "b": false
+        },
+        "group": {
+          "i": "1"
+        },
+        "_output_shapes": {
+          "list": {
+            "shape": [
+              {
+                "dim": [
+                  {
+                    "size": "-1"
+                  },
+                  {
+                    "size": "28"
+                  },
+                  {
+                    "size": "28"
+                  },
+                  {
+                    "size": "256"
+                  }
+                ]
+              }
+            ]
+          }
+        }
+      }
+    },
+    {
+      "name": "MobileNetnSequentialnmodelnnSequentialn4nnBatchNorm2dn4n163",
+      "op": "BatchNorm",
+      "input": [
+        "MobileNetnSequentialnmodelnnSequentialn4nnConv2dn3n162"
+      ],
+      "attr": {
+        "scale": {
+          "b": true
+        },
+        "bias": {
+          "b": true
+        },
+        "_output_shapes": {
+          "list": {
+            "shape": [
+              {
+                "dim": [
+                  {
+                    "size": "-1"
+                  },
+                  {
+                    "size": "28"
+                  },
+                  {
+                    "size": "28"
+                  },
+                  {
+                    "size": "256"
+                  }
+                ]
+              }
+            ]
+          }
+        },
+        "epsilon": {
+          "f": 9.999999747378752e-06
+        }
+      }
+    },
+    {
+      "name": "MobileNetnSequentialnmodelnnSequentialn4nnReLUn5n164",
+      "op": "Relu",
+      "input": [
+        "MobileNetnSequentialnmodelnnSequentialn4nnBatchNorm2dn4n163"
+      ],
+      "attr": {
+        "_output_shapes": {
+          "list": {
+            "shape": [
+              {
+                "dim": [
+                  {
+                    "size": "-1"
+                  },
+                  {
+                    "size": "28"
+                  },
+                  {
+                    "size": "28"
+                  },
+                  {
+                    "size": "256"
+                  }
+                ]
+              }
+            ]
+          }
+        }
+      }
+    },
+    {
+      "name": "MobileNetnSequentialnmodelnnSequentialn5nnConv2dn0n165",
+      "op": "Conv",
+      "input": [
+        "MobileNetnSequentialnmodelnnSequentialn4nnReLUn5n164"
+      ],
+      "attr": {
+        "kernel_shape": {
+          "list": {
+            "i": [
+              "3",
+              "3",
+              "1",
+              "256"
+            ]
+          }
+        },
+        "strides": {
+          "list": {
+            "i": [
+              "1",
+              "1",
+              "1",
+              "1"
+            ]
+          }
+        },
+        "dilations": {
+          "list": {
+            "i": [
+              "1",
+              "1",
+              "1",
+              "1"
+            ]
+          }
+        },
+        "pads": {
+          "list": {
+            "i": [
+              "0",
+              "1",
+              "1",
+              "0",
+              "0",
+              "1",
+              "1",
+              "0"
+            ]
+          }
+        },
+        "use_bias": {
+          "b": false
+        },
+        "group": {
+          "i": "256"
+        },
+        "_output_shapes": {
+          "list": {
+            "shape": [
+              {
+                "dim": [
+                  {
+                    "size": "-1"
+                  },
+                  {
+                    "size": "28"
+                  },
+                  {
+                    "size": "28"
+                  },
+                  {
+                    "size": "256"
+                  }
+                ]
+              }
+            ]
+          }
+        }
+      }
+    },
+    {
+      "name": "MobileNetnSequentialnmodelnnSequentialn5nnBatchNorm2dn1n166",
+      "op": "BatchNorm",
+      "input": [
+        "MobileNetnSequentialnmodelnnSequentialn5nnConv2dn0n165"
+      ],
+      "attr": {
+        "scale": {
+          "b": true
+        },
+        "bias": {
+          "b": true
+        },
+        "_output_shapes": {
+          "list": {
+            "shape": [
+              {
+                "dim": [
+                  {
+                    "size": "-1"
+                  },
+                  {
+                    "size": "28"
+                  },
+                  {
+                    "size": "28"
+                  },
+                  {
+                    "size": "256"
+                  }
+                ]
+              }
+            ]
+          }
+        },
+        "epsilon": {
+          "f": 9.999999747378752e-06
+        }
+      }
+    },
+    {
+      "name": "MobileNetnSequentialnmodelnnSequentialn5nnReLUn2n167",
+      "op": "Relu",
+      "input": [
+        "MobileNetnSequentialnmodelnnSequentialn5nnBatchNorm2dn1n166"
+      ],
+      "attr": {
+        "_output_shapes": {
+          "list": {
+            "shape": [
+              {
+                "dim": [
+                  {
+                    "size": "-1"
+                  },
+                  {
+                    "size": "28"
+                  },
+                  {
+                    "size": "28"
+                  },
+                  {
+                    "size": "256"
+                  }
+                ]
+              }
+            ]
+          }
+        }
+      }
+    },
+    {
+      "name": "MobileNetnSequentialnmodelnnSequentialn5nnConv2dn3n168",
+      "op": "Conv",
+      "input": [
+        "MobileNetnSequentialnmodelnnSequentialn5nnReLUn2n167"
+      ],
+      "attr": {
+        "kernel_shape": {
+          "list": {
+            "i": [
+              "1",
+              "1",
+              "256",
+              "256"
+            ]
+          }
+        },
+        "strides": {
+          "list": {
+            "i": [
+              "1",
+              "1",
+              "1",
+              "1"
+            ]
+          }
+        },
+        "dilations": {
+          "list": {
+            "i": [
+              "1",
+              "1",
+              "1",
+              "1"
+            ]
+          }
+        },
+        "pads": {
+          "list": {
+            "i": [
+              "0",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0"
+            ]
+          }
+        },
+        "use_bias": {
+          "b": false
+        },
+        "group": {
+          "i": "1"
+        },
+        "_output_shapes": {
+          "list": {
+            "shape": [
+              {
+                "dim": [
+                  {
+                    "size": "-1"
+                  },
+                  {
+                    "size": "28"
+                  },
+                  {
+                    "size": "28"
+                  },
+                  {
+                    "size": "256"
+                  }
+                ]
+              }
+            ]
+          }
+        }
+      }
+    },
+    {
+      "name": "MobileNetnSequentialnmodelnnSequentialn5nnBatchNorm2dn4n169",
+      "op": "BatchNorm",
+      "input": [
+        "MobileNetnSequentialnmodelnnSequentialn5nnConv2dn3n168"
+      ],
+      "attr": {
+        "scale": {
+          "b": true
+        },
+        "bias": {
+          "b": true
+        },
+        "_output_shapes": {
+          "list": {
+            "shape": [
+              {
+                "dim": [
+                  {
+                    "size": "-1"
+                  },
+                  {
+                    "size": "28"
+                  },
+                  {
+                    "size": "28"
+                  },
+                  {
+                    "size": "256"
+                  }
+                ]
+              }
+            ]
+          }
+        },
+        "epsilon": {
+          "f": 9.999999747378752e-06
+        }
+      }
+    },
+    {
+      "name": "MobileNetnSequentialnmodelnnSequentialn5nnReLUn5n170",
+      "op": "Relu",
+      "input": [
+        "MobileNetnSequentialnmodelnnSequentialn5nnBatchNorm2dn4n169"
+      ],
+      "attr": {
+        "_output_shapes": {
+          "list": {
+            "shape": [
+              {
+                "dim": [
+                  {
+                    "size": "-1"
+                  },
+                  {
+                    "size": "28"
+                  },
+                  {
+                    "size": "28"
+                  },
+                  {
+                    "size": "256"
+                  }
+                ]
+              }
+            ]
+          }
+        }
+      }
+    },
+    {
+      "name": "MobileNetnSequentialnmodelnnSequentialn6nnConv2dn0n171",
+      "op": "Conv",
+      "input": [
+        "MobileNetnSequentialnmodelnnSequentialn5nnReLUn5n170"
+      ],
+      "attr": {
+        "kernel_shape": {
+          "list": {
+            "i": [
+              "3",
+              "3",
+              "1",
+              "256"
+            ]
+          }
+        },
+        "strides": {
+          "list": {
+            "i": [
+              "1",
+              "2",
+              "2",
+              "1"
+            ]
+          }
+        },
+        "dilations": {
+          "list": {
+            "i": [
+              "1",
+              "1",
+              "1",
+              "1"
+            ]
+          }
+        },
+        "pads": {
+          "list": {
+            "i": [
+              "0",
+              "1",
+              "1",
+              "0",
+              "0",
+              "1",
+              "1",
+              "0"
+            ]
+          }
+        },
+        "use_bias": {
+          "b": false
+        },
+        "group": {
+          "i": "256"
+        },
+        "_output_shapes": {
+          "list": {
+            "shape": [
+              {
+                "dim": [
+                  {
+                    "size": "-1"
+                  },
+                  {
+                    "size": "14"
+                  },
+                  {
+                    "size": "14"
+                  },
+                  {
+                    "size": "256"
+                  }
+                ]
+              }
+            ]
+          }
+        }
+      }
+    },
+    {
+      "name": "MobileNetnSequentialnmodelnnSequentialn6nnBatchNorm2dn1n172",
+      "op": "BatchNorm",
+      "input": [
+        "MobileNetnSequentialnmodelnnSequentialn6nnConv2dn0n171"
+      ],
+      "attr": {
+        "scale": {
+          "b": true
+        },
+        "bias": {
+          "b": true
+        },
+        "_output_shapes": {
+          "list": {
+            "shape": [
+              {
+                "dim": [
+                  {
+                    "size": "-1"
+                  },
+                  {
+                    "size": "14"
+                  },
+                  {
+                    "size": "14"
+                  },
+                  {
+                    "size": "256"
+                  }
+                ]
+              }
+            ]
+          }
+        },
+        "epsilon": {
+          "f": 9.999999747378752e-06
+        }
+      }
+    },
+    {
+      "name": "MobileNetnSequentialnmodelnnSequentialn6nnReLUn2n173",
+      "op": "Relu",
+      "input": [
+        "MobileNetnSequentialnmodelnnSequentialn6nnBatchNorm2dn1n172"
+      ],
+      "attr": {
+        "_output_shapes": {
+          "list": {
+            "shape": [
+              {
+                "dim": [
+                  {
+                    "size": "-1"
+                  },
+                  {
+                    "size": "14"
+                  },
+                  {
+                    "size": "14"
+                  },
+                  {
+                    "size": "256"
+                  }
+                ]
+              }
+            ]
+          }
+        }
+      }
+    },
+    {
+      "name": "MobileNetnSequentialnmodelnnSequentialn6nnConv2dn3n174",
+      "op": "Conv",
+      "input": [
+        "MobileNetnSequentialnmodelnnSequentialn6nnReLUn2n173"
+      ],
+      "attr": {
+        "kernel_shape": {
+          "list": {
+            "i": [
+              "1",
+              "1",
+              "256",
+              "512"
+            ]
+          }
+        },
+        "strides": {
+          "list": {
+            "i": [
+              "1",
+              "1",
+              "1",
+              "1"
+            ]
+          }
+        },
+        "dilations": {
+          "list": {
+            "i": [
+              "1",
+              "1",
+              "1",
+              "1"
+            ]
+          }
+        },
+        "pads": {
+          "list": {
+            "i": [
+              "0",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0"
+            ]
+          }
+        },
+        "use_bias": {
+          "b": false
+        },
+        "group": {
+          "i": "1"
+        },
+        "_output_shapes": {
+          "list": {
+            "shape": [
+              {
+                "dim": [
+                  {
+                    "size": "-1"
+                  },
+                  {
+                    "size": "14"
+                  },
+                  {
+                    "size": "14"
+                  },
+                  {
+                    "size": "512"
+                  }
+                ]
+              }
+            ]
+          }
+        }
+      }
+    },
+    {
+      "name": "MobileNetnSequentialnmodelnnSequentialn6nnBatchNorm2dn4n175",
+      "op": "BatchNorm",
+      "input": [
+        "MobileNetnSequentialnmodelnnSequentialn6nnConv2dn3n174"
+      ],
+      "attr": {
+        "scale": {
+          "b": true
+        },
+        "bias": {
+          "b": true
+        },
+        "_output_shapes": {
+          "list": {
+            "shape": [
+              {
+                "dim": [
+                  {
+                    "size": "-1"
+                  },
+                  {
+                    "size": "14"
+                  },
+                  {
+                    "size": "14"
+                  },
+                  {
+                    "size": "512"
+                  }
+                ]
+              }
+            ]
+          }
+        },
+        "epsilon": {
+          "f": 9.999999747378752e-06
+        }
+      }
+    },
+    {
+      "name": "MobileNetnSequentialnmodelnnSequentialn6nnReLUn5n176",
+      "op": "Relu",
+      "input": [
+        "MobileNetnSequentialnmodelnnSequentialn6nnBatchNorm2dn4n175"
+      ],
+      "attr": {
+        "_output_shapes": {
+          "list": {
+            "shape": [
+              {
+                "dim": [
+                  {
+                    "size": "-1"
+                  },
+                  {
+                    "size": "14"
+                  },
+                  {
+                    "size": "14"
+                  },
+                  {
+                    "size": "512"
+                  }
+                ]
+              }
+            ]
+          }
+        }
+      }
+    },
+    {
+      "name": "MobileNetnSequentialnmodelnnSequentialn7nnConv2dn0n177",
+      "op": "Conv",
+      "input": [
+        "MobileNetnSequentialnmodelnnSequentialn6nnReLUn5n176"
+      ],
+      "attr": {
+        "kernel_shape": {
+          "list": {
+            "i": [
+              "3",
+              "3",
+              "1",
+              "512"
+            ]
+          }
+        },
+        "strides": {
+          "list": {
+            "i": [
+              "1",
+              "1",
+              "1",
+              "1"
+            ]
+          }
+        },
+        "dilations": {
+          "list": {
+            "i": [
+              "1",
+              "1",
+              "1",
+              "1"
+            ]
+          }
+        },
+        "pads": {
+          "list": {
+            "i": [
+              "0",
+              "1",
+              "1",
+              "0",
+              "0",
+              "1",
+              "1",
+              "0"
+            ]
+          }
+        },
+        "use_bias": {
+          "b": false
+        },
+        "group": {
+          "i": "512"
+        },
+        "_output_shapes": {
+          "list": {
+            "shape": [
+              {
+                "dim": [
+                  {
+                    "size": "-1"
+                  },
+                  {
+                    "size": "14"
+                  },
+                  {
+                    "size": "14"
+                  },
+                  {
+                    "size": "512"
+                  }
+                ]
+              }
+            ]
+          }
+        }
+      }
+    },
+    {
+      "name": "MobileNetnSequentialnmodelnnSequentialn7nnBatchNorm2dn1n178",
+      "op": "BatchNorm",
+      "input": [
+        "MobileNetnSequentialnmodelnnSequentialn7nnConv2dn0n177"
+      ],
+      "attr": {
+        "scale": {
+          "b": true
+        },
+        "bias": {
+          "b": true
+        },
+        "_output_shapes": {
+          "list": {
+            "shape": [
+              {
+                "dim": [
+                  {
+                    "size": "-1"
+                  },
+                  {
+                    "size": "14"
+                  },
+                  {
+                    "size": "14"
+                  },
+                  {
+                    "size": "512"
+                  }
+                ]
+              }
+            ]
+          }
+        },
+        "epsilon": {
+          "f": 9.999999747378752e-06
+        }
+      }
+    },
+    {
+      "name": "MobileNetnSequentialnmodelnnSequentialn7nnReLUn2n179",
+      "op": "Relu",
+      "input": [
+        "MobileNetnSequentialnmodelnnSequentialn7nnBatchNorm2dn1n178"
+      ],
+      "attr": {
+        "_output_shapes": {
+          "list": {
+            "shape": [
+              {
+                "dim": [
+                  {
+                    "size": "-1"
+                  },
+                  {
+                    "size": "14"
+                  },
+                  {
+                    "size": "14"
+                  },
+                  {
+                    "size": "512"
+                  }
+                ]
+              }
+            ]
+          }
+        }
+      }
+    },
+    {
+      "name": "MobileNetnSequentialnmodelnnSequentialn7nnConv2dn3n180",
+      "op": "Conv",
+      "input": [
+        "MobileNetnSequentialnmodelnnSequentialn7nnReLUn2n179"
+      ],
+      "attr": {
+        "kernel_shape": {
+          "list": {
+            "i": [
+              "1",
+              "1",
+              "512",
+              "512"
+            ]
+          }
+        },
+        "strides": {
+          "list": {
+            "i": [
+              "1",
+              "1",
+              "1",
+              "1"
+            ]
+          }
+        },
+        "dilations": {
+          "list": {
+            "i": [
+              "1",
+              "1",
+              "1",
+              "1"
+            ]
+          }
+        },
+        "pads": {
+          "list": {
+            "i": [
+              "0",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0"
+            ]
+          }
+        },
+        "use_bias": {
+          "b": false
+        },
+        "group": {
+          "i": "1"
+        },
+        "_output_shapes": {
+          "list": {
+            "shape": [
+              {
+                "dim": [
+                  {
+                    "size": "-1"
+                  },
+                  {
+                    "size": "14"
+                  },
+                  {
+                    "size": "14"
+                  },
+                  {
+                    "size": "512"
+                  }
+                ]
+              }
+            ]
+          }
+        }
+      }
+    },
+    {
+      "name": "MobileNetnSequentialnmodelnnSequentialn7nnBatchNorm2dn4n181",
+      "op": "BatchNorm",
+      "input": [
+        "MobileNetnSequentialnmodelnnSequentialn7nnConv2dn3n180"
+      ],
+      "attr": {
+        "scale": {
+          "b": true
+        },
+        "bias": {
+          "b": true
+        },
+        "_output_shapes": {
+          "list": {
+            "shape": [
+              {
+                "dim": [
+                  {
+                    "size": "-1"
+                  },
+                  {
+                    "size": "14"
+                  },
+                  {
+                    "size": "14"
+                  },
+                  {
+                    "size": "512"
+                  }
+                ]
+              }
+            ]
+          }
+        },
+        "epsilon": {
+          "f": 9.999999747378752e-06
+        }
+      }
+    },
+    {
+      "name": "MobileNetnSequentialnmodelnnSequentialn7nnReLUn5n182",
+      "op": "Relu",
+      "input": [
+        "MobileNetnSequentialnmodelnnSequentialn7nnBatchNorm2dn4n181"
+      ],
+      "attr": {
+        "_output_shapes": {
+          "list": {
+            "shape": [
+              {
+                "dim": [
+                  {
+                    "size": "-1"
+                  },
+                  {
+                    "size": "14"
+                  },
+                  {
+                    "size": "14"
+                  },
+                  {
+                    "size": "512"
+                  }
+                ]
+              }
+            ]
+          }
+        }
+      }
+    },
+    {
+      "name": "MobileNetnSequentialnmodelnnSequentialn8nnConv2dn0n183",
+      "op": "Conv",
+      "input": [
+        "MobileNetnSequentialnmodelnnSequentialn7nnReLUn5n182"
+      ],
+      "attr": {
+        "kernel_shape": {
+          "list": {
+            "i": [
+              "3",
+              "3",
+              "1",
+              "512"
+            ]
+          }
+        },
+        "strides": {
+          "list": {
+            "i": [
+              "1",
+              "1",
+              "1",
+              "1"
+            ]
+          }
+        },
+        "dilations": {
+          "list": {
+            "i": [
+              "1",
+              "1",
+              "1",
+              "1"
+            ]
+          }
+        },
+        "pads": {
+          "list": {
+            "i": [
+              "0",
+              "1",
+              "1",
+              "0",
+              "0",
+              "1",
+              "1",
+              "0"
+            ]
+          }
+        },
+        "use_bias": {
+          "b": false
+        },
+        "group": {
+          "i": "512"
+        },
+        "_output_shapes": {
+          "list": {
+            "shape": [
+              {
+                "dim": [
+                  {
+                    "size": "-1"
+                  },
+                  {
+                    "size": "14"
+                  },
+                  {
+                    "size": "14"
+                  },
+                  {
+                    "size": "512"
+                  }
+                ]
+              }
+            ]
+          }
+        }
+      }
+    },
+    {
+      "name": "MobileNetnSequentialnmodelnnSequentialn8nnBatchNorm2dn1n184",
+      "op": "BatchNorm",
+      "input": [
+        "MobileNetnSequentialnmodelnnSequentialn8nnConv2dn0n183"
+      ],
+      "attr": {
+        "scale": {
+          "b": true
+        },
+        "bias": {
+          "b": true
+        },
+        "_output_shapes": {
+          "list": {
+            "shape": [
+              {
+                "dim": [
+                  {
+                    "size": "-1"
+                  },
+                  {
+                    "size": "14"
+                  },
+                  {
+                    "size": "14"
+                  },
+                  {
+                    "size": "512"
+                  }
+                ]
+              }
+            ]
+          }
+        },
+        "epsilon": {
+          "f": 9.999999747378752e-06
+        }
+      }
+    },
+    {
+      "name": "MobileNetnSequentialnmodelnnSequentialn8nnReLUn2n185",
+      "op": "Relu",
+      "input": [
+        "MobileNetnSequentialnmodelnnSequentialn8nnBatchNorm2dn1n184"
+      ],
+      "attr": {
+        "_output_shapes": {
+          "list": {
+            "shape": [
+              {
+                "dim": [
+                  {
+                    "size": "-1"
+                  },
+                  {
+                    "size": "14"
+                  },
+                  {
+                    "size": "14"
+                  },
+                  {
+                    "size": "512"
+                  }
+                ]
+              }
+            ]
+          }
+        }
+      }
+    },
+    {
+      "name": "MobileNetnSequentialnmodelnnSequentialn8nnConv2dn3n186",
+      "op": "Conv",
+      "input": [
+        "MobileNetnSequentialnmodelnnSequentialn8nnReLUn2n185"
+      ],
+      "attr": {
+        "kernel_shape": {
+          "list": {
+            "i": [
+              "1",
+              "1",
+              "512",
+              "512"
+            ]
+          }
+        },
+        "strides": {
+          "list": {
+            "i": [
+              "1",
+              "1",
+              "1",
+              "1"
+            ]
+          }
+        },
+        "dilations": {
+          "list": {
+            "i": [
+              "1",
+              "1",
+              "1",
+              "1"
+            ]
+          }
+        },
+        "pads": {
+          "list": {
+            "i": [
+              "0",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0"
+            ]
+          }
+        },
+        "use_bias": {
+          "b": false
+        },
+        "group": {
+          "i": "1"
+        },
+        "_output_shapes": {
+          "list": {
+            "shape": [
+              {
+                "dim": [
+                  {
+                    "size": "-1"
+                  },
+                  {
+                    "size": "14"
+                  },
+                  {
+                    "size": "14"
+                  },
+                  {
+                    "size": "512"
+                  }
+                ]
+              }
+            ]
+          }
+        }
+      }
+    },
+    {
+      "name": "MobileNetnSequentialnmodelnnSequentialn8nnBatchNorm2dn4n187",
+      "op": "BatchNorm",
+      "input": [
+        "MobileNetnSequentialnmodelnnSequentialn8nnConv2dn3n186"
+      ],
+      "attr": {
+        "scale": {
+          "b": true
+        },
+        "bias": {
+          "b": true
+        },
+        "_output_shapes": {
+          "list": {
+            "shape": [
+              {
+                "dim": [
+                  {
+                    "size": "-1"
+                  },
+                  {
+                    "size": "14"
+                  },
+                  {
+                    "size": "14"
+                  },
+                  {
+                    "size": "512"
+                  }
+                ]
+              }
+            ]
+          }
+        },
+        "epsilon": {
+          "f": 9.999999747378752e-06
+        }
+      }
+    },
+    {
+      "name": "MobileNetnSequentialnmodelnnSequentialn8nnReLUn5n188",
+      "op": "Relu",
+      "input": [
+        "MobileNetnSequentialnmodelnnSequentialn8nnBatchNorm2dn4n187"
+      ],
+      "attr": {
+        "_output_shapes": {
+          "list": {
+            "shape": [
+              {
+                "dim": [
+                  {
+                    "size": "-1"
+                  },
+                  {
+                    "size": "14"
+                  },
+                  {
+                    "size": "14"
+                  },
+                  {
+                    "size": "512"
+                  }
+                ]
+              }
+            ]
+          }
+        }
+      }
+    },
+    {
+      "name": "MobileNetnSequentialnmodelnnSequentialn9nnConv2dn0n189",
+      "op": "Conv",
+      "input": [
+        "MobileNetnSequentialnmodelnnSequentialn8nnReLUn5n188"
+      ],
+      "attr": {
+        "kernel_shape": {
+          "list": {
+            "i": [
+              "3",
+              "3",
+              "1",
+              "512"
+            ]
+          }
+        },
+        "strides": {
+          "list": {
+            "i": [
+              "1",
+              "1",
+              "1",
+              "1"
+            ]
+          }
+        },
+        "dilations": {
+          "list": {
+            "i": [
+              "1",
+              "1",
+              "1",
+              "1"
+            ]
+          }
+        },
+        "pads": {
+          "list": {
+            "i": [
+              "0",
+              "1",
+              "1",
+              "0",
+              "0",
+              "1",
+              "1",
+              "0"
+            ]
+          }
+        },
+        "use_bias": {
+          "b": false
+        },
+        "group": {
+          "i": "512"
+        },
+        "_output_shapes": {
+          "list": {
+            "shape": [
+              {
+                "dim": [
+                  {
+                    "size": "-1"
+                  },
+                  {
+                    "size": "14"
+                  },
+                  {
+                    "size": "14"
+                  },
+                  {
+                    "size": "512"
+                  }
+                ]
+              }
+            ]
+          }
+        }
+      }
+    },
+    {
+      "name": "MobileNetnSequentialnmodelnnSequentialn9nnBatchNorm2dn1n190",
+      "op": "BatchNorm",
+      "input": [
+        "MobileNetnSequentialnmodelnnSequentialn9nnConv2dn0n189"
+      ],
+      "attr": {
+        "scale": {
+          "b": true
+        },
+        "bias": {
+          "b": true
+        },
+        "_output_shapes": {
+          "list": {
+            "shape": [
+              {
+                "dim": [
+                  {
+                    "size": "-1"
+                  },
+                  {
+                    "size": "14"
+                  },
+                  {
+                    "size": "14"
+                  },
+                  {
+                    "size": "512"
+                  }
+                ]
+              }
+            ]
+          }
+        },
+        "epsilon": {
+          "f": 9.999999747378752e-06
+        }
+      }
+    },
+    {
+      "name": "MobileNetnSequentialnmodelnnSequentialn9nnReLUn2n191",
+      "op": "Relu",
+      "input": [
+        "MobileNetnSequentialnmodelnnSequentialn9nnBatchNorm2dn1n190"
+      ],
+      "attr": {
+        "_output_shapes": {
+          "list": {
+            "shape": [
+              {
+                "dim": [
+                  {
+                    "size": "-1"
+                  },
+                  {
+                    "size": "14"
+                  },
+                  {
+                    "size": "14"
+                  },
+                  {
+                    "size": "512"
+                  }
+                ]
+              }
+            ]
+          }
+        }
+      }
+    },
+    {
+      "name": "MobileNetnSequentialnmodelnnSequentialn9nnConv2dn3n192",
+      "op": "Conv",
+      "input": [
+        "MobileNetnSequentialnmodelnnSequentialn9nnReLUn2n191"
+      ],
+      "attr": {
+        "kernel_shape": {
+          "list": {
+            "i": [
+              "1",
+              "1",
+              "512",
+              "512"
+            ]
+          }
+        },
+        "strides": {
+          "list": {
+            "i": [
+              "1",
+              "1",
+              "1",
+              "1"
+            ]
+          }
+        },
+        "dilations": {
+          "list": {
+            "i": [
+              "1",
+              "1",
+              "1",
+              "1"
+            ]
+          }
+        },
+        "pads": {
+          "list": {
+            "i": [
+              "0",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0"
+            ]
+          }
+        },
+        "use_bias": {
+          "b": false
+        },
+        "group": {
+          "i": "1"
+        },
+        "_output_shapes": {
+          "list": {
+            "shape": [
+              {
+                "dim": [
+                  {
+                    "size": "-1"
+                  },
+                  {
+                    "size": "14"
+                  },
+                  {
+                    "size": "14"
+                  },
+                  {
+                    "size": "512"
+                  }
+                ]
+              }
+            ]
+          }
+        }
+      }
+    },
+    {
+      "name": "MobileNetnSequentialnmodelnnSequentialn9nnBatchNorm2dn4n193",
+      "op": "BatchNorm",
+      "input": [
+        "MobileNetnSequentialnmodelnnSequentialn9nnConv2dn3n192"
+      ],
+      "attr": {
+        "scale": {
+          "b": true
+        },
+        "bias": {
+          "b": true
+        },
+        "_output_shapes": {
+          "list": {
+            "shape": [
+              {
+                "dim": [
+                  {
+                    "size": "-1"
+                  },
+                  {
+                    "size": "14"
+                  },
+                  {
+                    "size": "14"
+                  },
+                  {
+                    "size": "512"
+                  }
+                ]
+              }
+            ]
+          }
+        },
+        "epsilon": {
+          "f": 9.999999747378752e-06
+        }
+      }
+    },
+    {
+      "name": "MobileNetnSequentialnmodelnnSequentialn9nnReLUn5n194",
+      "op": "Relu",
+      "input": [
+        "MobileNetnSequentialnmodelnnSequentialn9nnBatchNorm2dn4n193"
+      ],
+      "attr": {
+        "_output_shapes": {
+          "list": {
+            "shape": [
+              {
+                "dim": [
+                  {
+                    "size": "-1"
+                  },
+                  {
+                    "size": "14"
+                  },
+                  {
+                    "size": "14"
+                  },
+                  {
+                    "size": "512"
+                  }
+                ]
+              }
+            ]
+          }
+        }
+      }
+    },
+    {
+      "name": "MobileNetnSequentialnmodelnnSequentialn10nnConv2dn0n195",
+      "op": "Conv",
+      "input": [
+        "MobileNetnSequentialnmodelnnSequentialn9nnReLUn5n194"
+      ],
+      "attr": {
+        "kernel_shape": {
+          "list": {
+            "i": [
+              "3",
+              "3",
+              "1",
+              "512"
+            ]
+          }
+        },
+        "strides": {
+          "list": {
+            "i": [
+              "1",
+              "1",
+              "1",
+              "1"
+            ]
+          }
+        },
+        "dilations": {
+          "list": {
+            "i": [
+              "1",
+              "1",
+              "1",
+              "1"
+            ]
+          }
+        },
+        "pads": {
+          "list": {
+            "i": [
+              "0",
+              "1",
+              "1",
+              "0",
+              "0",
+              "1",
+              "1",
+              "0"
+            ]
+          }
+        },
+        "use_bias": {
+          "b": false
+        },
+        "group": {
+          "i": "512"
+        },
+        "_output_shapes": {
+          "list": {
+            "shape": [
+              {
+                "dim": [
+                  {
+                    "size": "-1"
+                  },
+                  {
+                    "size": "14"
+                  },
+                  {
+                    "size": "14"
+                  },
+                  {
+                    "size": "512"
+                  }
+                ]
+              }
+            ]
+          }
+        }
+      }
+    },
+    {
+      "name": "MobileNetnSequentialnmodelnnSequentialn10nnBatchNorm2dn1n196",
+      "op": "BatchNorm",
+      "input": [
+        "MobileNetnSequentialnmodelnnSequentialn10nnConv2dn0n195"
+      ],
+      "attr": {
+        "scale": {
+          "b": true
+        },
+        "bias": {
+          "b": true
+        },
+        "_output_shapes": {
+          "list": {
+            "shape": [
+              {
+                "dim": [
+                  {
+                    "size": "-1"
+                  },
+                  {
+                    "size": "14"
+                  },
+                  {
+                    "size": "14"
+                  },
+                  {
+                    "size": "512"
+                  }
+                ]
+              }
+            ]
+          }
+        },
+        "epsilon": {
+          "f": 9.999999747378752e-06
+        }
+      }
+    },
+    {
+      "name": "MobileNetnSequentialnmodelnnSequentialn10nnReLUn2n197",
+      "op": "Relu",
+      "input": [
+        "MobileNetnSequentialnmodelnnSequentialn10nnBatchNorm2dn1n196"
+      ],
+      "attr": {
+        "_output_shapes": {
+          "list": {
+            "shape": [
+              {
+                "dim": [
+                  {
+                    "size": "-1"
+                  },
+                  {
+                    "size": "14"
+                  },
+                  {
+                    "size": "14"
+                  },
+                  {
+                    "size": "512"
+                  }
+                ]
+              }
+            ]
+          }
+        }
+      }
+    },
+    {
+      "name": "MobileNetnSequentialnmodelnnSequentialn10nnConv2dn3n198",
+      "op": "Conv",
+      "input": [
+        "MobileNetnSequentialnmodelnnSequentialn10nnReLUn2n197"
+      ],
+      "attr": {
+        "kernel_shape": {
+          "list": {
+            "i": [
+              "1",
+              "1",
+              "512",
+              "512"
+            ]
+          }
+        },
+        "strides": {
+          "list": {
+            "i": [
+              "1",
+              "1",
+              "1",
+              "1"
+            ]
+          }
+        },
+        "dilations": {
+          "list": {
+            "i": [
+              "1",
+              "1",
+              "1",
+              "1"
+            ]
+          }
+        },
+        "pads": {
+          "list": {
+            "i": [
+              "0",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0"
+            ]
+          }
+        },
+        "use_bias": {
+          "b": false
+        },
+        "group": {
+          "i": "1"
+        },
+        "_output_shapes": {
+          "list": {
+            "shape": [
+              {
+                "dim": [
+                  {
+                    "size": "-1"
+                  },
+                  {
+                    "size": "14"
+                  },
+                  {
+                    "size": "14"
+                  },
+                  {
+                    "size": "512"
+                  }
+                ]
+              }
+            ]
+          }
+        }
+      }
+    },
+    {
+      "name": "MobileNetnSequentialnmodelnnSequentialn10nnBatchNorm2dn4n199",
+      "op": "BatchNorm",
+      "input": [
+        "MobileNetnSequentialnmodelnnSequentialn10nnConv2dn3n198"
+      ],
+      "attr": {
+        "scale": {
+          "b": true
+        },
+        "bias": {
+          "b": true
+        },
+        "_output_shapes": {
+          "list": {
+            "shape": [
+              {
+                "dim": [
+                  {
+                    "size": "-1"
+                  },
+                  {
+                    "size": "14"
+                  },
+                  {
+                    "size": "14"
+                  },
+                  {
+                    "size": "512"
+                  }
+                ]
+              }
+            ]
+          }
+        },
+        "epsilon": {
+          "f": 9.999999747378752e-06
+        }
+      }
+    },
+    {
+      "name": "MobileNetnSequentialnmodelnnSequentialn10nnReLUn5n200",
+      "op": "Relu",
+      "input": [
+        "MobileNetnSequentialnmodelnnSequentialn10nnBatchNorm2dn4n199"
+      ],
+      "attr": {
+        "_output_shapes": {
+          "list": {
+            "shape": [
+              {
+                "dim": [
+                  {
+                    "size": "-1"
+                  },
+                  {
+                    "size": "14"
+                  },
+                  {
+                    "size": "14"
+                  },
+                  {
+                    "size": "512"
+                  }
+                ]
+              }
+            ]
+          }
+        }
+      }
+    },
+    {
+      "name": "MobileNetnSequentialnmodelnnSequentialn11nnConv2dn0n201",
+      "op": "Conv",
+      "input": [
+        "MobileNetnSequentialnmodelnnSequentialn10nnReLUn5n200"
+      ],
+      "attr": {
+        "kernel_shape": {
+          "list": {
+            "i": [
+              "3",
+              "3",
+              "1",
+              "512"
+            ]
+          }
+        },
+        "strides": {
+          "list": {
+            "i": [
+              "1",
+              "1",
+              "1",
+              "1"
+            ]
+          }
+        },
+        "dilations": {
+          "list": {
+            "i": [
+              "1",
+              "1",
+              "1",
+              "1"
+            ]
+          }
+        },
+        "pads": {
+          "list": {
+            "i": [
+              "0",
+              "1",
+              "1",
+              "0",
+              "0",
+              "1",
+              "1",
+              "0"
+            ]
+          }
+        },
+        "use_bias": {
+          "b": false
+        },
+        "group": {
+          "i": "512"
+        },
+        "_output_shapes": {
+          "list": {
+            "shape": [
+              {
+                "dim": [
+                  {
+                    "size": "-1"
+                  },
+                  {
+                    "size": "14"
+                  },
+                  {
+                    "size": "14"
+                  },
+                  {
+                    "size": "512"
+                  }
+                ]
+              }
+            ]
+          }
+        }
+      }
+    },
+    {
+      "name": "MobileNetnSequentialnmodelnnSequentialn11nnBatchNorm2dn1n202",
+      "op": "BatchNorm",
+      "input": [
+        "MobileNetnSequentialnmodelnnSequentialn11nnConv2dn0n201"
+      ],
+      "attr": {
+        "scale": {
+          "b": true
+        },
+        "bias": {
+          "b": true
+        },
+        "_output_shapes": {
+          "list": {
+            "shape": [
+              {
+                "dim": [
+                  {
+                    "size": "-1"
+                  },
+                  {
+                    "size": "14"
+                  },
+                  {
+                    "size": "14"
+                  },
+                  {
+                    "size": "512"
+                  }
+                ]
+              }
+            ]
+          }
+        },
+        "epsilon": {
+          "f": 9.999999747378752e-06
+        }
+      }
+    },
+    {
+      "name": "MobileNetnSequentialnmodelnnSequentialn11nnReLUn2n203",
+      "op": "Relu",
+      "input": [
+        "MobileNetnSequentialnmodelnnSequentialn11nnBatchNorm2dn1n202"
+      ],
+      "attr": {
+        "_output_shapes": {
+          "list": {
+            "shape": [
+              {
+                "dim": [
+                  {
+                    "size": "-1"
+                  },
+                  {
+                    "size": "14"
+                  },
+                  {
+                    "size": "14"
+                  },
+                  {
+                    "size": "512"
+                  }
+                ]
+              }
+            ]
+          }
+        }
+      }
+    },
+    {
+      "name": "MobileNetnSequentialnmodelnnSequentialn11nnConv2dn3n204",
+      "op": "Conv",
+      "input": [
+        "MobileNetnSequentialnmodelnnSequentialn11nnReLUn2n203"
+      ],
+      "attr": {
+        "kernel_shape": {
+          "list": {
+            "i": [
+              "1",
+              "1",
+              "512",
+              "512"
+            ]
+          }
+        },
+        "strides": {
+          "list": {
+            "i": [
+              "1",
+              "1",
+              "1",
+              "1"
+            ]
+          }
+        },
+        "dilations": {
+          "list": {
+            "i": [
+              "1",
+              "1",
+              "1",
+              "1"
+            ]
+          }
+        },
+        "pads": {
+          "list": {
+            "i": [
+              "0",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0"
+            ]
+          }
+        },
+        "use_bias": {
+          "b": false
+        },
+        "group": {
+          "i": "1"
+        },
+        "_output_shapes": {
+          "list": {
+            "shape": [
+              {
+                "dim": [
+                  {
+                    "size": "-1"
+                  },
+                  {
+                    "size": "14"
+                  },
+                  {
+                    "size": "14"
+                  },
+                  {
+                    "size": "512"
+                  }
+                ]
+              }
+            ]
+          }
+        }
+      }
+    },
+    {
+      "name": "MobileNetnSequentialnmodelnnSequentialn11nnBatchNorm2dn4n205",
+      "op": "BatchNorm",
+      "input": [
+        "MobileNetnSequentialnmodelnnSequentialn11nnConv2dn3n204"
+      ],
+      "attr": {
+        "scale": {
+          "b": true
+        },
+        "bias": {
+          "b": true
+        },
+        "_output_shapes": {
+          "list": {
+            "shape": [
+              {
+                "dim": [
+                  {
+                    "size": "-1"
+                  },
+                  {
+                    "size": "14"
+                  },
+                  {
+                    "size": "14"
+                  },
+                  {
+                    "size": "512"
+                  }
+                ]
+              }
+            ]
+          }
+        },
+        "epsilon": {
+          "f": 9.999999747378752e-06
+        }
+      }
+    },
+    {
+      "name": "MobileNetnSequentialnmodelnnSequentialn11nnReLUn5n206",
+      "op": "Relu",
+      "input": [
+        "MobileNetnSequentialnmodelnnSequentialn11nnBatchNorm2dn4n205"
+      ],
+      "attr": {
+        "_output_shapes": {
+          "list": {
+            "shape": [
+              {
+                "dim": [
+                  {
+                    "size": "-1"
+                  },
+                  {
+                    "size": "14"
+                  },
+                  {
+                    "size": "14"
+                  },
+                  {
+                    "size": "512"
+                  }
+                ]
+              }
+            ]
+          }
+        }
+      }
+    },
+    {
+      "name": "MobileNetnSequentialnmodelnnSequentialn12nnConv2dn0n207",
+      "op": "Conv",
+      "input": [
+        "MobileNetnSequentialnmodelnnSequentialn11nnReLUn5n206"
+      ],
+      "attr": {
+        "kernel_shape": {
+          "list": {
+            "i": [
+              "3",
+              "3",
+              "1",
+              "512"
+            ]
+          }
+        },
+        "strides": {
+          "list": {
+            "i": [
+              "1",
+              "1",
+              "1",
+              "1"
+            ]
+          }
+        },
+        "dilations": {
+          "list": {
+            "i": [
+              "1",
+              "1",
+              "1",
+              "1"
+            ]
+          }
+        },
+        "pads": {
+          "list": {
+            "i": [
+              "0",
+              "1",
+              "1",
+              "0",
+              "0",
+              "1",
+              "1",
+              "0"
+            ]
+          }
+        },
+        "use_bias": {
+          "b": false
+        },
+        "group": {
+          "i": "512"
+        },
+        "_output_shapes": {
+          "list": {
+            "shape": [
+              {
+                "dim": [
+                  {
+                    "size": "-1"
+                  },
+                  {
+                    "size": "14"
+                  },
+                  {
+                    "size": "14"
+                  },
+                  {
+                    "size": "512"
+                  }
+                ]
+              }
+            ]
+          }
+        }
+      }
+    },
+    {
+      "name": "MobileNetnSequentialnmodelnnSequentialn12nnBatchNorm2dn1n208",
+      "op": "BatchNorm",
+      "input": [
+        "MobileNetnSequentialnmodelnnSequentialn12nnConv2dn0n207"
+      ],
+      "attr": {
+        "scale": {
+          "b": true
+        },
+        "bias": {
+          "b": true
+        },
+        "_output_shapes": {
+          "list": {
+            "shape": [
+              {
+                "dim": [
+                  {
+                    "size": "-1"
+                  },
+                  {
+                    "size": "14"
+                  },
+                  {
+                    "size": "14"
+                  },
+                  {
+                    "size": "512"
+                  }
+                ]
+              }
+            ]
+          }
+        },
+        "epsilon": {
+          "f": 9.999999747378752e-06
+        }
+      }
+    },
+    {
+      "name": "MobileNetnSequentialnmodelnnSequentialn12nnReLUn2n209",
+      "op": "Relu",
+      "input": [
+        "MobileNetnSequentialnmodelnnSequentialn12nnBatchNorm2dn1n208"
+      ],
+      "attr": {
+        "_output_shapes": {
+          "list": {
+            "shape": [
+              {
+                "dim": [
+                  {
+                    "size": "-1"
+                  },
+                  {
+                    "size": "14"
+                  },
+                  {
+                    "size": "14"
+                  },
+                  {
+                    "size": "512"
+                  }
+                ]
+              }
+            ]
+          }
+        }
+      }
+    },
+    {
+      "name": "MobileNetnSequentialnmodelnnSequentialn12nnConv2dn3n210",
+      "op": "Conv",
+      "input": [
+        "MobileNetnSequentialnmodelnnSequentialn12nnReLUn2n209"
+      ],
+      "attr": {
+        "kernel_shape": {
+          "list": {
+            "i": [
+              "1",
+              "1",
+              "512",
+              "1024"
+            ]
+          }
+        },
+        "strides": {
+          "list": {
+            "i": [
+              "1",
+              "1",
+              "1",
+              "1"
+            ]
+          }
+        },
+        "dilations": {
+          "list": {
+            "i": [
+              "1",
+              "1",
+              "1",
+              "1"
+            ]
+          }
+        },
+        "pads": {
+          "list": {
+            "i": [
+              "0",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0"
+            ]
+          }
+        },
+        "use_bias": {
+          "b": false
+        },
+        "group": {
+          "i": "1"
+        },
+        "_output_shapes": {
+          "list": {
+            "shape": [
+              {
+                "dim": [
+                  {
+                    "size": "-1"
+                  },
+                  {
+                    "size": "14"
+                  },
+                  {
+                    "size": "14"
+                  },
+                  {
+                    "size": "1024"
+                  }
+                ]
+              }
+            ]
+          }
+        }
+      }
+    },
+    {
+      "name": "MobileNetnSequentialnmodelnnSequentialn12nnBatchNorm2dn4n211",
+      "op": "BatchNorm",
+      "input": [
+        "MobileNetnSequentialnmodelnnSequentialn12nnConv2dn3n210"
+      ],
+      "attr": {
+        "scale": {
+          "b": true
+        },
+        "bias": {
+          "b": true
+        },
+        "_output_shapes": {
+          "list": {
+            "shape": [
+              {
+                "dim": [
+                  {
+                    "size": "-1"
+                  },
+                  {
+                    "size": "14"
+                  },
+                  {
+                    "size": "14"
+                  },
+                  {
+                    "size": "1024"
+                  }
+                ]
+              }
+            ]
+          }
+        },
+        "epsilon": {
+          "f": 9.999999747378752e-06
+        }
+      }
+    },
+    {
+      "name": "MobileNetnSequentialnmodelnnSequentialn12nnReLUn5n212",
+      "op": "Relu",
+      "input": [
+        "MobileNetnSequentialnmodelnnSequentialn12nnBatchNorm2dn4n211"
+      ],
+      "attr": {
+        "_output_shapes": {
+          "list": {
+            "shape": [
+              {
+                "dim": [
+                  {
+                    "size": "-1"
+                  },
+                  {
+                    "size": "14"
+                  },
+                  {
+                    "size": "14"
+                  },
+                  {
+                    "size": "1024"
+                  }
+                ]
+              }
+            ]
+          }
+        }
+      }
+    },
+    {
+      "name": "MobileNetnSequentialnmodelnnSequentialn13nnConv2dn0n213",
+      "op": "Conv",
+      "input": [
+        "MobileNetnSequentialnmodelnnSequentialn12nnReLUn5n212"
+      ],
+      "attr": {
+        "kernel_shape": {
+          "list": {
+            "i": [
+              "3",
+              "3",
+              "1",
+              "1024"
+            ]
+          }
+        },
+        "strides": {
+          "list": {
+            "i": [
+              "1",
+              "1",
+              "1",
+              "1"
+            ]
+          }
+        },
+        "dilations": {
+          "list": {
+            "i": [
+              "1",
+              "1",
+              "1",
+              "1"
+            ]
+          }
+        },
+        "pads": {
+          "list": {
+            "i": [
+              "0",
+              "1",
+              "1",
+              "0",
+              "0",
+              "1",
+              "1",
+              "0"
+            ]
+          }
+        },
+        "use_bias": {
+          "b": false
+        },
+        "group": {
+          "i": "1024"
+        },
+        "_output_shapes": {
+          "list": {
+            "shape": [
+              {
+                "dim": [
+                  {
+                    "size": "-1"
+                  },
+                  {
+                    "size": "14"
+                  },
+                  {
+                    "size": "14"
+                  },
+                  {
+                    "size": "1024"
+                  }
+                ]
+              }
+            ]
+          }
+        }
+      }
+    },
+    {
+      "name": "MobileNetnSequentialnmodelnnSequentialn13nnBatchNorm2dn1n214",
+      "op": "BatchNorm",
+      "input": [
+        "MobileNetnSequentialnmodelnnSequentialn13nnConv2dn0n213"
+      ],
+      "attr": {
+        "scale": {
+          "b": true
+        },
+        "bias": {
+          "b": true
+        },
+        "_output_shapes": {
+          "list": {
+            "shape": [
+              {
+                "dim": [
+                  {
+                    "size": "-1"
+                  },
+                  {
+                    "size": "14"
+                  },
+                  {
+                    "size": "14"
+                  },
+                  {
+                    "size": "1024"
+                  }
+                ]
+              }
+            ]
+          }
+        },
+        "epsilon": {
+          "f": 9.999999747378752e-06
+        }
+      }
+    },
+    {
+      "name": "MobileNetnSequentialnmodelnnSequentialn13nnReLUn2n215",
+      "op": "Relu",
+      "input": [
+        "MobileNetnSequentialnmodelnnSequentialn13nnBatchNorm2dn1n214"
+      ],
+      "attr": {
+        "_output_shapes": {
+          "list": {
+            "shape": [
+              {
+                "dim": [
+                  {
+                    "size": "-1"
+                  },
+                  {
+                    "size": "14"
+                  },
+                  {
+                    "size": "14"
+                  },
+                  {
+                    "size": "1024"
+                  }
+                ]
+              }
+            ]
+          }
+        }
+      }
+    },
+    {
+      "name": "MobileNetnSequentialnmodelnnSequentialn13nnConv2dn3n216",
+      "op": "Conv",
+      "input": [
+        "MobileNetnSequentialnmodelnnSequentialn13nnReLUn2n215"
+      ],
+      "attr": {
+        "kernel_shape": {
+          "list": {
+            "i": [
+              "1",
+              "1",
+              "1024",
+              "1024"
+            ]
+          }
+        },
+        "strides": {
+          "list": {
+            "i": [
+              "1",
+              "1",
+              "1",
+              "1"
+            ]
+          }
+        },
+        "dilations": {
+          "list": {
+            "i": [
+              "1",
+              "1",
+              "1",
+              "1"
+            ]
+          }
+        },
+        "pads": {
+          "list": {
+            "i": [
+              "0",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0"
+            ]
+          }
+        },
+        "use_bias": {
+          "b": false
+        },
+        "group": {
+          "i": "1"
+        },
+        "_output_shapes": {
+          "list": {
+            "shape": [
+              {
+                "dim": [
+                  {
+                    "size": "-1"
+                  },
+                  {
+                    "size": "14"
+                  },
+                  {
+                    "size": "14"
+                  },
+                  {
+                    "size": "1024"
+                  }
+                ]
+              }
+            ]
+          }
+        }
+      }
+    },
+    {
+      "name": "MobileNetnSequentialnmodelnnSequentialn13nnBatchNorm2dn4n217",
+      "op": "BatchNorm",
+      "input": [
+        "MobileNetnSequentialnmodelnnSequentialn13nnConv2dn3n216"
+      ],
+      "attr": {
+        "scale": {
+          "b": true
+        },
+        "bias": {
+          "b": true
+        },
+        "_output_shapes": {
+          "list": {
+            "shape": [
+              {
+                "dim": [
+                  {
+                    "size": "-1"
+                  },
+                  {
+                    "size": "14"
+                  },
+                  {
+                    "size": "14"
+                  },
+                  {
+                    "size": "1024"
+                  }
+                ]
+              }
+            ]
+          }
+        },
+        "epsilon": {
+          "f": 9.999999747378752e-06
+        }
+      }
+    },
+    {
+      "name": "MobileNetnSequentialnmodelnnSequentialn13nnReLUn5n218",
+      "op": "Relu",
+      "input": [
+        "MobileNetnSequentialnmodelnnSequentialn13nnBatchNorm2dn4n217"
+      ],
+      "attr": {
+        "_output_shapes": {
+          "list": {
+            "shape": [
+              {
+                "dim": [
+                  {
+                    "size": "-1"
+                  },
+                  {
+                    "size": "14"
+                  },
+                  {
+                    "size": "14"
+                  },
+                  {
+                    "size": "1024"
+                  }
+                ]
+              }
+            ]
+          }
+        }
+      }
+    },
+    {
+      "name": "MobileNetnSequentialnmodelnnAvgPool2dn14n219",
+      "op": "Pool",
+      "input": [
+        "MobileNetnSequentialnmodelnnSequentialn13nnReLUn5n218"
+      ],
+      "attr": {
+        "strides": {
+          "list": {
+            "i": [
+              "1",
+              "14",
+              "14",
+              "1"
+            ]
+          }
+        },
+        "kernel_shape": {
+          "list": {
+            "i": [
+              "1",
+              "14",
+              "14",
+              "1"
+            ]
+          }
+        },
+        "dilations": {
+          "list": {
+            "i": [
+              "1",
+              "1",
+              "1",
+              "1"
+            ]
+          }
+        },
+        "pads": {
+          "list": {
+            "i": [
+              "0",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0"
+            ]
+          }
+        },
+        "pooling_type": {
+          "s": "QVZH"
+        },
+        "_output_shapes": {
+          "list": {
+            "shape": [
+              {
+                "dim": [
+                  {
+                    "size": "-1"
+                  },
+                  {
+                    "size": "1"
+                  },
+                  {
+                    "size": "1"
+                  },
+                  {
+                    "size": "1024"
+                  }
+                ]
+              }
+            ]
+          }
+        }
+      }
+    },
+    {
+      "name": "input",
+      "op": "DataInput",
+      "attr": {
+        "_output_shapes": {
+          "list": {
+            "shape": [
+              {
+                "dim": [
+                  {
+                    "size": "-1"
+                  },
+                  {
+                    "size": "224"
+                  },
+                  {
+                    "size": "224"
+                  },
+                  {
+                    "size": "3"
+                  }
+                ]
+              }
+            ]
+          }
+        },
+        "shape": {
+          "shape": {
+            "dim": [
+              {
+                "size": "-1"
+              },
+              {
+                "size": "224"
+              },
+              {
+                "size": "224"
+              },
+              {
+                "size": "3"
+              }
+            ]
+          }
+        }
+      }
+    }
+  ]
+}
