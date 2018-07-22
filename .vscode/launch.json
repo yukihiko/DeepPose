@@ -43,11 +43,11 @@
             "args": [
                 "pytorch",
                 "-g0",
-                "--NN=MobileNet_",
+                "--NN=MobileNet",
                 "--batchsize=64",
                 "--data-augmentation",
                 "--use-visibility",
-                "--out=${workspaceFolder}/result/pytorch/OneDrive",
+                "--out=${workspaceFolder}/result",
                 "--opt=Adam",
                 "-e5000"
             ]
@@ -60,9 +60,9 @@
             "args": [
                 "pytorch",
                 "-g0",
-                "--NN=MobileNet_",
+                "--NN=MobileNet",
                 "--batchsize=64",
-                "--resume-model=${workspaceFolder}/result/pytorch/epoch-80.model",
+                "--resume-model=${workspaceFolder}/result/pytorch/epoch-30.model",
                 "--out=${workspaceFolder}/result",
                 "--data-augmentation",
                 "--use-visibility",
@@ -91,6 +91,28 @@
             "type": "python",
             "request": "launch",
             "program": "${workspaceFolder}/scripts/onnx_check.py",
+        },        
+        {
+            "name": "Python: mmdnn_convert",
+            "type": "python",
+            "request": "launch",
+            "program": "${workspaceFolder}/scripts/mmdnn_convert.py",
+            "args": [
+                "--srcFramework=pytorch",
+                "-dnon_state.model",
+                "-nnon_state.model",
+            ]
+        },        
+        {
+            "name": "Python: mmdnn_conversion",
+            "type": "python",
+            "request": "launch",
+            "program": "c:/users/yukih/appdata/local/conda/conda/envs/tensorflow-gpu/lib/site-packages/mmdnn/conversion/_script/convertToIR.py",
+            "args": [
+                "-fpytorch",
+                "-dnon_state.model",
+                "-nnon_state.model",
+            ]
         },        
         {
             "name": "Python: Attach",

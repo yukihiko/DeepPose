@@ -3,6 +3,10 @@
 import torch.nn as nn
 import torch.nn.functional as F
 
+import sys
+sys.path.append("./")
+from modules.models.pytorch.Lin_View import Lin_View
+
 class MobileNet(nn.Module):
     def __init__(self):
         super(MobileNet, self).__init__()
@@ -43,14 +47,17 @@ class MobileNet(nn.Module):
             conv_dw(1024, 1024, 1),
             #nn.AvgPool2d(7),
             nn.AvgPool2d(14),
+            Lin_View(view_size=1024),
+            nn.Linear(1024, 14*2),
+            Lin_View(view_size=28),
         )
-        self.fc = nn.Linear(1024, 14*2)
-        #self.fc2 = nn.Linear(1024, 14)
+        #self.fc = nn.Linear(1024, 14*2)
 
     def forward(self, x):
         x = self.model(x)
-        x = x.view(-1, 1024)
-        x = self.fc(x)
-        #o = o.view(28)
+        #x = x.view(-1, 1024)
+        #x = self.fc(x)
+        #x = x.view(-1, 28)
+
         #s = F.sigmoid(self.fc2(x))
         return x
