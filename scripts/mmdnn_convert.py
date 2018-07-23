@@ -92,7 +92,7 @@ def main():
 
     parser = _get_parser()
     args = parser.parse_args()
-    #args.inputShape = "3 224 224"
+    args.inputShape = 3,224,224
 
     if args.NN == "VGG19":
         model = models.vgg19(pretrained=True)

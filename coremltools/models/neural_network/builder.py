@@ -2492,7 +2492,7 @@ class NeuralNetworkBuilder(object):
 
 
     def set_pre_processing_parameters(self, image_input_names = [], is_bgr = False,
-            red_bias = 0.0, green_bias = 0.0, blue_bias = 0.0, gray_bias = 0.0, image_scale = 1.0):
+            red_bias = -1.0, green_bias = -1.0, blue_bias = -1.0, gray_bias = 0.0, image_scale = 2.0/255):
         """Add pre-processing parameters to the neural network object
 
         Parameters
@@ -2535,7 +2535,7 @@ class NeuralNetworkBuilder(object):
         if not isinstance(green_bias, dict): green_bias = dict.fromkeys(image_input_names, green_bias) 
         if not isinstance(gray_bias, dict): gray_bias = dict.fromkeys(image_input_names, gray_bias) 
         if not isinstance(image_scale, dict): image_scale = dict.fromkeys(image_input_names, image_scale)
-        
+
         # Add image inputs
         for input_ in spec.description.input:
             if input_.name in image_input_names:

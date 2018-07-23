@@ -177,7 +177,7 @@ def _convert_multiarray_output_to_image(spec,  # type: Any
                         .format(array_shape,)
                     )
                 array_shape = array_shape[1:]
-
+            
             channels, height, width = array_shape
 
             if channels == 1:

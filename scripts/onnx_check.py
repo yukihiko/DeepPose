@@ -27,7 +27,7 @@ def main():
         output_transform=Scale(),
         transform=Crop(data_augmentation=False))
 
-    img, pose, _, _ = dataset[10]
+    img, pose, _, _ = dataset[0]
     arr = img.unsqueeze(0)
 
     #img = Image.open(img_path)
