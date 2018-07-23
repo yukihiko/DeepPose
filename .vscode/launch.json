@@ -82,7 +82,8 @@
             "request": "launch",
             "program": "${workspaceFolder}/scripts/pytorch2onnx.py",
             "args": [
-                "--input=result/pytorch/epoch-30.model",
+                "--NN=MobileNet",
+                "--input=result/pytorch/epoch-120.model",
                 "--output=test.onnx",
             ]
         },        
@@ -99,8 +100,11 @@
             "program": "${workspaceFolder}/scripts/mmdnn_convert.py",
             "args": [
                 "--srcFramework=pytorch",
-                "-dnon_state.model",
-                "-nnon_state.model",
+                "--NN=MobileNet_3",
+                "--inputShape=3,244,244",
+                "--resume-model=${workspaceFolder}/result/pytorch/epoch-1.model",
+                "-d${workspaceFolder}/result/non_state.model",
+                "-n${workspaceFolder}/result/non_state.model",
             ]
         },        
         {
