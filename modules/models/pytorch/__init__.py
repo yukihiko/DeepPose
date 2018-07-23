@@ -9,7 +9,8 @@ from modules.models.pytorch.MobileNet import MobileNet
 from modules.models.pytorch.MobileNetV2 import MobileNetV2
 from modules.models.pytorch.MobileNet_ import MobileNet_
 from modules.models.pytorch.MobileNet_2 import MobileNet_2
+from modules.models.pytorch.MobileNet_3 import MobileNet_3
 from modules.models.pytorch.Lin_View import Lin_View
 
 
-__all__ = ['AlexNet', 'VGG19Net', 'Inceptionv3', 'Resnet', 'MobileNet', 'MobileNetV2', 'MobileNet_', 'MobileNet_', 'Lin_View']
+__all__ = ['AlexNet', 'VGG19Net', 'Inceptionv3', 'Resnet', 'MobileNet', 'MobileNetV2', 'MobileNet_', 'MobileNet_2', 'MobileNet_3', 'Lin_View']

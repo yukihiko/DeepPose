@@ -43,7 +43,7 @@
             "args": [
                 "pytorch",
                 "-g0",
-                "--NN=MobileNet",
+                "--NN=MobileNet_3",
                 "--batchsize=64",
                 "--data-augmentation",
                 "--use-visibility",

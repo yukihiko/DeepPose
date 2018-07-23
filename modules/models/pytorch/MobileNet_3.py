@@ -7,9 +7,9 @@ import sys
 sys.path.append("./")
 from modules.models.pytorch.Lin_View import Lin_View
 
-class MobileNet(nn.Module):
+class MobileNet_3(nn.Module):
     def __init__(self):
-        super(MobileNet, self).__init__()
+        super(MobileNet_3, self).__init__()
 
         def conv_bn(inp, oup, stride):
             return nn.Sequential(
@@ -42,19 +42,15 @@ class MobileNet(nn.Module):
             conv_dw(512, 512, 1),
             conv_dw(512, 512, 1),
             conv_dw(512, 512, 1),
-            #conv_dw(512, 1024, 2),
             conv_dw(512, 1024, 1),
             conv_dw(1024, 1024, 1),
-            #nn.AvgPool2d(7),
             nn.AvgPool2d(14),
+            Lin_View(view_size=1024),
+            nn.Linear(1024, 14*2),
+            Lin_View(view_size=28),
         )
-        self.fc = nn.Linear(1024, 14*2)
 
     def forward(self, x):
         x = self.model(x)
-        x = x.view(-1, 1024)
-        x = self.fc(x)
-        x = x.view(-1, 28)
-
-        #s = F.sigmoid(self.fc2(x))
+        
         return x
