@@ -5,6 +5,7 @@ import torch.nn as nn
 import torch
 import numpy as np
 from torch.autograd import Variable
+import scipy.ndimage.filters as fi
 
 class MeanSquaredError2(nn.Module):
     """ Mean squared error (a.k.a. Euclidean loss) function. """
@@ -15,21 +16,31 @@ class MeanSquaredError2(nn.Module):
         self.Nj = Nj
         self.col = col
 
+    def min_max(self, x, axis=None):
+        min = x.min(axis=axis, keepdims=True)
+        max = x.max(axis=axis, keepdims=True)
+        result = (x-min)/(max-min)
+        return torch.Tensor(result)
+
     def forward(self, *inputs):
         o, h, t, v = inputs
 
         s = h.size()
         tt = torch.zeros(s).float()
-        pp = torch.zeros(o.size()).float()
         ti = t*self.col
-        tpos = t*224
-        one = np.ones(self.col).reshape(-1,1) # 縦ベクトルに変換
-        arg = (torch.arange(self.col) * self.col)
+        #zeros = Variable(torch.zeros([14, 14]).float(), requires_grad=True).cuda()
+        #zeros = Variable(torch.zeros([14, 14]).float()).cuda()
+        #ones = Variable(torch.ones(s).float()).cuda()
+        #pp = torch.zeros(o.size()).float()
+        #tpos = t*224
+        #one = np.ones(self.col).reshape(-1,1) # 縦ベクトルに変換
+        #arg = (torch.arange(self.col) * self.col)
         for i in range(s[0]):
             for j in range(self.Nj):
                 if int(v[i, j, 0]) == 1:
                     xi = int(ti[i, j, 0])
                     yi = int(ti[i, j, 1])
+
                     if xi < 0:
                         xi = 0
                     if xi > 13:
@@ -38,12 +49,18 @@ class MeanSquaredError2(nn.Module):
                         yi = 0
                     if yi > 13:
                         yi = 13
-                    tt[ i, j, xi, yi]  = 1
 
-                x = one*(tpos[i, j, 0].cpu().data  - arg)
-                y = one*(tpos[i, j, 1].cpu().data  - arg)
-                pp[ i, j, :, :]  = x
-                pp[ i, j + self.Nj, :, :]  = y.t()
+                    # 正規分布に近似したサンプルを得る
+                    # 平均は 100 、標準偏差を 1 
+                    tt[i, j, yi, xi]  = 1
+                    tt[i, j] = self.min_max(fi.gaussian_filter(tt[i, j], 1))
+
+                #x = one*(tpos[i, j, 0].cpu().data  - arg)
+                #y = one*(tpos[i, j, 1].cpu().data  - arg)
+                #pp[ i, j, :, :]  = x
+                #pp[ i, j + self.Nj, :, :]  = y.t()
+        
+        #print(h[0, 0])
 
         '''
         reshaped = h.view(-1, self.Nj, self.col*self.col)
@@ -58,6 +75,7 @@ class MeanSquaredError2(nn.Module):
             for j in range(self.Nj):
                 point[i, j, 0] = (op[i, j, xc[i, j], yc[i, j]] + xc[i, j] * self.col)/224.0
                 point[i, j, 1] = (op[i, j + self.Nj, xc[i, j], yc[i, j]] + yc[i, j] * self.col)/224.0
+        '''
         '''
         #xxx = o[:, 0, xc, yc]
         #xc =  xCoords.cpu().data[0].numpy()
@@ -80,23 +98,31 @@ class MeanSquaredError2(nn.Module):
         #x=Variable(torch.from_numpy(p), requires_grad=True).float().cuda().view(-1, self.Nj, 2)
         
         #torch.masked_select
+        '''
 
         #heatmapのみの学習の時
-        diff1 = h - Variable(tt).cuda()
-        diff2 = o - Variable(pp).cuda()
+        #print(h[0, 1])
+        tt = Variable(tt).cuda()
+        #print(tt[0, 1])
+        diff1 = h - tt
+        for i in range(s[0]):
+            for j in range(self.Nj):
+                if int(v[i, j, 0]) == 0:
+                    diff1[i, j].data[0] = diff1[i, j].data[0]*0
+ 
+        #print(diff1[0, 1])
+        #diff2 = o - Variable(pp).cuda()
         #diff2 = point - t
-        #if self.use_visibility:
+
         N = (v.sum()/2).data[0]
-        #diff1 = diff1*v
-        #diff2 = diff2*v
-        #else:
         #    N = diff.numel()/2
+
         diff1 = diff1.view(-1)
-        diff2 = diff2.view(-1)
+        #diff2 = diff2.view(-1)
         d1 = diff1.dot(diff1)
-        d2 = diff2.dot(diff2)
-        #return (d1)/N
-        return (d1 + d2)/N
+        #d2 = diff2.dot(diff2)
+        return (d1)/N
+        #return (d1 + d2)/N
 
 
 def mean_squared_error2(o, h, t, v, use_visibility=False):

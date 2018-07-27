@@ -21,7 +21,8 @@
             "args": [
                 "10000",
                 "\"plot_estimating_time\"",
-                "--pytorch-model-file=${workspaceFolder}/result/pytorch/epoch-120.model",
+                "--NN=MobileNet_",
+                "--pytorch-model-file=${workspaceFolder}/result/pytorch/epoch-1.model",
                 "-g0"
             ]
         },              
@@ -43,7 +44,7 @@
             "args": [
                 "pytorch",
                 "-g0",
-                "--NN=MobileNet_3",
+                "--NN=MobileNet_",
                 "--batchsize=64",
                 "--data-augmentation",
                 "--use-visibility",
@@ -60,9 +61,9 @@
             "args": [
                 "pytorch",
                 "-g0",
-                "--NN=MobileNet",
+                "--NN=MobileNet_",
                 "--batchsize=64",
-                "--resume-model=${workspaceFolder}/result/pytorch/epoch-30.model",
+                "--resume-model=${workspaceFolder}/result/pytorch/epoch-1.model",
                 "--out=${workspaceFolder}/result",
                 "--data-augmentation",
                 "--use-visibility",
@@ -83,7 +84,7 @@
             "program": "${workspaceFolder}/scripts/pytorch2onnx.py",
             "args": [
                 "--NN=MobileNet",
-                "--input=result/pytorch/epoch-120.model",
+                "--input=result/pytorch/MobileNet.model",
                 "--output=test.onnx",
             ]
         },        

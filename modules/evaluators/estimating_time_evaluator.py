@@ -57,21 +57,25 @@ class EstimatingTimeEvaluator(object):
                 if self.NN == "MobileNet_":
                     image, offset, heatmap, testPose = estimator.estimate_(index)
                     _, size, _ = image.shape
+                    scale = float(size)/float(self.col)
+                    print(scale)
 
-                    reshaped = heatmap.view(-1, self.Nj, 14*14)
+                    reshaped = heatmap.view(-1, self.Nj, self.col*self.col)
                     _, argmax = reshaped.max(-1)
                     yCoords = argmax/self.col
                     xCoords = argmax - yCoords*self.col
-                    xc =  np.squeeze(xCoords.cpu().data.numpy())
-                    yc =  np.squeeze(yCoords.cpu().data.numpy())
+                    xc = np.squeeze(xCoords.cpu().data.numpy()).astype(np.float32)
+                    yc = np.squeeze(yCoords.cpu().data.numpy()).astype(np.float32)
         
-                    offset_reshaped = offset.view(-1, self.Nj * 2, 14*14)
+                    offset_reshaped = offset.view(-1, self.Nj * 2, self.col*self.col)
                     op = np.squeeze(offset_reshaped.cpu().data.numpy())
                     px = op[:14, :]
                     py = op[14:, :]
                     arg = np.squeeze(argmax.cpu().data.numpy())
-                    dat_x = px[:, arg[0]] + xc * self.col
-                    dat_y = py[:, arg[0]] + yc * self.col
+                    #dat_x = px[:, arg[0]] + xc * self.col
+                    #dat_y = py[:, arg[0]] + yc * self.col
+                    dat_x = xc * scale
+                    dat_y = yc * scale
 
                 else:
                     image, pose, testPose = estimator.estimate(index)

@@ -32,31 +32,8 @@ elif args.NN == "MobileNet_3":
     model = MobileNet_3( )
 
 model.load_state_dict(torch.load(args.input))
+#model = model.cpu()
 model.eval()
-'''
-pytorch_model = args.input
-keras_output = 'model.hdf5'
-# export to ONNF
-dummy_input = Variable(torch.randn(1, 3, 224, 224))
-
-print('converting to ONNX')
-torch.onnx.export(model, dummy_input, args.output)
-
-print('checking converted model')
-onnx_model = onnx.load(args.output)
-
-k_model = load_model(keras_output)
-coreml_model = convert(k_model)
-coreml_model.save('modle.mlmodel')
-'''
-
-'''
-input_np = np.random.uniform(0, 1, (1, 3, 224, 224))
-input_var = Variable(torch.FloatTensor(input_np))
-k_model = pytorch_to_keras(model, input_var, [(3, 224, 224,)], verbose=True)  
-coreml_model = convert(k_model)
-coreml_model.save('modle.mlmodel')
-'''
 
 # export to ONNF
 dummy_input = Variable(torch.randn(1, 3, 224, 224))
@@ -64,19 +41,31 @@ dummy_input = Variable(torch.randn(1, 3, 224, 224))
 print('converting to ONNX')
 torch.onnx.export(model, dummy_input, args.output)
 onnx_model = onnx.load(args.output)
+
+# モデル（グラフ）を構成するノードを全て出力する
+print("====== Nodes ======")
+for i, node in enumerate(onnx_model.graph.node):
+    print("[Node #{}]".format(i))
+    print(node)
+
+# モデルの入力データ一覧を出力する
+print("====== Inputs ======")
+for i, input in enumerate(onnx_model.graph.input):
+    print("[Input #{}]".format(i))
+    print(input)
+
+# モデルの出力データ一覧を出力する
+print("====== Outputs ======")
+for i, output in enumerate(onnx_model.graph.output):
+    print("[Output #{}]".format(i))
+    print(output)
 
 print('converting coreml model')
 mlmodel = convert(
         onnx_model, 
+        preprocessing_args={'is_bgr':True, 'red_bias':0., 'green_bias':0., 'blue_bias':0., 'image_scale':0.00392157},
         image_input_names='0')
 mlmodel.save('coreml_model.mlmodel')
-'''
-mlmodel = convert(onnx_model, 
-    image_input_names=['image'], 
-    image_output_names=['output'],
-    )
-mlmodel.save('coreml_model.mlmodel')
-'''
 
 print('checking converted model')
 #onnx.checker.check_model(onnx_model)

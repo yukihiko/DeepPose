@@ -52,5 +52,6 @@ class MobileNet_(nn.Module):
         h = self.heatmap(x)
         h = F.sigmoid(h)
         o = self.offset(x)
+        #print(h[0, 1])
 
         return o, h

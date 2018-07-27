@@ -18,6 +18,7 @@ model_path = "test.onnx"
 filename = "data/test"
 
 def main():
+
     # 画像の読み込み
     dataset = PoseDataset(
         filename,

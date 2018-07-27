@@ -2492,7 +2492,7 @@ class NeuralNetworkBuilder(object):
 
 
     def set_pre_processing_parameters(self, image_input_names = [], is_bgr = False,
-            red_bias = -1.0, green_bias = -1.0, blue_bias = -1.0, gray_bias = 0.0, image_scale = 2.0/255):
+            red_bias = 0.0, green_bias = 0.0, blue_bias = 0.0, gray_bias = 0.0, image_scale = 0.00392157):
         """Add pre-processing parameters to the neural network object
 
         Parameters
