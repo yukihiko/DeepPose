@@ -166,6 +166,7 @@ class TrainPoseNet(object):
                     lr = 0.00001
                     optimizer = optim.SGD(model.parameters(), lr=lr, momentum=0.9)
                 """
+                torch.save(model.state_dict(), 'D:/github/DeepPose/result/pytorch/lastest.model')
                 #torch.save(model.state_dict(), 'D:/github/DeepPose/result/pytorch/OneDrive/lastest.model')
                 #model.eval()
                 #torch.save(model.cpu(), 'non_state.model')

@@ -60,6 +60,7 @@ class PoseDataset(data.Dataset):
             visibilities.append(visibility)
             """
             line_split = line[:-1].split(',')
+            # 通常の画像
             images.append(line_split[0])
             x = torch.Tensor(list(map(float, line_split[1:])))
             x = x.view(-1, 3)
@@ -79,24 +80,46 @@ class PoseDataset(data.Dataset):
 
             # 画像の反転
             images.append(line_split[0])
-            p2 = torch.stack([256-pose[:,0], pose[:,1]], dim=1)
+            p2 = torch.stack([255-pose[:,0], pose[:,1]], dim=1)
             poses.append(p2[[5, 4, 3, 2, 1, 0, 11, 10, 9, 8, 7, 6, 12, 13]])
             visibilities.append(v[[5, 4, 3, 2, 1, 0, 11, 10, 9, 8, 7, 6, 12, 13]])
             image_types.append("M")
 
             # 画像の上下反転
             images.append(line_split[0])
-            p3 = torch.stack([pose[:,0], 256-pose[:,1]], dim=1)
+            p3 = torch.stack([pose[:,0], 255-pose[:,1]], dim=1)
             poses.append(p3[[5, 4, 3, 2, 1, 0, 11, 10, 9, 8, 7, 6, 12, 13]])
             visibilities.append(v[[5, 4, 3, 2, 1, 0, 11, 10, 9, 8, 7, 6, 12, 13]])
             image_types.append("F")
 
             # 画像の転置の反転
             images.append(line_split[0])
-            p4 = torch.stack([256-p[:,0], p[:,1]], dim=1)
+            p4 = torch.stack([255-p[:,0], p[:,1]], dim=1)
             poses.append(p4)
             visibilities.append(visibility.clone())
             image_types.append("T")
+
+            # 画像の転置の上下反転
+            images.append(line_split[0])
+            p5 = torch.stack([pose[:,1], 255-pose[:,0]], dim=1)
+            poses.append(p5)
+            visibilities.append(visibility.clone())
+            image_types.append("L")
+
+            # 画像の上下反転左右反転
+            images.append(line_split[0])
+            p6 = torch.stack([255-pose[:,0], 255-pose[:,1]], dim=1)
+            poses.append(p6)
+            visibilities.append(visibility.clone())
+            image_types.append("A")
+            
+            # 画像の転置の上下反転左右反転
+            images.append(line_split[0])
+            p7 = torch.stack([255-pose[:,1], 255-pose[:,0]], dim=1)
+            poses.append(p7[[5, 4, 3, 2, 1, 0, 11, 10, 9, 8, 7, 6, 12, 13]])
+            visibilities.append(v[[5, 4, 3, 2, 1, 0, 11, 10, 9, 8, 7, 6, 12, 13]])
+            image_types.append("B")
+
         return images, poses, visibilities, image_types
 
     @staticmethod
@@ -121,5 +144,25 @@ class PoseDataset(data.Dataset):
             B = imgArray[:,:,2].T
             image = numpy.stack([R, G, B], axis=2)
             img =Image.fromarray(numpy.uint8(image))
+            img =ImageOps.mirror(img)
+        elif image_type == "L":
+            imgArray = numpy.asarray(img)
+            R = imgArray[:,:,0].T
+            G = imgArray[:,:,1].T
+            B = imgArray[:,:,2].T
+            image = numpy.stack([R, G, B], axis=2)
+            img =Image.fromarray(numpy.uint8(image))
+            img =ImageOps.flip(img)
+        elif image_type == "A":
+            img =ImageOps.flip(img)
+            img =ImageOps.mirror(img)
+        elif image_type == "B":
+            imgArray = numpy.asarray(img)
+            R = imgArray[:,:,0].T
+            G = imgArray[:,:,1].T
+            B = imgArray[:,:,2].T
+            image = numpy.stack([R, G, B], axis=2)
+            img =Image.fromarray(numpy.uint8(image))
+            img =ImageOps.flip(img)
             img =ImageOps.mirror(img)
         return img

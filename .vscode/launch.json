@@ -33,7 +33,7 @@
             "program": "${workspaceFolder}/scripts/plot_training_time.py",
             "args": [
                 "\"plot_training_time\"",
-                "--pytorch-log=${workspaceFolder}/result/pytorch/log"
+                "--pytorch-log=${workspaceFolder}/result/log.txt"
             ]
         },        
         {
@@ -63,7 +63,7 @@
                 "-g0",
                 "--NN=MobileNet_",
                 "--batchsize=64",
-                "--resume-model=${workspaceFolder}/result/pytorch/epoch-1.model",
+                "--resume-model=${workspaceFolder}/result/pytorch/epoch-46.model",
                 "--out=${workspaceFolder}/result",
                 "--data-augmentation",
                 "--use-visibility",
@@ -78,14 +78,15 @@
             "program": "${workspaceFolder}/scripts/dataset.py"
         },
         {
-            "name": "Python: pytorch2onnx",
+            "name": "Python: pytorch2coreml",
             "type": "python",
             "request": "launch",
             "program": "${workspaceFolder}/scripts/pytorch2onnx.py",
             "args": [
-                "--NN=MobileNet",
-                "--input=result/pytorch/MobileNet.model",
-                "--output=test.onnx",
+                "--NN=MobileNet_",
+                "--input=result/pytorch/MobileNet_.model",
+                "--onnx_output=result/onnx_output.onnx",
+                "--output=result/MobileNet_.mlmodel"
             ]
         },        
         {

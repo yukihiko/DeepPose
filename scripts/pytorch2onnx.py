@@ -19,15 +19,18 @@ from modules.dataset_indexing.pytorch import PoseDataset, Crop, RandomNoise, Sca
 from torchvision import transforms
 
 print('ArgumentParser')
-parser = argparse.ArgumentParser(description='Convert PyTorch model to ONNX')
+parser = argparse.ArgumentParser(description='Convert PyTorch model to CoreML')
 parser.add_argument('--input', '-i', required=True, type=str)
 parser.add_argument('--output', '-o', required=True, type=str)
 parser.add_argument('--NN', '-n', required=True, type=str)
+parser.add_argument('--onnx_output', required=True, type=str)
 args = parser.parse_args()
 
 print('Set up model')
 if args.NN == "MobileNet":
     model = MobileNet( )
+elif args.NN == "MobileNet_":
+    model = MobileNet_( )
 elif args.NN == "MobileNet_3":
     model = MobileNet_3( )
 
@@ -39,8 +42,8 @@ model.eval()
 dummy_input = Variable(torch.randn(1, 3, 224, 224))
 
 print('converting to ONNX')
-torch.onnx.export(model, dummy_input, args.output)
-onnx_model = onnx.load(args.output)
+torch.onnx.export(model, dummy_input, args.onnx_output)
+onnx_model = onnx.load(args.onnx_output)
 
 # モデル（グラフ）を構成するノードを全て出力する
 print("====== Nodes ======")
@@ -65,7 +68,7 @@ mlmodel = convert(
         onnx_model, 
         preprocessing_args={'is_bgr':True, 'red_bias':0., 'green_bias':0., 'blue_bias':0., 'image_scale':0.00392157},
         image_input_names='0')
-mlmodel.save('coreml_model.mlmodel')
+mlmodel.save(args.output)
 
 print('checking converted model')
 #onnx.checker.check_model(onnx_model)

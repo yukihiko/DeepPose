@@ -56,9 +56,10 @@ def main():
         fig = plt.figure(figsize=(2.56, 2.56))
         img = image.numpy().transpose(1, 2, 0)
         plt.imshow(img, vmin=0., vmax=1.)
-        plt.scatter(pose_x, pose_y, color="r", s=5)
+        print(pose_x)
+        #plt.scatter(pose_x, pose_y, color="r", s=5)
         for i in range(14):   
-            plt.scatter(pose_x[i], pose_y[i], color=cm.hsv(i/14.0),  s=15-(i+2))
+            plt.scatter(pose_x[i], pose_y[i], color=cm.hsv(i/14.0),  s=17-(i+2))
 
         plt.axis("off")
         plt.savefig(os.path.join(output_dir, '{0}{1}.png'.format(image_types,index)))
