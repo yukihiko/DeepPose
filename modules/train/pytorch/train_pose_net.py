@@ -43,6 +43,14 @@ class TrainLogger(object):
         if colab == True:
             subprocess.run(["cp", "./result/pytorch/log", "../drive/result/pytorch/log.txt"])
 
+    def write_ouedrive(self, log):
+        """ Write log. """
+        self.file = open('C:/Users/aoyagi/OneDrive/pytorch/log.txt', 'a')
+        tqdm.write(log, file=self.file)
+        self.file.flush()
+        self.file.close()
+        self.logs.append(log)
+
     def state_dict(self):
         """ Returns the state of the logger. """
         return {'logs': self.logs}
@@ -166,10 +174,14 @@ class TrainPoseNet(object):
                     lr = 0.00001
                     optimizer = optim.SGD(model.parameters(), lr=lr, momentum=0.9)
                 """
-                torch.save(model.state_dict(), 'D:/github/DeepPose/result/pytorch/lastest.model')
-                #torch.save(model.state_dict(), 'D:/github/DeepPose/result/pytorch/OneDrive/lastest.model')
-                #model.eval()
-                #torch.save(model.cpu(), 'non_state.model')
+                try:
+                    torch.save(model.state_dict(), 'D:/github/DeepPose/result/pytorch/lastest.model')
+                    torch.save(model.state_dict(), 'C:/Users/aoyagi/OneDrive/pytorch/lastest.model')
+                    logger.write_ouedrive(log)
+                    #model.eval()
+                    #torch.save(model.cpu(), 'non_state.model')
+                except:
+                    print("Unexpected error:")
 
     def _test(self, model, test_iter, logger, start_time):
         model.eval()

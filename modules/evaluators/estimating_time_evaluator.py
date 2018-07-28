@@ -66,16 +66,17 @@ class EstimatingTimeEvaluator(object):
                     xCoords = argmax - yCoords*self.col
                     xc = np.squeeze(xCoords.cpu().data.numpy()).astype(np.float32)
                     yc = np.squeeze(yCoords.cpu().data.numpy()).astype(np.float32)
-        
-                    offset_reshaped = offset.view(-1, self.Nj * 2, self.col*self.col)
-                    op = np.squeeze(offset_reshaped.cpu().data.numpy())
-                    px = op[:14, :]
-                    py = op[14:, :]
-                    arg = np.squeeze(argmax.cpu().data.numpy())
-                    #dat_x = px[:, arg[0]] + xc * self.col
-                    #dat_y = py[:, arg[0]] + yc * self.col
                     dat_x = xc * scale
                     dat_y = yc * scale
+               
+                    '''
+                    # 最終
+                    offset_reshaped = offset.view(-1, self.Nj * 2, self.col,self.col)
+                    op = np.squeeze(offset_reshaped.cpu().data.numpy())
+                    for j in range(self.Nj):
+                        dat_x[j] = op[j, int(yc[j]), int(xc[j])] * scale + dat_x[j]
+                        dat_y[j] = op[j + 14, int(yc[j]), int(xc[j])] * scale + dat_y[j]
+                    '''
 
                 else:
                     image, pose, testPose = estimator.estimate(index)
