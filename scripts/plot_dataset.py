@@ -42,22 +42,30 @@ def main():
 
     for index, (image, pose, visibility, image_types) in enumerate(tqdm(dataset, ascii=True)):
         # get data.
-        #image = trans1(image)
         _, size, _ = image.shape
-        #size = image.width
+
+        '''
         if args.use_visibility:
             pose = pose[visibility.ravel().astype(bool)]
         else:
             pose = pose.abs()
         pose *= size
         pose_x, pose_y = zip(*pose)
+        '''
+        scale = float(size)/float(14)
+        if args.use_visibility:
+            pose = pose[visibility.ravel().astype(bool)]
+        else:
+            pose = pose.abs()
+        #pose = (pose*scale + 0.5).int() * 14
+        pose = (pose*14).int() * 16
+        pose_x, pose_y = zip(*pose)
+        
         # plot image and pose.
-        #fig = plt.figure()
-        fig = plt.figure(figsize=(2.56, 2.56))
+        fig = plt.figure(figsize=(2.24, 2.24))
         img = image.numpy().transpose(1, 2, 0)
         plt.imshow(img, vmin=0., vmax=1.)
-        print(pose_x)
-        #plt.scatter(pose_x, pose_y, color="r", s=5)
+
         for i in range(14):   
             plt.scatter(pose_x[i], pose_y[i], color=cm.hsv(i/14.0),  s=17-(i+2))
 

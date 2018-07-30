@@ -176,10 +176,8 @@ class TrainPoseNet(object):
                 """
                 try:
                     torch.save(model.state_dict(), 'D:/github/DeepPose/result/pytorch/lastest.model')
-                    torch.save(model.state_dict(), 'C:/Users/aoyagi/OneDrive/pytorch/lastest.model')
-                    logger.write_ouedrive(log)
-                    #model.eval()
-                    #torch.save(model.cpu(), 'non_state.model')
+                    #torch.save(model.state_dict(), 'C:/Users/aoyagi/OneDrive/pytorch/lastest.model')
+                    #logger.write_ouedrive(log)
                 except:
                     print("Unexpected error:")
 

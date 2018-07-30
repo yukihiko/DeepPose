@@ -58,7 +58,6 @@ class EstimatingTimeEvaluator(object):
                     image, offset, heatmap, testPose = estimator.estimate_(index)
                     _, size, _ = image.shape
                     scale = float(size)/float(self.col)
-                    print(scale)
 
                     reshaped = heatmap.view(-1, self.Nj, self.col*self.col)
                     _, argmax = reshaped.max(-1)
@@ -69,15 +68,13 @@ class EstimatingTimeEvaluator(object):
                     dat_x = xc * scale
                     dat_y = yc * scale
                
-                    '''
                     # 最終
                     offset_reshaped = offset.view(-1, self.Nj * 2, self.col,self.col)
                     op = np.squeeze(offset_reshaped.cpu().data.numpy())
                     for j in range(self.Nj):
                         dat_x[j] = op[j, int(yc[j]), int(xc[j])] * scale + dat_x[j]
                         dat_y[j] = op[j + 14, int(yc[j]), int(xc[j])] * scale + dat_y[j]
-                    '''
-
+                    
                 else:
                     image, pose, testPose = estimator.estimate(index)
                     _, size, _ = image.shape
@@ -94,7 +91,7 @@ class EstimatingTimeEvaluator(object):
                 # pose *= size
                 # pose_x, pose_y = zip(*pose)
                 # plot image and pose.
-                fig = plt.figure(figsize=(2.56, 2.56))
+                fig = plt.figure(figsize=(2.24, 2.24))
                 #print(pose.data[0])
                 #print(pose.data[0][:, 0])
                 #print(pose.data[0][:, 1])
@@ -102,7 +99,7 @@ class EstimatingTimeEvaluator(object):
                 plt.imshow(img, vmin=0., vmax=1.)
                 for i in range(14):   
                     #plt.scatter(testdat_x[i], testdat_y[i], color=cm.hsv(i/14.0), s=7)
-                    plt.scatter(dat_x[i], dat_y[i], color=cm.hsv(i/14.0),  s=5)
+                    plt.scatter(dat_x[i], dat_y[i], color=cm.hsv(i/14.0),  s=8)
                 plt.axis("off")
                 plt.savefig(os.path.join(self.output, '{}.png'.format(index)))
                 plt.close(fig)
