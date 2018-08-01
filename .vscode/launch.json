@@ -63,10 +63,11 @@
                 "-g0",
                 "--NN=MobileNet_",
                 "--batchsize=64",
-                "--resume-model=${workspaceFolder}/result/pytorch/epoch-4.model",
+                "--resume-model=${workspaceFolder}/result/pytorch/epoch-1.model",
                 "--out=${workspaceFolder}/result",
                 "--data-augmentation",
                 "--use-visibility",
+                "--useOneDrive",
                 "--opt=Adam",
                 "-e5000"
             ]

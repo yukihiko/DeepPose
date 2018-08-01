@@ -25,6 +25,64 @@ class MeanSquaredError2(nn.Module):
     def forward(self, *inputs):
         o, h, t, v = inputs
 
+        
+        #最終
+        scale = 1./float(self.col)
+        reshaped = h.view(-1, self.Nj, self.col*self.col)
+        _, argmax = reshaped.max(-1)
+        yCoords = argmax/self.col
+        xCoords = argmax - yCoords*self.col
+
+        x = Variable(torch.zeros(t.size()).float(), requires_grad=True).cuda()
+
+        s = h.size()
+        tt = torch.zeros(s).float()
+        ti = t*self.col
+
+        for i in range(s[0]):
+            for j in range(self.Nj):
+                #if h[i, j, yCoords[i, j], xCoords[i, j]] > 0.5:
+                x[i, j, 0] = (o[i, j, yCoords[i, j], xCoords[i, j]] + xCoords[i, j].float()) * scale
+                x[i, j, 1] = (o[i, j + 14, yCoords[i, j], xCoords[i, j]] + yCoords[i, j].float()) * scale
+
+                if int(v[i, j, 0]) == 1:
+                    xi = int(ti[i, j, 0])
+                    yi = int(ti[i, j, 1])
+                    
+                    if xi < 0:
+                        xi = 0
+                    if xi > 13:
+                        xi = 13
+                    if yi < 0:
+                        yi = 0
+                    if yi > 13:
+                        yi = 13
+                    
+                    # 正規分布に近似したサンプルを得る
+                    # 平均は 100 、標準偏差を 1 
+                    tt[i, j, yi, xi]  = 1
+                    tt[i, j] = self.min_max(fi.gaussian_filter(tt[i, j], 0.5))
+
+        #print(h[0, 1])
+        tt = Variable(tt).cuda()
+        #print(tt[0, 1])
+        diff1 = h - tt
+        for i in range(s[0]):
+            for j in range(self.Nj):
+                if int(v[i, j, 0]) == 0:
+                    diff1[i, j].data[0] = diff1[i, j].data[0]*0
+ 
+        N = (v.sum()/2).data[0]
+
+        diff1 = diff1.view(-1)
+        d1 = diff1.dot(diff1) / 224
+
+        diff2 = x - t
+        diff2 = diff2*v
+        diff2 = diff2.view(-1)
+        d2 = diff2.dot(diff2)
+        return (d1 + d2)/N
+        
         '''
         #最終
         scale = 1./float(self.col)
@@ -51,6 +109,7 @@ class MeanSquaredError2(nn.Module):
         diff = diff.view(-1)
         return diff.dot(diff)/N
         '''
+        
         '''
         #heatmapのみの学習の時
         s = h.size()
@@ -90,6 +149,7 @@ class MeanSquaredError2(nn.Module):
         diff1 = diff1.view(-1)
         d1 = diff1.dot(diff1)
         return (d1)/N
+        '''
         '''
         #heatmapのみの学習の時第２弾
         s = h.size()
@@ -138,6 +198,8 @@ class MeanSquaredError2(nn.Module):
             N = diff.numel()/2
         diff = diff.view(-1)
         return diff.dot(diff)/N
+        '''
+
         '''
         s = h.size()
         tt = torch.zeros(s).float()

@@ -43,7 +43,7 @@ class TrainLogger(object):
         if colab == True:
             subprocess.run(["cp", "./result/pytorch/log", "../drive/result/pytorch/log.txt"])
 
-    def write_ouedrive(self, log):
+    def write_oneDrive(self, log):
         """ Write log. """
         self.file = open('C:/Users/aoyagi/OneDrive/pytorch/log.txt', 'a')
         tqdm.write(log, file=self.file)
@@ -106,6 +106,7 @@ class TrainPoseNet(object):
         self.resume_model = kwargs['resume_model']
         self.resume_opt = kwargs['resume_opt']
         self.colab = kwargs['colab']
+        self.useOneDrive = kwargs['useOneDrive']
         # validate arguments.
         self._validate_arguments()
 
@@ -176,8 +177,9 @@ class TrainPoseNet(object):
                 """
                 try:
                     torch.save(model.state_dict(), 'D:/github/DeepPose/result/pytorch/lastest.model')
-                    #torch.save(model.state_dict(), 'C:/Users/aoyagi/OneDrive/pytorch/lastest.model')
-                    #logger.write_ouedrive(log)
+                    if self.useOneDrive == True:
+                        torch.save(model.state_dict(), 'C:/Users/aoyagi/OneDrive/pytorch/lastest.model')
+                        logger.write_oneDrive(log)
                 except:
                     print("Unexpected error:")
 
@@ -202,6 +204,8 @@ class TrainPoseNet(object):
         test_loss /= len(test_iter)
         log = 'elapsed_time: {0}, validation/loss: {1}'.format(time.time() - start_time, test_loss)
         logger.write(log, self.colab)
+        if self.useOneDrive == True:
+            logger.write_oneDrive(log)
 
     def _checkpoint(self, epoch, model, optimizer, logger):
         filename = os.path.join(self.out, 'pytorch', 'epoch-{0}'.format(epoch + 1))
