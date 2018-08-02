@@ -41,9 +41,9 @@ class MeanSquaredError2(nn.Module):
 
         for i in range(s[0]):
             for j in range(self.Nj):
-                #if h[i, j, yCoords[i, j], xCoords[i, j]] > 0.5:
-                x[i, j, 0] = (o[i, j, yCoords[i, j], xCoords[i, j]] + xCoords[i, j].float()) * scale
-                x[i, j, 1] = (o[i, j + 14, yCoords[i, j], xCoords[i, j]] + yCoords[i, j].float()) * scale
+                if h[i, j, yCoords[i, j], xCoords[i, j]] > 0.5:
+                    x[i, j, 0] = (o[i, j, yCoords[i, j], xCoords[i, j]] + xCoords[i, j].float()) * scale
+                    x[i, j, 1] = (o[i, j + 14, yCoords[i, j], xCoords[i, j]] + yCoords[i, j].float()) * scale
 
                 if int(v[i, j, 0]) == 1:
                     xi = int(ti[i, j, 0])
@@ -67,6 +67,10 @@ class MeanSquaredError2(nn.Module):
         tt = Variable(tt).cuda()
         #print(tt[0, 1])
         diff1 = h - tt
+        #di1 = torch.abs(h - tt)
+        #rs = di1.view(-1, self.Nj, self.col*self.col)
+        #diff1, am = rs.max(-1)
+
         for i in range(s[0]):
             for j in range(self.Nj):
                 if int(v[i, j, 0]) == 0:
@@ -75,13 +79,14 @@ class MeanSquaredError2(nn.Module):
         N = (v.sum()/2).data[0]
 
         diff1 = diff1.view(-1)
-        d1 = diff1.dot(diff1) / 224
+        d1 = diff1.dot(diff1) / N
+        #return d1
 
         diff2 = x - t
         diff2 = diff2*v
         diff2 = diff2.view(-1)
-        d2 = diff2.dot(diff2)
-        return (d1 + d2)/N
+        d2 = diff2.dot(diff2)/N
+        return d1 + d2
         
         '''
         #最終
