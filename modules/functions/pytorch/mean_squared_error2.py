@@ -61,7 +61,7 @@ class MeanSquaredError2(nn.Module):
                     # 正規分布に近似したサンプルを得る
                     # 平均は 100 、標準偏差を 1 
                     tt[i, j, yi, xi]  = 1
-                    tt[i, j] = self.min_max(fi.gaussian_filter(tt[i, j], 0.5))
+                    #tt[i, j] = self.min_max(fi.gaussian_filter(tt[i, j], 0.5))
 
         #print(h[0, 1])
         tt = Variable(tt).cuda()
