@@ -67,7 +67,6 @@
                 "--out=${workspaceFolder}/result",
                 "--data-augmentation",
                 "--use-visibility",
-                "--useOneDrive",
                 "--opt=Adam",
                 "-e5000"
             ]

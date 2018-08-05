@@ -80,7 +80,7 @@ class MeanSquaredError2(nn.Module):
 
         diff1 = diff1.view(-1)
         d1 = diff1.dot(diff1) / N
-        #return d1
+        return d1
 
         diff2 = x - t
         diff2 = diff2*v
