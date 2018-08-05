@@ -66,26 +66,26 @@ class MeanSquaredError2(nn.Module):
         #print(h[0, 1])
         tt = Variable(tt).cuda()
         #print(tt[0, 1])
-        diff1 = h - tt
-        #di1 = torch.abs(h - tt)
-        #rs = di1.view(-1, self.Nj, self.col*self.col)
-        #diff1, am = rs.max(-1)
-
-        for i in range(s[0]):
-            for j in range(self.Nj):
-                if int(v[i, j, 0]) == 0:
-                    diff1[i, j].data[0] = diff1[i, j].data[0]*0
- 
-        N = (v.sum()/2).data[0]
+        diff1 = h[:, :, yi, xi] - tt[:, :, yi, xi]
+        vv = v[:,:,0]
+        N1 = (vv.sum()/2).data[0]
+        diff1 = diff1*vv
+        #for i in range(s[0]):
+        #    for j in range(self.Nj):
+        #        if int(v[i, j, 0]) == 0:
+        #            diff1[i, j].data[0] = diff1[i, j].data[0]*0
+        #
+        #N = (v.sum()/2).data[0]
 
         diff1 = diff1.view(-1)
-        d1 = diff1.dot(diff1) / N
-        return d1
+        d1 = diff1.dot(diff1) / N1
+        #return d1
 
         diff2 = x - t
         diff2 = diff2*v
+        N2 = (v.sum()/2).data[0]
         diff2 = diff2.view(-1)
-        d2 = diff2.dot(diff2)/N
+        d2 = diff2.dot(diff2)/N2
         return d1 + d2
         
         '''
