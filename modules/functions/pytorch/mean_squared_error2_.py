@@ -125,7 +125,7 @@ class MeanSquaredError2_(nn.Module):
         N2 = (v.sum()/2).data[0]
         diff2 = diff2.view(-1)
         d2 = diff2.dot(diff2)/N2
-        return d1 + d2
+
         return d1 + d2 + d3 + d4
         
 
