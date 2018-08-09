@@ -31,6 +31,8 @@ class PoseEstimator(object):
             self.model = MobileNet_()
         elif self.NN == "MobileNet__":
             self.model = MobileNet__()
+        elif self.NN == "MobileNet___":
+            self.model = MobileNet___()
         elif self.NN == "MobileNet":
             self.model = MobileNet()
         elif self.NN == "AlexNet":
@@ -73,4 +75,13 @@ class PoseEstimator(object):
             v_image = v_image.cuda()
             offset, heatmap = self.model.forward(v_image)
         return image, offset, heatmap, pose
+
+    def estimate__(self, index):
+        """ Estimate pose of i-th image. """
+        image, pose, _, _ = self.dataset[index]
+        v_image = Variable(image.unsqueeze(0))
+        if self.gpu:
+            v_image = v_image.cuda()
+            offset, heatmap, output = self.model.forward(v_image)
+        return image, offset, heatmap, output, pose
         

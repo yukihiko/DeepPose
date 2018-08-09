@@ -13,9 +13,9 @@ import torch.nn as nn
 import subprocess
 
 from modules.errors import FileNotFoundError, GPUNotFoundError, UnknownOptimizationMethodError, NotSupportedError
-from modules.models.pytorch import AlexNet, VGG19Net, Inceptionv3, Resnet, MobileNet, MobileNetV2, MobileNet_, MobileNet_2, MobileNet_3, MobileNet__
+from modules.models.pytorch import AlexNet, VGG19Net, Inceptionv3, Resnet, MobileNet, MobileNetV2, MobileNet_, MobileNet_2, MobileNet_3, MobileNet__, MobileNet___
 from modules.dataset_indexing.pytorch import PoseDataset, Crop, RandomNoise, Scale
-from modules.functions.pytorch import mean_squared_error, mean_squared_error2,mean_squared_error3, mean_squared_error2_
+from modules.functions.pytorch import mean_squared_error, mean_squared_error2,mean_squared_error3, mean_squared_error2_, mean_squared_error2__
 
 class TrainLogger(object):
     """ Logger of training pose net.
@@ -151,6 +151,10 @@ class TrainPoseNet(object):
                 offset, heatmap, output = model(image)
                 loss = mean_squared_error2_(offset, heatmap, output.view(-1, self.Nj, 3), pose, visibility, self.use_visibility)
                 loss.backward()
+            elif self.NN == "MobileNet___":
+                offset, heatmap = model(image)
+                loss = mean_squared_error2__(offset, heatmap, pose, visibility, self.use_visibility)
+                loss.backward()
             elif self.NN == "MobileNet" or self.NN == "MobileNet_2":
                 output = model(image)
                 loss = mean_squared_error3(output, pose, visibility, self.use_visibility)
@@ -199,8 +203,11 @@ class TrainPoseNet(object):
                 offset, heatmap = model(image)
                 test_loss += mean_squared_error2(offset, heatmap, pose, visibility, self.use_visibility).data[0]
             elif self.NN == "MobileNet__":
+                offset, heatmap, output = model(image)
+                test_loss += mean_squared_error2_(offset, heatmap, output.view(-1, self.Nj, 3), pose, visibility, self.use_visibility).data[0]
+            elif self.NN == "MobileNet___":
                 offset, heatmap = model(image)
-                test_loss += mean_squared_error2(offset, heatmap, pose, visibility, self.use_visibility).data[0]
+                test_loss += mean_squared_error2__(offset, heatmap, pose, visibility, self.use_visibility).data[0]
             elif self.NN == "MobileNet":
                 output = model(image)
                 test_loss += mean_squared_error3(output, pose, visibility, self.use_visibility).data[0]
@@ -256,6 +263,8 @@ class TrainPoseNet(object):
             model = MobileNet_( )
         elif self.NN == "MobileNet__":
             model = MobileNet__( )
+        elif self.NN == "MobileNet___":
+            model = MobileNet___( )
         elif self.NN == "MobileNet_2":
             model = MobileNet_2( )
         elif self.NN == "MobileNet_3":

@@ -26,10 +26,11 @@ class MeanSquaredError2_(nn.Module):
         os, h, op, t, v = inputs
 
         #最終
+        '''
         v3 = torch.cat([op[:, :, 2:] , op[:, :, 2:]], dim=2)
         v3 = torch.floor(v3 + 0.5)
         op = op[:, :, 0:2]
-
+        '''
         scale = 1./float(self.col)
         #print(v[0,0])
         #print(h[0,0])
@@ -70,8 +71,9 @@ class MeanSquaredError2_(nn.Module):
                     # 正規分布に近似したサンプルを得る
                     # 平均は 100 、標準偏差を 1 
                     tt[i, j, yi, xi]  = 1
-                    tt[i, j] = self.min_max(fi.gaussian_filter(tt[i, j], 1))
+                    tt[i, j] = self.min_max(fi.gaussian_filter(tt[i, j], 0.5))
 
+                '''
                 if int(v3[i, j, 0]) >= 0.5:
                     oxi = int(op[i, j, 0])
                     oyi = int(op[i, j, 1])
@@ -88,24 +90,38 @@ class MeanSquaredError2_(nn.Module):
                     # 正規分布に近似したサンプルを得る
                     # 平均は 100 、標準偏差を 1 
                     ott[i, j, oyi, oxi]  = 1
+                '''
 
         #print(h[0, 1])
         tt = Variable(tt).cuda()
         #print(tt[0, 1])
-        #diff1 = h[:, :, yi, xi] - tt[:, :, yi, xi]
-        #vv = v[:,:,0]
-        #N1 = (vv.sum()/2).data[0]
-        #diff1 = diff1*vv
+
+        diff1 = h[:, :, yi, xi] - tt[:, :, yi, xi]
+        vv = v[:,:,0]
+        diff1 = diff1*vv
+        N1 = (vv.sum()/2).data[0]
+        '''
         diff1 = h - tt
         for i in range(s[0]):
             for j in range(self.Nj):
                 if int(v[i, j, 0]) == 0:
-                    diff1[i, j].data[0] = diff1[i, j].data[0]*0
+                    diff1[i, j] = diff1[i, j]*0
         N1 = (v.sum()/2).data[0]
-        
+        '''
 
         diff1 = diff1.view(-1)
         d1 = diff1.dot(diff1) / N1
+        
+        #return d1
+
+        diff2 = x - t
+        diff2 = diff2*v
+        N2 = (v.sum()/2).data[0]
+        diff2 = diff2.view(-1)
+        d2 = diff2.dot(diff2)/N2
+
+        return d1 + d2
+
 
         diff3 = op - t
         diff3 = diff3*v
@@ -120,13 +136,7 @@ class MeanSquaredError2_(nn.Module):
 
         #return d1 + d3 + d4
 
-        diff2 = x - t
-        diff2 = diff2*v
-        N2 = (v.sum()/2).data[0]
-        diff2 = diff2.view(-1)
-        d2 = diff2.dot(diff2)/N2
-
-        return d1 + d2 + d3 + d4
+        return d1 + d2 + d3
         
 
 

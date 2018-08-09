@@ -6,9 +6,9 @@ import sys
 sys.path.append("./")
 from modules.models.pytorch.Lin_View import Lin_View
 
-class MobileNet__(nn.Module):
+class MobileNet___(nn.Module):
     def __init__(self):
-        super(MobileNet__, self).__init__()
+        super(MobileNet___, self).__init__()
         self.col = 14
         self.Nj = 14
 
@@ -55,27 +55,13 @@ class MobileNet__(nn.Module):
             conv_dw(1024, 1024, 1),
         )
         self.heatmap = nn.Sequential(
-            nn.Conv2d(1024, 1024, 1),
-            nn.BatchNorm2d(1024),
-            nn.ReLU(inplace=True),
-            nn.Conv2d(1024, self.Nj, 1),
+            nn.Conv2d(1024, self.Nj + 4, 1),
         )
 
         self.offset = nn.Sequential(
-            nn.Conv2d(1024, 1024, 1),
-            nn.BatchNorm2d(1024),
-            nn.ReLU(inplace=True),
             nn.Conv2d(1024, self.Nj*2, 1),
         )
 
-        self.output = nn.Sequential(
-            nn.AvgPool2d(14),
-            Lin_View(view_size=1024),
-            nn.Linear(1024, 1024),
-            nn.ReLU(inplace=True),
-            nn.Linear(1024, 14*3),
-            Lin_View(view_size=42),
-        )
 
     def forward(self, x):
         x = self.model1(x)
@@ -88,7 +74,6 @@ class MobileNet__(nn.Module):
         h = F.sigmoid(h)
 
         os = self.offset(x)
-        op = self.output(x)
         #print(h[0, 1])
 
-        return os, h, op
+        return os, h
