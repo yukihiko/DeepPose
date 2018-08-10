@@ -16,6 +16,7 @@ class MeanSquaredError2__(nn.Module):
         self.Nj = Nj
         self.col = col
         self.gaussian = 1.0
+        self.m = torch.Tensor([1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,2.0,2.0]).cuda()
 
     def min_max(self, x, axis=None):
         min = x.min(axis=axis, keepdims=True)
@@ -39,11 +40,12 @@ class MeanSquaredError2__(nn.Module):
 
         #最終
         scale = 1./float(self.col)
-        h2 = h[:, 14:, :, :]
+        h2 = h[:, self.Nj:, :, :]
         s = h.size()
         tt = torch.zeros(s).float()
         ti = t*self.col
 
+        '''
         z = tt[:,0,:,:].view(-1, 1, self.col, self.col).cuda()
         h2_0 = h2[:,0,:,:].view(-1, 1, self.col, self.col)
         h2_1 = h2[:,1,:,:].view(-1, 1, self.col, self.col)
@@ -63,15 +65,15 @@ class MeanSquaredError2__(nn.Module):
         xCoords = argmax - yCoords*self.col
 
         x = Variable(torch.zeros(t.size()).float(), requires_grad=True).cuda()
-
+        '''
         
         for i in range(s[0]):
             for j in range(self.Nj):
-                
-                if h[i, j, yCoords[i, j], xCoords[i, j]] > 0.5:
+                '''
+                if h[i, j, yCoords[i, j], xCoords[i, j]] * self.m[j] > 1.0:
                     x[i, j, 0] = (os[i, j, yCoords[i, j], xCoords[i, j]] + xCoords[i, j].float()) * scale
                     x[i, j, 1] = (os[i, j + 14, yCoords[i, j], xCoords[i, j]] + yCoords[i, j].float()) * scale
-                
+                '''
                 if int(v[i, j, 0]) == 1:
                     
                     xi, yi = self.checkMatrix(int(ti[i, j, 0]), int(ti[i, j, 1]))
@@ -125,6 +127,7 @@ class MeanSquaredError2__(nn.Module):
         tt = Variable(tt).cuda()
         #print(tt[0, 17])
 
+        '''
         diff1 = h[:, :14, yi, xi] - tt[:, :14, yi, xi]
         vv = v[:,:,0]
         diff1 = diff1*vv
@@ -135,13 +138,49 @@ class MeanSquaredError2__(nn.Module):
             for j in range(self.Nj):
                 if int(v[i, j, 0]) == 0:
                     diff1[i, j] = diff1[i, j]*0
+
+            # 右足
+            f_rf = False
+            for index in range(3):
+                if int(v[i, index, 0]) == 1:
+                    f_rf = True
+                    break
+            if f_rf == False:
+                diff1[i, self.Nj] = diff1[i, self.Nj]*0
+            
+            # 左足
+            f_lf = False
+            for index in range(3,6):
+                if int(v[i, index, 0]) == 1:
+                    f_lf = True
+                    break
+            if f_lf == False:
+                diff1[i, self.Nj + 1] = diff1[i, self.Nj + 1]*0
+
+            # 右手
+            f_rh = False
+            for index in range(6,9):
+                if int(v[i, index, 0]) == 1:
+                    f_rh = True
+                    break
+            if f_rh == False:
+                diff1[i, self.Nj + 2] = diff1[i, self.Nj + 2]*0
+
+            # 左手
+            f_lh = False
+            for index in range(9,12):
+                if int(v[i, index, 0]) == 1:
+                    f_lh = True
+                    break
+            if f_lh == False:
+                diff1[i, self.Nj + 3] = diff1[i, self.Nj + 3]*0
+            
         N1 = (v.sum()/2)
-        '''
 
         diff1 = diff1.contiguous().view(-1)
         d1 = diff1.dot(diff1) / N1
 
-        #return d1
+        return d1
 
         diff2 = x - t
         diff2 = diff2*v

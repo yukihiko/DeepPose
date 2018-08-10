@@ -7,6 +7,7 @@ from tqdm import tqdm
 import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib.cm as cm
+import torch
 
 from modules.evaluators import chainer, pytorch
 
@@ -106,18 +107,18 @@ class EstimatingTimeEvaluator(object):
                     dat_x, dat_y = zip(*dat)
                     '''
                 elif self.NN == "MobileNet___":
-                    image, offset, heatmap, testPose = estimator.estimate__(index)
+                    image, offset, heatmap, testPose = estimator.estimate_(index)
                     _, size, _ = image.shape
                     scale = float(size)/float(self.col)
 
-                    heatmap2 = heatmap[: , self.Nj:, self.col, self.col]
-                    heatmap = heatmap[: , :self.Nj, self.col, self.col]
+                    heatmap2 = heatmap[: , self.Nj:, :, :]
+                    heatmap = heatmap[: , :self.Nj, :, :]
                     
-        z = tt[:,0,:,:].view(-1, 1, self.col, self.col).cuda()
                     h2_0 = heatmap2[:,0,:,:].view(-1, 1, self.col, self.col)
                     h2_1 = heatmap2[:,1,:,:].view(-1, 1, self.col, self.col)
                     h2_2 = heatmap2[:,2,:,:].view(-1, 1, self.col, self.col)
                     h2_3 = heatmap2[:,3,:,:].view(-1, 1, self.col, self.col)
+                    z = torch.zeros(h2_0.size()).float().cuda()
                     h2_0 = torch.cat([h2_0, h2_0, h2_0,], dim=1)
                     h2_1 = torch.cat([h2_1, h2_1, h2_1], dim=1)
                     h2_2 = torch.cat([h2_2, h2_2, h2_2], dim=1)
@@ -140,9 +141,11 @@ class EstimatingTimeEvaluator(object):
                     #offset_reshaped = offset.view(-1, self.Nj, 2)
                     offset_reshaped = offset.view(-1, self.Nj * 2, self.col,self.col)
                     op = np.squeeze(offset_reshaped.cpu().data.numpy())
+                    m = torch.Tensor([1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,2.0,2.0]).cuda()
                     for j in range(self.Nj):
-                        dat_x[j] = op[j, int(yc[j]), int(xc[j])] * scale + dat_x[j]
-                        dat_y[j] = op[j + 14, int(yc[j]), int(xc[j])] * scale + dat_y[j]
+                        if heatmap[0, j, int(yc[j]), int(xc[j])] * m[j] > 1.0:
+                            dat_x[j] = op[j, int(yc[j]), int(xc[j])] * scale + dat_x[j]
+                            dat_y[j] = op[j + 14, int(yc[j]), int(xc[j])] * scale + dat_y[j]
                         #dat_x[j] = op[j, 0] * scale + dat_x[j]
                         #dat_y[j] = op[j, 1] * scale + dat_y[j]
                 else:
