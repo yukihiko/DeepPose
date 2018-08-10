@@ -41,25 +41,33 @@ class MeanSquaredError2__(nn.Module):
         scale = 1./float(self.col)
         s = h.size()
         tt = torch.zeros(s).float()
+        ti = t*self.col
 
-        reshaped = h[:, :self.Nj, :, :].view(-1, self.Nj, self.col*self.col)
-        #print(reshaped[0,0])
+        z = tt[:,0,:,:].view(-1, 1, self.col, self.col)
+        h2 = h[:, 14:, :, :]
+        h2_0 = h2[:,0,:,:].view(-1, 1, self.col, self.col)
+        h2_1 = h2[:,1,:,:].view(-1, 1, self.col, self.col)
+        h2_2 = h2[:,2,:,:].view(-1, 1, self.col, self.col)
+        h2_3 = h2[:,3,:,:].view(-1, 1, self.col, self.col)
+
+        h3 = torch.cat([h2_0, h2_0, h2_0, h2_1, h2_1, h2_1, h2_2, h2_2, h2_2, h2_3, h2_3, h2_3, z, z], dim=1)
+        h = h + h3
+
+        reshaped = h.view(-1, self.Nj, self.col*self.col)
         _, argmax = reshaped.max(-1)
-        #print(argmax[0, 0])
         yCoords = argmax/self.col
         xCoords = argmax - yCoords*self.col
-        #print(h[0,0, yCoords[0, 0], xCoords[0, 0]])
 
         x = Variable(torch.zeros(t.size()).float(), requires_grad=True).cuda()
 
-        ti = t*self.col
         
         for i in range(s[0]):
             for j in range(self.Nj):
+                
                 if h[i, j, yCoords[i, j], xCoords[i, j]] > 0.5:
                     x[i, j, 0] = (os[i, j, yCoords[i, j], xCoords[i, j]] + xCoords[i, j].float()) * scale
                     x[i, j, 1] = (os[i, j + 14, yCoords[i, j], xCoords[i, j]] + yCoords[i, j].float()) * scale
-
+                
                 if int(v[i, j, 0]) == 1:
                     
                     xi, yi = self.checkMatrix(int(ti[i, j, 0]), int(ti[i, j, 1]))
