@@ -39,21 +39,25 @@ class MeanSquaredError2__(nn.Module):
 
         #最終
         scale = 1./float(self.col)
+        h2 = h[:, 14:, :, :]
         s = h.size()
         tt = torch.zeros(s).float()
         ti = t*self.col
 
-        z = tt[:,0,:,:].view(-1, 1, self.col, self.col)
-        h2 = h[:, 14:, :, :]
+        z = tt[:,0,:,:].view(-1, 1, self.col, self.col).cuda()
         h2_0 = h2[:,0,:,:].view(-1, 1, self.col, self.col)
         h2_1 = h2[:,1,:,:].view(-1, 1, self.col, self.col)
         h2_2 = h2[:,2,:,:].view(-1, 1, self.col, self.col)
         h2_3 = h2[:,3,:,:].view(-1, 1, self.col, self.col)
+        h2_0 = torch.cat([h2_0, h2_0, h2_0,], dim=1)
+        h2_1 = torch.cat([h2_1, h2_1, h2_1], dim=1)
+        h2_2 = torch.cat([h2_2, h2_2, h2_2], dim=1)
+        h2_3 = torch.cat([h2_3, h2_3, h2_3], dim=1)
 
-        h3 = torch.cat([h2_0, h2_0, h2_0, h2_1, h2_1, h2_1, h2_2, h2_2, h2_2, h2_3, h2_3, h2_3, z, z], dim=1)
-        h = h + h3
+        h3 = torch.cat([ h2_0, h2_1, h2_2, h2_3, z, z], dim=1)
+        h2 = h[:, :14, :, :] + h3
 
-        reshaped = h.view(-1, self.Nj, self.col*self.col)
+        reshaped = h2.view(-1, self.Nj, self.col*self.col)
         _, argmax = reshaped.max(-1)
         yCoords = argmax/self.col
         xCoords = argmax - yCoords*self.col
@@ -121,8 +125,7 @@ class MeanSquaredError2__(nn.Module):
         tt = Variable(tt).cuda()
         #print(tt[0, 17])
 
-        '''
-        diff1 = h[:, :, yi, xi] - tt[:, :, yi, xi]
+        diff1 = h[:, :14, yi, xi] - tt[:, :14, yi, xi]
         vv = v[:,:,0]
         diff1 = diff1*vv
         N1 = (vv.sum()/2).data[0]
@@ -133,23 +136,12 @@ class MeanSquaredError2__(nn.Module):
                 if int(v[i, j, 0]) == 0:
                     diff1[i, j] = diff1[i, j]*0
         N1 = (v.sum()/2)
+        '''
 
         diff1 = diff1.contiguous().view(-1)
         d1 = diff1.dot(diff1) / N1
 
-        '''
-        diff1_1 = diff1[:, :self.Nj].contiguous()
-        diff1_2 = diff1[:, self.Nj:].contiguous()
-        diff1_1 = diff1_1.view(-1)
-        diff1_2 = diff1_2.view(-1)
-        print(diff1_1)
-        print(diff1_2)
-        d1_1 = diff1_1.dot(diff1_1)
-        d1_2 = diff1_2.dot(diff1_2)
-        print(d1_1)
-        print(d1_2)
-        '''
-        return d1
+        #return d1
 
         diff2 = x - t
         diff2 = diff2*v

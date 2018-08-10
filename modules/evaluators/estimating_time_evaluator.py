@@ -113,6 +113,18 @@ class EstimatingTimeEvaluator(object):
                     heatmap2 = heatmap[: , self.Nj:, self.col, self.col]
                     heatmap = heatmap[: , :self.Nj, self.col, self.col]
                     
+        z = tt[:,0,:,:].view(-1, 1, self.col, self.col).cuda()
+                    h2_0 = heatmap2[:,0,:,:].view(-1, 1, self.col, self.col)
+                    h2_1 = heatmap2[:,1,:,:].view(-1, 1, self.col, self.col)
+                    h2_2 = heatmap2[:,2,:,:].view(-1, 1, self.col, self.col)
+                    h2_3 = heatmap2[:,3,:,:].view(-1, 1, self.col, self.col)
+                    h2_0 = torch.cat([h2_0, h2_0, h2_0,], dim=1)
+                    h2_1 = torch.cat([h2_1, h2_1, h2_1], dim=1)
+                    h2_2 = torch.cat([h2_2, h2_2, h2_2], dim=1)
+                    h2_3 = torch.cat([h2_3, h2_3, h2_3], dim=1)
+
+                    h3 = torch.cat([ h2_0, h2_1, h2_2, h2_3, z, z], dim=1)
+
                     #for index in range(3):
                     #    heatmap = heatmap[:, index, :,]
                     reshaped = heatmap.view(-1, self.Nj, self.col*self.col)
