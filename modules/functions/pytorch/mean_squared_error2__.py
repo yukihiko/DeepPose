@@ -15,8 +15,8 @@ class MeanSquaredError2__(nn.Module):
         self.use_visibility = use_visibility
         self.Nj = Nj
         self.col = col
-        self.gaussian = 1.0
-        self.m = torch.Tensor([1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,2.0,2.0]).cuda()
+        self.gaussian = 0.5
+        self.m = torch.Tensor([0.5,0.5,0.5,0.5,0.5,0.5,0.5,0.5,0.5,0.5,0.5,0.5,1.0,1.0]).cuda()
 
     def min_max(self, x, axis=None):
         min = x.min(axis=axis, keepdims=True)
@@ -46,6 +46,7 @@ class MeanSquaredError2__(nn.Module):
         ti = t*self.col
 
         '''
+        '''
         z = tt[:,0,:,:].view(-1, 1, self.col, self.col).cuda()
         h2_0 = h2[:,0,:,:].view(-1, 1, self.col, self.col)
         h2_1 = h2[:,1,:,:].view(-1, 1, self.col, self.col)
@@ -57,22 +58,26 @@ class MeanSquaredError2__(nn.Module):
         h2_3 = torch.cat([h2_3, h2_3, h2_3], dim=1)
 
         h3 = torch.cat([ h2_0, h2_1, h2_2, h2_3, z, z], dim=1)
-        h2 = h[:, :14, :, :] + h3
+        h3 = (h[:, :14, :, :] + h3) * self.m
 
-        reshaped = h2.view(-1, self.Nj, self.col*self.col)
+        reshaped = h3.view(-1, self.Nj, self.col*self.col)
         _, argmax = reshaped.max(-1)
         yCoords = argmax/self.col
         xCoords = argmax - yCoords*self.col
 
         x = Variable(torch.zeros(t.size()).float(), requires_grad=True).cuda()
+        vt = Variable(torch.zeros([s[0], 4, self.col, self.col]).float(), requires_grad=True).cuda()
+        '''
         '''
         
         for i in range(s[0]):
             for j in range(self.Nj):
                 '''
-                if h[i, j, yCoords[i, j], xCoords[i, j]] * self.m[j] > 1.0:
+                '''
+                if h3[i, j, yCoords[i, j], xCoords[i, j]] > 0.5:
                     x[i, j, 0] = (os[i, j, yCoords[i, j], xCoords[i, j]] + xCoords[i, j].float()) * scale
                     x[i, j, 1] = (os[i, j + 14, yCoords[i, j], xCoords[i, j]] + yCoords[i, j].float()) * scale
+                '''
                 '''
                 if int(v[i, j, 0]) == 1:
                     
@@ -92,6 +97,7 @@ class MeanSquaredError2__(nn.Module):
                     tt[i, self.Nj, yi, xi]  = 1
             if f_rf == True:
                 tt[i, self.Nj] = self.min_max(fi.gaussian_filter(tt[i, self.Nj], self.gaussian))
+                vt[i, 0] = 1
 
             # 左足
             f_lf = False
@@ -102,6 +108,7 @@ class MeanSquaredError2__(nn.Module):
                     tt[i, self.Nj + 1, yi, xi]  = 1
             if f_lf == True:
                 tt[i, self.Nj + 1] = self.min_max(fi.gaussian_filter(tt[i, self.Nj + 1], self.gaussian))
+                vt[i, 1] = 1
 
             # 右手
             f_rh = False
@@ -112,6 +119,7 @@ class MeanSquaredError2__(nn.Module):
                     tt[i, self.Nj + 2, yi, xi]  = 1
             if f_rh == True:
                 tt[i, self.Nj + 2] = self.min_max(fi.gaussian_filter(tt[i, self.Nj + 2], self.gaussian))
+                vt[i, 2] = 1
 
             # 左手
             f_lh = False
@@ -122,13 +130,14 @@ class MeanSquaredError2__(nn.Module):
                     tt[i, self.Nj + 3, yi, xi]  = 1
             if f_lh == True:
                 tt[i, self.Nj + 3] = self.min_max(fi.gaussian_filter(tt[i, self.Nj + 3], self.gaussian))
+                vt[i, 3] = 1
 
         #print(h[0, 17])
         tt = Variable(tt).cuda()
         #print(tt[0, 17])
 
         '''
-        diff1 = h[:, :14, yi, xi] - tt[:, :14, yi, xi]
+        diff1 = h3[:, :, yi, xi] - tt[:, :self.Nj, yi, xi]
         vv = v[:,:,0]
         diff1 = diff1*vv
         N1 = (vv.sum()/2).data[0]
@@ -174,21 +183,24 @@ class MeanSquaredError2__(nn.Module):
                     break
             if f_lh == False:
                 diff1[i, self.Nj + 3] = diff1[i, self.Nj + 3]*0
-            
         N1 = (v.sum()/2)
 
         diff1 = diff1.contiguous().view(-1)
         d1 = diff1.dot(diff1) / N1
 
-        return d1
-
         diff2 = x - t
         diff2 = diff2*v
-        N2 = (v.sum()/2).data[0]
+        N2 = (v.sum()/2)
         diff2 = diff2.view(-1)
         d2 = diff2.dot(diff2)/N2
 
-        return d1 + d2
+        diff3 = h2 - tt[:, self.Nj:, :, :]
+        diff3 = diff3*vt
+        N3 = (vt.sum()/2)
+        diff3 = diff3.contiguous().view(-1)
+        d3 = diff3.dot(diff3) / N3
+
+        return d1 + d2 + d3
 
 
 def mean_squared_error2__(os, h, t, v, use_visibility=False):

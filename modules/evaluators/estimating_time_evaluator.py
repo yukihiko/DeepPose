@@ -75,7 +75,14 @@ class EstimatingTimeEvaluator(object):
                     for j in range(self.Nj):
                         dat_x[j] = op[j, int(yc[j]), int(xc[j])] * scale + dat_x[j]
                         dat_y[j] = op[j + 14, int(yc[j]), int(xc[j])] * scale + dat_y[j]
-                
+
+                    fig = plt.figure(figsize=(2.24, 2.24))
+
+                    img = image.numpy().transpose(1, 2, 0)
+                    plt.imshow(img, vmin=0., vmax=1.)
+                    for i in range(14):   
+                        plt.scatter(dat_x[i], dat_y[i], color=cm.hsv(i/14.0),  s=8)
+
                 elif self.NN == "MobileNet__":
                     image, offset, heatmap, output, testPose = estimator.estimate__(index)
                     _, size, _ = image.shape
@@ -106,6 +113,13 @@ class EstimatingTimeEvaluator(object):
                     dat *= size
                     dat_x, dat_y = zip(*dat)
                     '''
+                    fig = plt.figure(figsize=(2.24, 2.24))
+
+                    img = image.numpy().transpose(1, 2, 0)
+                    plt.imshow(img, vmin=0., vmax=1.)
+                    for i in range(14):   
+                        plt.scatter(dat_x[i], dat_y[i], color=cm.hsv(i/14.0),  s=8)
+
                 elif self.NN == "MobileNet___":
                     image, offset, heatmap, testPose = estimator.estimate_(index)
                     _, size, _ = image.shape
@@ -125,6 +139,7 @@ class EstimatingTimeEvaluator(object):
                     h2_3 = torch.cat([h2_3, h2_3, h2_3], dim=1)
 
                     h3 = torch.cat([ h2_0, h2_1, h2_2, h2_3, z, z], dim=1)
+                    heatmap = heatmap + h3
 
                     #for index in range(3):
                     #    heatmap = heatmap[:, index, :,]
@@ -141,13 +156,21 @@ class EstimatingTimeEvaluator(object):
                     #offset_reshaped = offset.view(-1, self.Nj, 2)
                     offset_reshaped = offset.view(-1, self.Nj * 2, self.col,self.col)
                     op = np.squeeze(offset_reshaped.cpu().data.numpy())
-                    m = torch.Tensor([1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,2.0,2.0]).cuda()
+
+                    fig = plt.figure(figsize=(2.24, 2.24))
+
+                    img = image.numpy().transpose(1, 2, 0)
+                    plt.imshow(img, vmin=0., vmax=1.)
+                    m = torch.Tensor([0.5,0.5,0.5,0.5,0.5,0.5,0.5,0.5,0.5,0.5,0.5,0.5,1.0,1.0]).cuda()
+
                     for j in range(self.Nj):
-                        if heatmap[0, j, int(yc[j]), int(xc[j])] * m[j] > 1.0:
-                            dat_x[j] = op[j, int(yc[j]), int(xc[j])] * scale + dat_x[j]
-                            dat_y[j] = op[j + 14, int(yc[j]), int(xc[j])] * scale + dat_y[j]
+                        if heatmap[0, j, int(yc[j]), int(xc[j])] * m[j] > 0.5:
+                            dx = op[j, int(yc[j]), int(xc[j])] * scale + dat_x[j]
+                            dy = op[j + 14, int(yc[j]), int(xc[j])] * scale + dat_y[j]
+                            plt.scatter(dx, dy, color=cm.hsv(j/14.0),  s=8)
                         #dat_x[j] = op[j, 0] * scale + dat_x[j]
                         #dat_y[j] = op[j, 1] * scale + dat_y[j]
+
                 else:
                     image, pose, testPose = estimator.estimate(index)
                     _, size, _ = image.shape
@@ -157,22 +180,23 @@ class EstimatingTimeEvaluator(object):
                     dat *= size
                     dat_x, dat_y = zip(*dat)
 
-                testdat = testPose.cpu().numpy()
-                testdat *= size
-                testdat_x, testdat_y = zip(*testdat)
+                    testdat = testPose.cpu().numpy()
+                    testdat *= size
+                    testdat_x, testdat_y = zip(*testdat)
 
-                # pose *= size
-                # pose_x, pose_y = zip(*pose)
-                # plot image and pose.
-                fig = plt.figure(figsize=(2.24, 2.24))
-                #print(pose.data[0])
-                #print(pose.data[0][:, 0])
-                #print(pose.data[0][:, 1])
-                img = image.numpy().transpose(1, 2, 0)
-                plt.imshow(img, vmin=0., vmax=1.)
-                for i in range(14):   
-                    #plt.scatter(testdat_x[i], testdat_y[i], color=cm.hsv(i/14.0), s=7)
-                    plt.scatter(dat_x[i], dat_y[i], color=cm.hsv(i/14.0),  s=8)
+                    # pose *= size
+                    # pose_x, pose_y = zip(*pose)
+                    # plot image and pose.
+                    fig = plt.figure(figsize=(2.24, 2.24))
+                    #print(pose.data[0])
+                    #print(pose.data[0][:, 0])
+                    #print(pose.data[0][:, 1])
+                    img = image.numpy().transpose(1, 2, 0)
+                    plt.imshow(img, vmin=0., vmax=1.)
+                    for i in range(14):   
+                        #plt.scatter(testdat_x[i], testdat_y[i], color=cm.hsv(i/14.0), s=7)
+                        plt.scatter(dat_x[i], dat_y[i], color=cm.hsv(i/14.0),  s=8)
+
                 plt.axis("off")
                 plt.savefig(os.path.join(self.output, '{}.png'.format(index)))
                 plt.close(fig)
