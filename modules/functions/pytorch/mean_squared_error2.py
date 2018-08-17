@@ -15,6 +15,7 @@ class MeanSquaredError2(nn.Module):
         self.use_visibility = use_visibility
         self.Nj = Nj
         self.col = col
+        self.gaussian = 1.0
 
     def min_max(self, x, axis=None):
         min = x.min(axis=axis, keepdims=True)
@@ -22,9 +23,19 @@ class MeanSquaredError2(nn.Module):
         result = (x-min)/(max-min)
         return torch.Tensor(result)
 
+    def checkMatrix(self, xi, yi):
+        if xi < 0:
+            xi = 0
+        if xi > 13:
+            xi = 13
+        if yi < 0:
+            yi = 0
+        if yi > 13:
+            yi = 13
+        return xi, yi
+
     def forward(self, *inputs):
         o, h, t, v = inputs
-
         
         #最終
         scale = 1./float(self.col)
@@ -46,36 +57,29 @@ class MeanSquaredError2(nn.Module):
                     x[i, j, 1] = (o[i, j + 14, yCoords[i, j], xCoords[i, j]] + yCoords[i, j].float()) * scale
 
                 if int(v[i, j, 0]) == 1:
-                    xi = int(ti[i, j, 0])
-                    yi = int(ti[i, j, 1])
-                    
-                    if xi < 0:
-                        xi = 0
-                    if xi > 13:
-                        xi = 13
-                    if yi < 0:
-                        yi = 0
-                    if yi > 13:
-                        yi = 13
+                    xi, yi = self.checkMatrix(int(ti[i, j, 0]), int(ti[i, j, 1]))
                     
                     # 正規分布に近似したサンプルを得る
                     # 平均は 100 、標準偏差を 1 
                     tt[i, j, yi, xi]  = 1
-                    #tt[i, j] = self.min_max(fi.gaussian_filter(tt[i, j], 0.5))
+                    tt[i, j] = self.min_max(fi.gaussian_filter(tt[i, j], self.gaussian))
 
         #print(h[0, 1])
         tt = Variable(tt).cuda()
         #print(tt[0, 1])
+        '''
         diff1 = h[:, :, yi, xi] - tt[:, :, yi, xi]
         vv = v[:,:,0]
         N1 = (vv.sum()/2).data[0]
         diff1 = diff1*vv
-        #for i in range(s[0]):
-        #    for j in range(self.Nj):
-        #        if int(v[i, j, 0]) == 0:
-        #            diff1[i, j].data[0] = diff1[i, j].data[0]*0
-        #
-        #N = (v.sum()/2).data[0]
+        '''
+        diff1 = h - tt
+        for i in range(s[0]):
+            for j in range(self.Nj):
+                if int(v[i, j, 0]) == 0:
+                    diff1[i, j].data[0] = diff1[i, j].data[0]*0
+        
+        N1 = (v.sum()/2)
 
         diff1 = diff1.view(-1)
         d1 = diff1.dot(diff1) / N1
@@ -83,7 +87,7 @@ class MeanSquaredError2(nn.Module):
 
         diff2 = x - t
         diff2 = diff2*v
-        N2 = (v.sum()/2).data[0]
+        N2 = (v.sum()/2)
         diff2 = diff2.view(-1)
         d2 = diff2.dot(diff2)/N2
         return d1 + d2

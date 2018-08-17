@@ -73,8 +73,9 @@ class EstimatingTimeEvaluator(object):
                     offset_reshaped = offset.view(-1, self.Nj * 2, self.col,self.col)
                     op = np.squeeze(offset_reshaped.cpu().data.numpy())
                     for j in range(self.Nj):
-                        dat_x[j] = op[j, int(yc[j]), int(xc[j])] * scale + dat_x[j]
-                        dat_y[j] = op[j + 14, int(yc[j]), int(xc[j])] * scale + dat_y[j]
+                        if heatmap[0, j, int(yc[j]), int(xc[j])] > 0.5:
+                            dat_x[j] = op[j, int(yc[j]), int(xc[j])] * scale + dat_x[j]
+                            dat_y[j] = op[j + 14, int(yc[j]), int(xc[j])] * scale + dat_y[j]
 
                     fig = plt.figure(figsize=(2.24, 2.24))
 
@@ -165,11 +166,11 @@ class EstimatingTimeEvaluator(object):
 
                     for j in range(self.Nj):
                         if heatmap[0, j, int(yc[j]), int(xc[j])] * m[j] > 0.5:
-                            dx = op[j, int(yc[j]), int(xc[j])] * scale + dat_x[j]
-                            dy = op[j + 14, int(yc[j]), int(xc[j])] * scale + dat_y[j]
+                            #dx = op[j, int(yc[j]), int(xc[j])] * scale + dat_x[j]
+                            #dy = op[j + 14, int(yc[j]), int(xc[j])] * scale + dat_y[j]
+                            dx = dat_x[j]
+                            dy = dat_y[j]
                             plt.scatter(dx, dy, color=cm.hsv(j/14.0),  s=8)
-                        #dat_x[j] = op[j, 0] * scale + dat_x[j]
-                        #dat_y[j] = op[j, 1] * scale + dat_y[j]
 
                 else:
                     image, pose, testPose = estimator.estimate(index)
