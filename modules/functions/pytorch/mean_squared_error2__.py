@@ -15,7 +15,7 @@ class MeanSquaredError2__(nn.Module):
         self.use_visibility = use_visibility
         self.Nj = Nj
         self.col = col
-        self.gaussian = 0.5
+        self.gaussian = 1.0
         self.m = torch.Tensor([0.5,0.5,0.5,0.5,0.5,0.5,0.5,0.5,0.5,0.5,0.5,0.5,1.0,1.0]).cuda()
 
     def min_max(self, x, axis=None):
@@ -23,6 +23,12 @@ class MeanSquaredError2__(nn.Module):
         max = x.max(axis=axis, keepdims=True)
         result = (x-min)/(max-min)
         return torch.Tensor(result)
+
+    def min_max_(self, x, dim=1):
+        min = x.min(dim=1).float()
+        max = x.max(dim=1).float()
+        result = (x-min)/(max-min)
+        return result
 
     def checkMatrix(self, xi, yi):
         if xi < 0:
@@ -88,6 +94,11 @@ class MeanSquaredError2__(nn.Module):
                     tt[i, j, yi, xi]  = 1
                     tt[i, j] = self.min_max(fi.gaussian_filter(tt[i, j], self.gaussian))
 
+            #tt[i, self.Nj] = self.min_max_(tt[i, 0] + tt[i, 1] + tt[i, 2])
+            #tt[i, self.Nj + 1] = self.min_max_(tt[i, 3] + tt[i, 4] + tt[i, 5])
+            #tt[i, self.Nj + 2] = self.min_max_(tt[i, 6] + tt[i, 7] + tt[i, 8])
+            #tt[i, self.Nj + 3] = self.min_max_(tt[i, 9] + tt[i, 10] + tt[i, 11])
+            
             # 右足
             f_rf = False
             for index in range(3):
@@ -131,10 +142,8 @@ class MeanSquaredError2__(nn.Module):
             if f_lh == True:
                 tt[i, self.Nj + 3] = self.min_max(fi.gaussian_filter(tt[i, self.Nj + 3], self.gaussian))
                 vt[i, 3] = 1
-
-        #print(h[0, 17])
+            
         tt = Variable(tt).cuda()
-        #print(tt[0, 17])
 
         '''
         diff1 = h3[:, :, yi, xi] - tt[:, :self.Nj, yi, xi]
@@ -153,6 +162,7 @@ class MeanSquaredError2__(nn.Module):
             for index in range(3):
                 if int(v[i, index, 0]) == 1:
                     f_rf = True
+                    vt[i, 0] = 1
                     break
             if f_rf == False:
                 diff1[i, self.Nj] = diff1[i, self.Nj]*0
@@ -162,6 +172,7 @@ class MeanSquaredError2__(nn.Module):
             for index in range(3,6):
                 if int(v[i, index, 0]) == 1:
                     f_lf = True
+                    vt[i, 1] = 1
                     break
             if f_lf == False:
                 diff1[i, self.Nj + 1] = diff1[i, self.Nj + 1]*0
@@ -171,6 +182,7 @@ class MeanSquaredError2__(nn.Module):
             for index in range(6,9):
                 if int(v[i, index, 0]) == 1:
                     f_rh = True
+                    vt[i, 2] = 1
                     break
             if f_rh == False:
                 diff1[i, self.Nj + 2] = diff1[i, self.Nj + 2]*0
@@ -180,6 +192,7 @@ class MeanSquaredError2__(nn.Module):
             for index in range(9,12):
                 if int(v[i, index, 0]) == 1:
                     f_lh = True
+                    vt[i, 3] = 1
                     break
             if f_lh == False:
                 diff1[i, self.Nj + 3] = diff1[i, self.Nj + 3]*0
