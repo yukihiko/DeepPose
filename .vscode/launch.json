@@ -21,7 +21,7 @@
             "args": [
                 "10000",
                 "\"plot_estimating_time\"",
-                "--NN=MobileNet_",
+                "--NN=MnasNet",
                 "--pytorch-model-file=${workspaceFolder}/result/pytorch/lastest.model",
                 "-g0"
             ]
@@ -44,11 +44,10 @@
             "args": [
                 "pytorch",
                 "-g0",
-                "--NN=MobileNet___",
+                "--NN=MnasNet",
                 "--batchsize=64",
                 "--data-augmentation",
                 "--use-visibility",
-                "--useOneDrive",
                 "--out=${workspaceFolder}/result",
                 "--opt=Adam",
                 "-e5000"
@@ -62,12 +61,11 @@
             "args": [
                 "pytorch",
                 "-g0",
-                "--NN=MobileNet_",
+                "--NN=MnasNet",
                 "--batchsize=64",
-                "--resume-model=${workspaceFolder}/result/pytorch/epoch-6.model",
+                "--resume-model=${workspaceFolder}/result/pytorch/lastest.model",
                 "--out=${workspaceFolder}/result",
                 "--data-augmentation",
-                "--useOneDrive",
                 "--use-visibility",
                 "--opt=Adam",
                 "-e5000"
@@ -85,7 +83,7 @@
             "request": "launch",
             "program": "${workspaceFolder}/scripts/pytorch2onnx.py",
             "args": [
-                "--NN=MobileNet_",
+                "--NN=MnasNet",
                 "--input=result/pytorch/lastest.model",
                 "--onnx_output=result/onnx_output.onnx",
                 "--output=result/MobileNet_.mlmodel"

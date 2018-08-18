@@ -13,6 +13,7 @@ from modules.models.pytorch.MobileNet_3 import MobileNet_3
 from modules.models.pytorch.Lin_View import Lin_View
 from modules.models.pytorch.MobileNet__ import MobileNet__
 from modules.models.pytorch.MobileNet___ import MobileNet___
+from modules.models.pytorch.MnasNet import MnasNet
 
 
-__all__ = ['AlexNet', 'VGG19Net', 'Inceptionv3', 'Resnet', 'MobileNet', 'MobileNetV2', 'MobileNet_', 'MobileNet_2', 'MobileNet_3', 'Lin_View', 'MobileNet__', 'MobileNet___']
+__all__ = ['AlexNet', 'VGG19Net', 'Inceptionv3', 'Resnet', 'MobileNet', 'MobileNetV2', 'MobileNet_', 'MobileNet_2', 'MobileNet_3', 'Lin_View', 'MobileNet__', 'MobileNet___', 'MnasNet']

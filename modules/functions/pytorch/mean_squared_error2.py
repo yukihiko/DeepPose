@@ -73,7 +73,7 @@ class MeanSquaredError2(nn.Module):
         N1 = (vv.sum()/2).data[0]
         diff1 = diff1*vv
         '''
-        diff1 = h - tt
+        #diff1 = h - tt
         for i in range(s[0]):
             for j in range(self.Nj):
                 if int(v[i, j, 0]) == 0:

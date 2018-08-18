@@ -73,7 +73,6 @@ class EstimatingTimeEvaluator(object):
                     offset_reshaped = offset.view(-1, self.Nj * 2, self.col,self.col)
                     op = np.squeeze(offset_reshaped.cpu().data.numpy())
                     for j in range(self.Nj):
-                        if heatmap[0, j, int(yc[j]), int(xc[j])] > 0.5:
                             dat_x[j] = op[j, int(yc[j]), int(xc[j])] * scale + dat_x[j]
                             dat_y[j] = op[j + 14, int(yc[j]), int(xc[j])] * scale + dat_y[j]
 
@@ -81,8 +80,9 @@ class EstimatingTimeEvaluator(object):
 
                     img = image.numpy().transpose(1, 2, 0)
                     plt.imshow(img, vmin=0., vmax=1.)
-                    for i in range(14):   
-                        plt.scatter(dat_x[i], dat_y[i], color=cm.hsv(i/14.0),  s=8)
+                    for j in range(14):   
+                        if heatmap[0, j, int(yc[j]), int(xc[j])] > 0.5:
+                            plt.scatter(dat_x[j], dat_y[j], color=cm.hsv(j/14.0),  s=10)
 
                 elif self.NN == "MobileNet__":
                     image, offset, heatmap, output, testPose = estimator.estimate__(index)
@@ -171,6 +171,28 @@ class EstimatingTimeEvaluator(object):
                             dx = dat_x[j]
                             dy = dat_y[j]
                             plt.scatter(dx, dy, color=cm.hsv(j/14.0),  s=8)
+
+                elif self.NN == "MnasNet":
+                    image, pose, testPose = estimator.estimate(index)
+                    _, size, _ = image.shape
+               
+                    pose = pose.view(-1, self.Nj, 3)
+                    pose = pose[:, :, :2]
+                    dat = pose.data[0].cpu().numpy()
+                    dat *= size
+                    dat_x = dat[:, 0]
+                    dat_y = dat[:, 1]
+
+                    testdat = testPose.cpu().numpy()
+                    testdat *= size
+                    testdat_x, testdat_y = zip(*testdat)
+
+                    fig = plt.figure(figsize=(2.24, 2.24))
+                    img = image.numpy().transpose(1, 2, 0)
+                    plt.imshow(img, vmin=0., vmax=1.)
+                    for i in range(14):   
+                        #plt.scatter(testdat_x[i], testdat_y[i], color=cm.hsv(i/14.0), s=7)
+                        plt.scatter(dat_x[i], dat_y[i], color=cm.hsv(i/14.0),  s=8)
 
                 else:
                     image, pose, testPose = estimator.estimate(index)

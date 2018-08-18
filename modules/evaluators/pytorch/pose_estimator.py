@@ -7,7 +7,7 @@ from torchvision import transforms
 
 from modules.errors import GPUNotFoundError
 from modules.dataset_indexing.pytorch import PoseDataset, Crop, RandomNoise, Scale
-from modules.models.pytorch import AlexNet, VGG19Net, Inceptionv3, Resnet, MobileNet, MobileNet_, MobileNet__, MobileNet___
+from modules.models.pytorch import AlexNet, VGG19Net, Inceptionv3, Resnet, MobileNet, MobileNet_, MobileNet__, MobileNet___, MnasNet
 
 
 class PoseEstimator(object):
@@ -35,6 +35,8 @@ class PoseEstimator(object):
             self.model = MobileNet___()
         elif self.NN == "MobileNet":
             self.model = MobileNet()
+        elif self.NN == "MnasNet":
+            self.model = MnasNet()
         elif self.NN == "AlexNet":
             self.model = AlexNet(Nj)
         else:
