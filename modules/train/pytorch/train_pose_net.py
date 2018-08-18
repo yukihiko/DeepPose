@@ -314,7 +314,7 @@ class TrainPoseNet(object):
         if self.resume_opt:
             optimizer.load_state_dict(torch.load(self.resume_opt))
         # set intervals.
-        val_interval = 1
+        val_interval = 5
         #resume_interval = self.epoch/10
         resume_interval = 1
         log_interval = 10
