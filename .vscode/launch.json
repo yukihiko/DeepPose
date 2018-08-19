@@ -86,7 +86,7 @@
                 "--NN=MnasNet_",
                 "--input=result/pytorch/lastest.model",
                 "--onnx_output=result/onnx_output.onnx",
-                "--output=result/MobileNet_.mlmodel"
+                "--output=result/MnasNetNet_.mlmodel"
             ]
         },        
         {
