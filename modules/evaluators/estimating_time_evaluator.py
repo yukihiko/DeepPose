@@ -194,6 +194,37 @@ class EstimatingTimeEvaluator(object):
                         #plt.scatter(testdat_x[i], testdat_y[i], color=cm.hsv(i/14.0), s=7)
                         plt.scatter(dat_x[i], dat_y[i], color=cm.hsv(i/14.0),  s=8)
 
+                elif self.NN == "MnasNet_":
+                    image, offset, heatmap, testPose = estimator.estimate_(index)
+                    _, size, _ = image.shape
+                    scale = float(size)/float(self.col)
+
+                    reshaped = heatmap.view(-1, self.Nj, self.col*self.col)
+                    _, argmax = reshaped.max(-1)
+                    yCoords = argmax/self.col
+                    xCoords = argmax - yCoords*self.col
+                    xc = np.squeeze(xCoords.cpu().data.numpy()).astype(np.float32)
+                    yc = np.squeeze(yCoords.cpu().data.numpy()).astype(np.float32)
+                    dat_x = xc * scale
+                    dat_y = yc * scale
+               
+                    # 最終
+                    offset_reshaped = offset.view(-1, self.Nj * 2, self.col,self.col)
+                    op = np.squeeze(offset_reshaped.cpu().data.numpy())
+                    for j in range(self.Nj):
+                        dat_x[j] = op[j, int(yc[j]), int(xc[j])] * scale + dat_x[j]
+                        dat_y[j] = op[j + 14, int(yc[j]), int(xc[j])] * scale + dat_y[j]
+                            #dat_x[j] = dat_x[j]
+                            #dat_y[j] = dat_y[j]
+
+                    fig = plt.figure(figsize=(2.24, 2.24))
+
+                    img = image.numpy().transpose(1, 2, 0)
+                    plt.imshow(img, vmin=0., vmax=1.)
+                    for j in range(14):   
+                        if heatmap[0, j, int(yc[j]), int(xc[j])] > 0.5:
+                            plt.scatter(dat_x[j], dat_y[j], color=cm.hsv(j/14.0),  s=10)
+
                 else:
                     image, pose, testPose = estimator.estimate(index)
                     _, size, _ = image.shape

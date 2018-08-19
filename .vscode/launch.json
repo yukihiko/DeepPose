@@ -21,7 +21,7 @@
             "args": [
                 "10000",
                 "\"plot_estimating_time\"",
-                "--NN=MnasNet",
+                "--NN=MnasNet_",
                 "--pytorch-model-file=${workspaceFolder}/result/pytorch/lastest.model",
                 "-g0"
             ]
@@ -44,7 +44,7 @@
             "args": [
                 "pytorch",
                 "-g0",
-                "--NN=MnasNet",
+                "--NN=MnasNet_",
                 "--batchsize=64",
                 "--data-augmentation",
                 "--use-visibility",
@@ -61,7 +61,7 @@
             "args": [
                 "pytorch",
                 "-g0",
-                "--NN=MnasNet",
+                "--NN=MnasNet_",
                 "--batchsize=64",
                 "--resume-model=${workspaceFolder}/result/pytorch/lastest.model",
                 "--out=${workspaceFolder}/result",
@@ -83,7 +83,7 @@
             "request": "launch",
             "program": "${workspaceFolder}/scripts/pytorch2onnx.py",
             "args": [
-                "--NN=MnasNet",
+                "--NN=MnasNet_",
                 "--input=result/pytorch/lastest.model",
                 "--onnx_output=result/onnx_output.onnx",
                 "--output=result/MobileNet_.mlmodel"

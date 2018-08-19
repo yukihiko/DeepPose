@@ -13,7 +13,7 @@ import torch.nn as nn
 import subprocess
 
 from modules.errors import FileNotFoundError, GPUNotFoundError, UnknownOptimizationMethodError, NotSupportedError
-from modules.models.pytorch import AlexNet, VGG19Net, Inceptionv3, Resnet, MobileNet, MobileNetV2, MobileNet_, MobileNet_2, MobileNet_3, MobileNet__, MobileNet___, MnasNet
+from modules.models.pytorch import AlexNet, VGG19Net, Inceptionv3, Resnet, MobileNet, MobileNetV2, MobileNet_, MobileNet_2, MobileNet_3, MobileNet__, MobileNet___, MnasNet, MnasNet_
 from modules.dataset_indexing.pytorch import PoseDataset, Crop, RandomNoise, Scale
 from modules.functions.pytorch import mean_squared_error, mean_squared_error2,mean_squared_error3, mean_squared_error2_, mean_squared_error2__, mean_squared_error_FC3
 
@@ -163,6 +163,10 @@ class TrainPoseNet(object):
                 output = model(image)
                 loss = mean_squared_error_FC3(output.view(-1, self.Nj, 3), pose, visibility, self.use_visibility)
                 loss.backward()
+            elif self.NN == "MnasNet_":
+                offset, heatmap = model(image)
+                loss = mean_squared_error2(offset, heatmap, pose, visibility, self.use_visibility)
+                loss.backward()
             else :
                 output = model(image)
                 loss = mean_squared_error(output.view(-1, self.Nj, 2), pose, visibility, self.use_visibility)
@@ -218,6 +222,9 @@ class TrainPoseNet(object):
             elif self.NN == "MnasNet":
                 output = model(image)
                 test_loss += mean_squared_error_FC3(output.view(-1, self.Nj, 3), pose, visibility, self.use_visibility).data[0]
+            elif self.NN == "MnasNet_":
+                offset, heatmap = model(image)
+                test_loss += mean_squared_error2(offset, heatmap, pose, visibility, self.use_visibility).data[0]
             else :
                 output = model(image)
                 test_loss += mean_squared_error(output.view(-1, self.Nj, 2), pose, visibility, self.use_visibility).data[0]
@@ -280,6 +287,8 @@ class TrainPoseNet(object):
             model = MobileNetV2( )
         elif self.NN == "MnasNet":
             model = MnasNet( )
+        elif self.NN == "MnasNet_":
+            model = MnasNet_( )
         else :
              model = AlexNet(self.Nj)
            

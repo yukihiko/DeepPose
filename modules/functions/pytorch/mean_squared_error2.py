@@ -64,16 +64,27 @@ class MeanSquaredError2(nn.Module):
                     tt[i, j, yi, xi]  = 1
                     tt[i, j] = self.min_max(fi.gaussian_filter(tt[i, j], self.gaussian))
 
-        #print(h[0, 1])
         tt = Variable(tt).cuda()
-        #print(tt[0, 1])
+
         '''
-        diff1 = h[:, :, yi, xi] - tt[:, :, yi, xi]
+        _, tt_argmax = tt.view(-1, self.Nj, self.col*self.col).max(-1)
+        tt_yCoords = tt_argmax/self.col
+        tt_xCoords = tt_argmax - tt_yCoords*self.col
+
+        diff1 = h[:, :, tt_yCoords, tt_xCoords] - tt[:, :, tt_yCoords, tt_xCoords]
         vv = v[:,:,0]
         N1 = (vv.sum()/2).data[0]
         diff1 = diff1*vv
+        diff3 = h[:, :, yCoords, xCoords] - tt[:, :, yCoords, xCoords]
+        diff3 = diff3*vv
+        diff3 = diff3.view(-1)
+        d3 = diff3.dot(diff3) / N1
+        diff1 = diff1.view(-1)
+        d1 = diff1.dot(diff1) / N1
+        return (d1 + d3) / 2.0
         '''
-        #diff1 = h - tt
+        
+        diff1 = h - tt
         for i in range(s[0]):
             for j in range(self.Nj):
                 if int(v[i, j, 0]) == 0:
