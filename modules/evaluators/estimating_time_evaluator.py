@@ -166,10 +166,10 @@ class EstimatingTimeEvaluator(object):
 
                     for j in range(self.Nj):
                         if heatmap[0, j, int(yc[j]), int(xc[j])] * m[j] > 0.5:
-                            #dx = op[j, int(yc[j]), int(xc[j])] * scale + dat_x[j]
-                            #dy = op[j + 14, int(yc[j]), int(xc[j])] * scale + dat_y[j]
-                            dx = dat_x[j]
-                            dy = dat_y[j]
+                            dx = op[j, int(yc[j]), int(xc[j])] * scale + dat_x[j]
+                            dy = op[j + 14, int(yc[j]), int(xc[j])] * scale + dat_y[j]
+                            #dx = dat_x[j]
+                            #dy = dat_y[j]
                             plt.scatter(dx, dy, color=cm.hsv(j/14.0),  s=8)
 
                 elif self.NN == "MnasNet":

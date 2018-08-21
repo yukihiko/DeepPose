@@ -72,7 +72,7 @@ class MeanSquaredError2__(nn.Module):
         xCoords = argmax - yCoords*self.col
 
         x = Variable(torch.zeros(t.size()).float(), requires_grad=True).cuda()
-        vt = Variable(torch.zeros([s[0], 4, self.col, self.col]).float(), requires_grad=True).cuda()
+        #vt = Variable(torch.zeros([s[0], 4, self.col, self.col]).float(), requires_grad=True).cuda()
         '''
         '''
         
@@ -80,9 +80,9 @@ class MeanSquaredError2__(nn.Module):
             for j in range(self.Nj):
                 '''
                 '''
-                if h3[i, j, yCoords[i, j], xCoords[i, j]] > 0.5:
-                    x[i, j, 0] = (os[i, j, yCoords[i, j], xCoords[i, j]] + xCoords[i, j].float()) * scale
-                    x[i, j, 1] = (os[i, j + 14, yCoords[i, j], xCoords[i, j]] + yCoords[i, j].float()) * scale
+                #if h3[i, j, yCoords[i, j], xCoords[i, j]] > 0.5:
+                x[i, j, 0] = (os[i, j, yCoords[i, j], xCoords[i, j]] + xCoords[i, j].float()) * scale
+                x[i, j, 1] = (os[i, j + 14, yCoords[i, j], xCoords[i, j]] + yCoords[i, j].float()) * scale
                 '''
                 '''
                 if int(v[i, j, 0]) == 1:
@@ -108,7 +108,7 @@ class MeanSquaredError2__(nn.Module):
                     tt[i, self.Nj, yi, xi]  = 1
             if f_rf == True:
                 tt[i, self.Nj] = self.min_max(fi.gaussian_filter(tt[i, self.Nj], self.gaussian))
-                vt[i, 0] = 1
+                #vt[i, 0] = 1
 
             # 左足
             f_lf = False
@@ -119,7 +119,7 @@ class MeanSquaredError2__(nn.Module):
                     tt[i, self.Nj + 1, yi, xi]  = 1
             if f_lf == True:
                 tt[i, self.Nj + 1] = self.min_max(fi.gaussian_filter(tt[i, self.Nj + 1], self.gaussian))
-                vt[i, 1] = 1
+                #vt[i, 1] = 1
 
             # 右手
             f_rh = False
@@ -130,7 +130,7 @@ class MeanSquaredError2__(nn.Module):
                     tt[i, self.Nj + 2, yi, xi]  = 1
             if f_rh == True:
                 tt[i, self.Nj + 2] = self.min_max(fi.gaussian_filter(tt[i, self.Nj + 2], self.gaussian))
-                vt[i, 2] = 1
+                #vt[i, 2] = 1
 
             # 左手
             f_lh = False
@@ -141,7 +141,7 @@ class MeanSquaredError2__(nn.Module):
                     tt[i, self.Nj + 3, yi, xi]  = 1
             if f_lh == True:
                 tt[i, self.Nj + 3] = self.min_max(fi.gaussian_filter(tt[i, self.Nj + 3], self.gaussian))
-                vt[i, 3] = 1
+                #vt[i, 3] = 1
             
         tt = Variable(tt).cuda()
 
@@ -162,7 +162,7 @@ class MeanSquaredError2__(nn.Module):
             for index in range(3):
                 if int(v[i, index, 0]) == 1:
                     f_rf = True
-                    vt[i, 0] = 1
+                    #vt[i, 0] = 1
                     break
             if f_rf == False:
                 diff1[i, self.Nj] = diff1[i, self.Nj]*0
@@ -172,7 +172,7 @@ class MeanSquaredError2__(nn.Module):
             for index in range(3,6):
                 if int(v[i, index, 0]) == 1:
                     f_lf = True
-                    vt[i, 1] = 1
+                    #vt[i, 1] = 1
                     break
             if f_lf == False:
                 diff1[i, self.Nj + 1] = diff1[i, self.Nj + 1]*0
@@ -182,7 +182,7 @@ class MeanSquaredError2__(nn.Module):
             for index in range(6,9):
                 if int(v[i, index, 0]) == 1:
                     f_rh = True
-                    vt[i, 2] = 1
+                    #vt[i, 2] = 1
                     break
             if f_rh == False:
                 diff1[i, self.Nj + 2] = diff1[i, self.Nj + 2]*0
@@ -192,28 +192,28 @@ class MeanSquaredError2__(nn.Module):
             for index in range(9,12):
                 if int(v[i, index, 0]) == 1:
                     f_lh = True
-                    vt[i, 3] = 1
+                    #vt[i, 3] = 1
                     break
             if f_lh == False:
                 diff1[i, self.Nj + 3] = diff1[i, self.Nj + 3]*0
-        N1 = (v.sum()/2)
+        N1 = tt.sum()
 
         diff1 = diff1.contiguous().view(-1)
-        d1 = diff1.dot(diff1) / N1
+        d1 = diff1.dot(diff1) /N1
 
         diff2 = x - t
         diff2 = diff2*v
         N2 = (v.sum()/2)
         diff2 = diff2.view(-1)
         d2 = diff2.dot(diff2)/N2
-
+        '''
         diff3 = h2 - tt[:, self.Nj:, :, :]
         diff3 = diff3*vt
         N3 = (vt.sum()/2)
         diff3 = diff3.contiguous().view(-1)
         d3 = diff3.dot(diff3) / N3
-
-        return d1 + d2 + d3
+        '''
+        return d1 + d2
 
 
 def mean_squared_error2__(os, h, t, v, use_visibility=False):
