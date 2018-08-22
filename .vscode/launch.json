@@ -21,7 +21,7 @@
             "args": [
                 "10000",
                 "\"plot_estimating_time\"",
-                "--NN=MobileNet___",
+                "--NN=MnasNet_",
                 "--pytorch-model-file=${workspaceFolder}/result/pytorch/lastest.model",
                 "-g0"
             ]
@@ -61,9 +61,9 @@
             "args": [
                 "pytorch",
                 "-g0",
-                "--NN=MobileNet___",
+                "--NN=MnasNet_",
                 "--batchsize=64",
-                "--resume-model=${workspaceFolder}/result/pytorch/epoch-10.model",
+                "--resume-model=${workspaceFolder}/result/pytorch/epoch-27.model",
                 "--out=${workspaceFolder}/result",
                 "--data-augmentation",
                 "--useOneDrive",

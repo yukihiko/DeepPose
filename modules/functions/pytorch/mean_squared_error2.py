@@ -85,15 +85,18 @@ class MeanSquaredError2(nn.Module):
         '''
         
         diff1 = h - tt
+        cnt = 0
         for i in range(s[0]):
             for j in range(self.Nj):
                 if int(v[i, j, 0]) == 0:
                     diff1[i, j].data[0] = diff1[i, j].data[0]*0
-        
-        N1 = (v.sum()/2)
+                else:
+                    cnt = cnt + 1
+     
+        #N1 = (v.sum()/2)
 
         diff1 = diff1.view(-1)
-        d1 = diff1.dot(diff1) / N1
+        d1 = diff1.dot(diff1) / (cnt * self.col*self.col)
         #return d1
 
         diff2 = x - t
@@ -101,7 +104,7 @@ class MeanSquaredError2(nn.Module):
         N2 = (v.sum()/2)
         diff2 = diff2.view(-1)
         d2 = diff2.dot(diff2)/N2
-        return d1 + d2
+        return d1
         
         '''
         #最終

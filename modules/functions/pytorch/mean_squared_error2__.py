@@ -152,16 +152,19 @@ class MeanSquaredError2__(nn.Module):
         N1 = (vv.sum()/2).data[0]
         '''
         diff1 = h - tt
+        cnt = 0
         for i in range(s[0]):
             for j in range(self.Nj):
                 if int(v[i, j, 0]) == 0:
                     diff1[i, j] = diff1[i, j]*0
-
+                else:
+                    cnt = cnt + 1
             # 右足
             f_rf = False
             for index in range(3):
                 if int(v[i, index, 0]) == 1:
                     f_rf = True
+                    cnt = cnt + 1
                     #vt[i, 0] = 1
                     break
             if f_rf == False:
@@ -172,6 +175,7 @@ class MeanSquaredError2__(nn.Module):
             for index in range(3,6):
                 if int(v[i, index, 0]) == 1:
                     f_lf = True
+                    cnt = cnt + 1
                     #vt[i, 1] = 1
                     break
             if f_lf == False:
@@ -182,6 +186,7 @@ class MeanSquaredError2__(nn.Module):
             for index in range(6,9):
                 if int(v[i, index, 0]) == 1:
                     f_rh = True
+                    cnt = cnt + 1
                     #vt[i, 2] = 1
                     break
             if f_rh == False:
@@ -192,14 +197,15 @@ class MeanSquaredError2__(nn.Module):
             for index in range(9,12):
                 if int(v[i, index, 0]) == 1:
                     f_lh = True
-                    #vt[i, 3] = 1
+                    cnt = cnt + 1
+                #vt[i, 3] = 1
                     break
             if f_lh == False:
                 diff1[i, self.Nj + 3] = diff1[i, self.Nj + 3]*0
         N1 = tt.sum()
 
         diff1 = diff1.contiguous().view(-1)
-        d1 = diff1.dot(diff1) /N1
+        d1 = diff1.dot(diff1) /(cnt * self.col*self.col)
 
         diff2 = x - t
         diff2 = diff2*v
@@ -213,7 +219,7 @@ class MeanSquaredError2__(nn.Module):
         diff3 = diff3.contiguous().view(-1)
         d3 = diff3.dot(diff3) / N3
         '''
-        return d1 + d2
+        return d1
 
 
 def mean_squared_error2__(os, h, t, v, use_visibility=False):
