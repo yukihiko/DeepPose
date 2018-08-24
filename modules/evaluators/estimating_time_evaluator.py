@@ -214,8 +214,8 @@ class EstimatingTimeEvaluator(object):
                     for j in range(self.Nj):
                         dat_x[j] = op[j, int(yc[j]), int(xc[j])] * scale + dat_x[j]
                         dat_y[j] = op[j + 14, int(yc[j]), int(xc[j])] * scale + dat_y[j]
-                            #dat_x[j] = dat_x[j]
-                            #dat_y[j] = dat_y[j]
+                        #dat_x[j] = dat_x[j]
+                        #dat_y[j] = dat_y[j]
 
                     fig = plt.figure(figsize=(2.24, 2.24))
 

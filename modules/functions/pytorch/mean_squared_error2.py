@@ -52,9 +52,9 @@ class MeanSquaredError2(nn.Module):
 
         for i in range(s[0]):
             for j in range(self.Nj):
-                if h[i, j, yCoords[i, j], xCoords[i, j]] > 0.5:
-                    x[i, j, 0] = (o[i, j, yCoords[i, j], xCoords[i, j]] + xCoords[i, j].float()) * scale
-                    x[i, j, 1] = (o[i, j + 14, yCoords[i, j], xCoords[i, j]] + yCoords[i, j].float()) * scale
+                #if h[i, j, yCoords[i, j], xCoords[i, j]] > 0.5:
+                x[i, j, 0] = (o[i, j, yCoords[i, j], xCoords[i, j]] + xCoords[i, j].float()) * scale
+                x[i, j, 1] = (o[i, j + 14, yCoords[i, j], xCoords[i, j]] + yCoords[i, j].float()) * scale
 
                 if int(v[i, j, 0]) == 1:
                     xi, yi = self.checkMatrix(int(ti[i, j, 0]), int(ti[i, j, 1]))
@@ -104,7 +104,7 @@ class MeanSquaredError2(nn.Module):
         N2 = (v.sum()/2)
         diff2 = diff2.view(-1)
         d2 = diff2.dot(diff2)/N2
-        return d1
+        return d1 + d2
         
         '''
         #最終

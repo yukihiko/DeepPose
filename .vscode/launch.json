@@ -22,7 +22,7 @@
                 "10000",
                 "\"plot_estimating_time\"",
                 "--NN=MnasNet_",
-                "--pytorch-model-file=${workspaceFolder}/result/pytorch/lastest.model",
+                "--pytorch-model-file=${workspaceFolder}/result/pytorch/epoch-6.model",
                 "-g0"
             ]
         },              
@@ -63,7 +63,7 @@
                 "-g0",
                 "--NN=MnasNet_",
                 "--batchsize=64",
-                "--resume-model=${workspaceFolder}/result/pytorch/epoch-27.model",
+                "--resume-model=${workspaceFolder}/result/pytorch/epoch-6.model",
                 "--out=${workspaceFolder}/result",
                 "--data-augmentation",
                 "--useOneDrive",
