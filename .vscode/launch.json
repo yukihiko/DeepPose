@@ -22,7 +22,7 @@
                 "10000",
                 "\"plot_estimating_time\"",
                 "--NN=MnasNet_",
-                "--pytorch-model-file=${workspaceFolder}/result/pytorch/epoch-6.model",
+                "--pytorch-model-file=${workspaceFolder}/result/pytorch/lastest.model",
                 "-g0"
             ]
         },              
@@ -63,7 +63,7 @@
                 "-g0",
                 "--NN=MnasNet_",
                 "--batchsize=64",
-                "--resume-model=${workspaceFolder}/result/pytorch/epoch-6.model",
+                "--resume-model=${workspaceFolder}/result/pytorch/epoch-74.model",
                 "--out=${workspaceFolder}/result",
                 "--data-augmentation",
                 "--useOneDrive",
@@ -85,7 +85,7 @@
             "program": "${workspaceFolder}/scripts/pytorch2onnx.py",
             "args": [
                 "--NN=MnasNet_",
-                "--input=result/pytorch/lastest.model",
+                "--input=result/pytorch/epoch-74.model",
                 "--onnx_output=result/onnx_output.onnx",
                 "--output=result/MnasNetNet_.mlmodel"
             ]

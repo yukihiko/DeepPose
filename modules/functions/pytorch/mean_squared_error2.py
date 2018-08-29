@@ -24,6 +24,11 @@ class MeanSquaredError2(nn.Module):
         return torch.Tensor(result)
 
     def checkMatrix(self, xi, yi):
+        f = False
+        if xi >= 0 and xi <= 13 and yi >= 0 and yi <= 13:
+            f = True
+
+        '''
         if xi < 0:
             xi = 0
         if xi > 13:
@@ -32,7 +37,8 @@ class MeanSquaredError2(nn.Module):
             yi = 0
         if yi > 13:
             yi = 13
-        return xi, yi
+        '''
+        return xi, yi, f
 
     def forward(self, *inputs):
         o, h, t, v = inputs
@@ -57,13 +63,17 @@ class MeanSquaredError2(nn.Module):
                 x[i, j, 1] = (o[i, j + 14, yCoords[i, j], xCoords[i, j]] + yCoords[i, j].float()) * scale
 
                 if int(v[i, j, 0]) == 1:
-                    xi, yi = self.checkMatrix(int(ti[i, j, 0]), int(ti[i, j, 1]))
+                    xi, yi, f = self.checkMatrix(int(ti[i, j, 0]), int(ti[i, j, 1]))
                     
-                    # 正規分布に近似したサンプルを得る
-                    # 平均は 100 、標準偏差を 1 
-                    tt[i, j, yi, xi]  = 1
-                    tt[i, j] = self.min_max(fi.gaussian_filter(tt[i, j], self.gaussian))
-
+                    if f == True:
+                        # 正規分布に近似したサンプルを得る
+                        # 平均は 100 、標準偏差を 1 
+                        tt[i, j, yi, xi]  = 1
+                        tt[i, j] = self.min_max(fi.gaussian_filter(tt[i, j], self.gaussian))
+                    else:
+                        v[i, j, 0] = 0
+                        v[i, j, 1] = 0
+                        
         tt = Variable(tt).cuda()
 
         '''

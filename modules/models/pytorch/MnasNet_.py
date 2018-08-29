@@ -100,21 +100,21 @@ class MnasNet_(nn.Module):
 
         # building last several layers
         self.features.append(Conv_1x1(input_channel, self.last_channel))
-        #self.features.append(nn.AdaptiveAvgPool2d(1))
-        #self.features.append(nn.AvgPool2d(7))
 
         # make it nn.Sequential
         self.features = nn.Sequential(*self.features)
         
         self.heatmap = nn.ConvTranspose2d(self.last_channel, self.Nj, 4, 2, 1)
         self.offset = nn.ConvTranspose2d(self.last_channel, self.Nj*2, 4, 2, 1)
-        #self.heatmap = nn.Conv2d(self.last_channel, self.Nj, 1)
-        #self.offset = nn.Conv2d(self.last_channel, self.Nj*2, 1)
+        #self.deconv = nn.ConvTranspose2d(self.last_channel, 96, 4, 2, 1)
+        #self.heatmap = nn.Conv2d(96, self.Nj, 3, 1, 1)
+        #self.offset = nn.Conv2d(96, self.Nj*2, 3, 1, 1)
 
         self._initialize_weights()
 
     def forward(self, x):
         x = self.features(x)
+        #x = self.deconv(x)
         h = self.heatmap(x)
         h = F.sigmoid(h)
         o = self.offset(x)

@@ -13,7 +13,7 @@ import torch.nn as nn
 import subprocess
 
 from modules.errors import FileNotFoundError, GPUNotFoundError, UnknownOptimizationMethodError, NotSupportedError
-from modules.models.pytorch import AlexNet, VGG19Net, Inceptionv3, Resnet, MobileNet, MobileNetV2, MobileNet_, MobileNet_2, MobileNet_3, MobileNet__, MobileNet___, MnasNet, MnasNet_
+from modules.models.pytorch import AlexNet, VGG19Net, Inceptionv3, Resnet, MobileNet, MobileNetV2, MobileNet_, MobileNet_2, MobileNet_3, MobileNet__, MobileNet___, MnasNet, MnasNet_, Discriminator
 from modules.dataset_indexing.pytorch import PoseDataset, Crop, RandomNoise, Scale
 from modules.functions.pytorch import mean_squared_error, mean_squared_error2,mean_squared_error3, mean_squared_error2_, mean_squared_error2__, mean_squared_error_FC3
 
@@ -104,6 +104,7 @@ class TrainPoseNet(object):
         self.out = kwargs['out']
         self.resume = kwargs['resume']
         self.resume_model = kwargs['resume_model']
+        self.resume_discriminator = kwargs['resume_discriminator']
         self.resume_opt = kwargs['resume_opt']
         self.colab = kwargs['colab']
         self.useOneDrive = kwargs['useOneDrive']
@@ -133,9 +134,15 @@ class TrainPoseNet(object):
             optimizer = optim.Adam(model.parameters())
         return optimizer
 
-    def _train(self, model, optimizer, train_iter, log_interval, logger, start_time):
+    def _train(self, model, optimizer, train_iter, log_interval, logger, start_time, discriminator=None, optimizer_d=None):
         model.train()
+        if discriminator != None:
+            discriminator.train()
+
         lr = 0.1
+        ones= Variable(torch.ones(self.batchsize))
+        zero= Variable(torch.zeros(self.batchsize))
+
         for iteration, batch in enumerate(tqdm(train_iter, desc='this epoch'), 1):
             image, pose, visibility = Variable(batch[0]), Variable(batch[1]), Variable(batch[2])
             if self.gpu:
@@ -167,13 +174,33 @@ class TrainPoseNet(object):
                 offset, heatmap = model(image)
                 loss = mean_squared_error2(offset, heatmap, pose, visibility, self.use_visibility)
                 loss.backward()
+            elif self.NN == "MnasNet_+Discriminator":
+                # fake data
+                offset, heatmap = model(image)
+                heatmap_tensor = heatmap.data
+                out = discriminator(heatmap)
+                loss = mean_squared_error2(offset, heatmap, pose, visibility, self.use_visibility)
+                loss_g = nn.BCEWithLogitsLoss(out, ones) + loss
+                #loss.backward()
+                loss_g.backward()
             else :
                 output = model(image)
                 loss = mean_squared_error(output.view(-1, self.Nj, 2), pose, visibility, self.use_visibility)
                 loss.backward()
 
             optimizer.step()
-               
+            
+            if discriminator != None:
+                optimizer_d.zero_grad()
+                real_out = discriminator(tt)
+                loss_d_real = nn.BCEWithLogitsLoss(real_out, ones) 
+                hm = Variable(heatmap_tensor)
+                fake_out = discriminator(hm)
+                loss_d_fake = nn.BCEWithLogitsLoss(fake_out, zero) 
+                loss_d = loss_d_real + loss_d_fake
+                loss_d.backward()
+                optimizer_d.step()
+
             if iteration % log_interval == 0:
                 log = 'elapsed_time: {0}, loss: {1}'.format(time.time() - start_time, loss.data[0])
                 logger.write(log, self.colab)
@@ -225,6 +252,9 @@ class TrainPoseNet(object):
             elif self.NN == "MnasNet_":
                 offset, heatmap = model(image)
                 test_loss += mean_squared_error2(offset, heatmap, pose, visibility, self.use_visibility).data[0]
+            elif self.NN == "MnasNet_+Discriminator":
+                offset, heatmap = model(image)
+                test_loss += mean_squared_error2(offset, heatmap, pose, visibility, self.use_visibility).data[0]
             else :
                 output = model(image)
                 test_loss += mean_squared_error(output.view(-1, self.Nj, 2), pose, visibility, self.use_visibility).data[0]
@@ -246,6 +276,9 @@ class TrainPoseNet(object):
 
     def start(self):
         """ Train pose net. """
+        discriminator = None
+        optimizer_d = None
+
         # set random seed.
         if self.seed is not None:
             random.seed(self.seed)
@@ -289,6 +322,9 @@ class TrainPoseNet(object):
             model = MnasNet( )
         elif self.NN == "MnasNet_":
             model = MnasNet_( )
+        elif self.NN == "MnasNet_+Discriminator":
+            model = MnasNet_( )
+            discriminator = Discriminator( )
         else :
              model = AlexNet(self.Nj)
            
@@ -296,10 +332,15 @@ class TrainPoseNet(object):
             model.load_state_dict(torch.load(self.resume_model))
             #model.fc2 = None
             #torch.save(model.state_dict(), 'del.model')
+        if self.resume_discriminator:
+            discriminator.load_state_dict(torch.load(self.resume_discriminator))
 
         # prepare gpu.
         if self.gpu:
             model.cuda()
+            if self.NN == "MnasNet_+Discriminator":
+                discriminator.cuda()
+
         # load the datasets.
         input_transforms = [transforms.ToTensor()]
         if self.data_augmentation:
@@ -322,8 +363,12 @@ class TrainPoseNet(object):
         optimizer = self._get_optimizer(model)
         if self.resume_opt:
             optimizer.load_state_dict(torch.load(self.resume_opt))
+        
+        if discriminator != None:
+            optimizer_d = self._get_optimizer(discriminator)
+
         # set intervals.
-        val_interval = 5
+        val_interval = 2
         #resume_interval = self.epoch/10
         resume_interval = 1
         log_interval = 10
@@ -338,7 +383,7 @@ class TrainPoseNet(object):
         # start training.
         start_time = time.time()
         for epoch in trange(start_epoch, self.epoch, initial=start_epoch, total=self.epoch, desc='     total'):
-            self._train(model, optimizer, train_iter, log_interval, logger, start_time)
+            self._train(model, optimizer, train_iter, log_interval, logger, start_time, discriminator, optimizer_d)
             if (epoch + 1) % val_interval == 0:
                 self._test(model, val_iter, logger, start_time)
             if (epoch + 1) % resume_interval == 0:

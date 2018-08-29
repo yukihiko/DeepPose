@@ -55,6 +55,11 @@ def main():
         (it\'s necessary when you resume a training). \
         The file name is "epoch-{epoch number}.mode"')
     parser.add_argument(
+        '--resume_discriminator', type=str, default=None,
+        help='Load model definition file to use for resuming training \
+        (it\'s necessary when you resume a training). \
+        The file name is "epoch-{epoch number}.mode"')
+    parser.add_argument(
         '--resume-opt', type=str, default=None,
         help='Load optimization states from this file \
         (it\'s necessary when you resume a training). \
