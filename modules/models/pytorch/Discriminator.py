@@ -50,4 +50,4 @@ class Discriminator(nn.Module):
         x = x.view(-1, 256*2*2)
         x = F.dropout(x, training=self.training)
         x = self.linear(x)
-        return x
+        return x.squeeze()

@@ -25,7 +25,7 @@ class MeanSquaredError2(nn.Module):
 
     def checkMatrix(self, xi, yi):
         f = False
-        if xi >= 0 and xi <= 13 and yi >= 0 and yi <= 13:
+        if xi >= 0 and xi <= self.col - 1 and yi >= 0 and yi <= self.col - 1:
             f = True
 
         '''
@@ -60,7 +60,7 @@ class MeanSquaredError2(nn.Module):
             for j in range(self.Nj):
                 #if h[i, j, yCoords[i, j], xCoords[i, j]] > 0.5:
                 x[i, j, 0] = (o[i, j, yCoords[i, j], xCoords[i, j]] + xCoords[i, j].float()) * scale
-                x[i, j, 1] = (o[i, j + 14, yCoords[i, j], xCoords[i, j]] + yCoords[i, j].float()) * scale
+                x[i, j, 1] = (o[i, j + self.Nj, yCoords[i, j], xCoords[i, j]] + yCoords[i, j].float()) * scale
 
                 if int(v[i, j, 0]) == 1:
                     xi, yi, f = self.checkMatrix(int(ti[i, j, 0]), int(ti[i, j, 1]))
@@ -106,8 +106,8 @@ class MeanSquaredError2(nn.Module):
         #N1 = (v.sum()/2)
 
         diff1 = diff1.view(-1)
-        d1 = diff1.dot(diff1) / (cnt * self.col*self.col)
-        #return d1
+        d1 = diff1.dot(diff1) / cnt
+        return d1
 
         diff2 = x - t
         diff2 = diff2*v
@@ -335,7 +335,7 @@ class MeanSquaredError2(nn.Module):
         '''
 
 
-def mean_squared_error2(o, h, t, v, use_visibility=False):
+def mean_squared_error2(o, h, t, v, use_visibility=False, col=14):
     """ Computes mean squared error over the minibatch.
 
     Args:
@@ -348,4 +348,4 @@ def mean_squared_error2(o, h, t, v, use_visibility=False):
     Returns:
         Variable: A variable holding a scalar of the mean squared error loss.
     """
-    return MeanSquaredError2(use_visibility)(o, h, t, v)
+    return MeanSquaredError2(use_visibility, col=col)(o, h, t, v)
