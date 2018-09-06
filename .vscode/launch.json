@@ -22,7 +22,7 @@
                 "10000",
                 "\"plot_estimating_time\"",
                 "--NN=MnasNet56_",
-                "--pytorch-model-file=${workspaceFolder}/result/pytorch/epoch-1.model",
+                "--pytorch-model-file=${workspaceFolder}/result/pytorch/epoch-12.model",
                 "-g0"
             ]
         },              
