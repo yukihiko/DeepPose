@@ -13,7 +13,7 @@ sys.path.append("./")
 from onnx_coreml.converter import convert
 #from pytorch2keras.converter import pytorch_to_keras
 from modules.errors import FileNotFoundError, GPUNotFoundError, UnknownOptimizationMethodError, NotSupportedError
-from modules.models.pytorch import AlexNet, VGG19Net, Inceptionv3, Resnet, MobileNet, MobileNetV2, MobileNet_, MobileNet_2, MobileNet_3, MobileNet___, MnasNet, MnasNet_
+from modules.models.pytorch import AlexNet, VGG19Net, Inceptionv3, Resnet, MobileNet, MobileNetV2, MobileNet_, MobileNet_2, MobileNet_3, MobileNet___, MnasNet, MnasNet_,MnasNet56_
 #from coremltools.converters.keras import convert
 from modules.dataset_indexing.pytorch import PoseDataset, Crop, RandomNoise, Scale
 from torchvision import transforms
@@ -39,6 +39,8 @@ elif args.NN == "MnasNet":
     model = MnasNet( )
 elif args.NN == "MnasNet_":
     model = MnasNet_( )
+elif args.NN == "MnasNet56_":
+    model = MnasNet56_( )
 
 model.load_state_dict(torch.load(args.input))
 #model = model.cpu()
