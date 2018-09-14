@@ -85,10 +85,10 @@
             "request": "launch",
             "program": "${workspaceFolder}/scripts/pytorch2onnx.py",
             "args": [
-                "--NN=MnasNet56_",
-                "--input=result/pytorch/epoch-12.model",
+                "--NN=MnasNet16_",
+                "--input=result/pytorch/checkpoint.pth.tar",
                 "--onnx_output=result/onnx_output.onnx",
-                "--output=result/MnasNetNet56_.mlmodel"
+                "--output=result/MnasNet16_.mlmodel"
             ]
         },        
         {

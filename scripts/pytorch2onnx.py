@@ -7,13 +7,15 @@ import torchvision.models as models
 import onnx
 import numpy as np
 #from keras.models import load_model
+import torch.nn.parallel
+import torch.backends.cudnn as cudnn
 
 import sys
 sys.path.append("./")
 from onnx_coreml.converter import convert
 #from pytorch2keras.converter import pytorch_to_keras
 from modules.errors import FileNotFoundError, GPUNotFoundError, UnknownOptimizationMethodError, NotSupportedError
-from modules.models.pytorch import AlexNet, VGG19Net, Inceptionv3, Resnet, MobileNet, MobileNetV2, MobileNet_, MobileNet_2, MobileNet_3, MobileNet___, MnasNet, MnasNet_,MnasNet56_
+from modules.models.pytorch import AlexNet, VGG19Net, Inceptionv3, Resnet, MobileNet, MobileNetV2, MobileNet_, MobileNet_2, MobileNet_3, MobileNet___, MnasNet, MnasNet_,MnasNet56_,MnasNet16_
 #from coremltools.converters.keras import convert
 from modules.dataset_indexing.pytorch import PoseDataset, Crop, RandomNoise, Scale
 from torchvision import transforms
@@ -41,13 +43,31 @@ elif args.NN == "MnasNet_":
     model = MnasNet_( )
 elif args.NN == "MnasNet56_":
     model = MnasNet56_( )
+elif args.NN == "MnasNet16_":
+    model = MnasNet16_( )
+
+cudnn.benchmark = True
+torch.backends.cudnn.deterministic = False
+torch.backends.cudnn.enabled = True
 
 model.load_state_dict(torch.load(args.input))
+'''    
+checkpoint = torch.load(args.input)
+state_dict = checkpoint['state_dict']
+# create new OrderedDict that does not contain `module.`
+from collections import OrderedDict
+new_state_dict = OrderedDict()
+for k, v in state_dict.items():
+    name = k[7:] # remove `module.`
+    new_state_dict[name] = v
+# load params
+model.load_state_dict(new_state_dict)
+'''     
 #model = model.cpu()
 model.eval()
 
 # export to ONNF
-dummy_input = Variable(torch.randn(1, 3, 224, 224))
+dummy_input = Variable(torch.randn(1, 3, 256, 256))
 
 print('converting to ONNX')
 torch.onnx.export(model, dummy_input, args.onnx_output)
