@@ -44,7 +44,7 @@
             "args": [
                 "pytorch",
                 "-g0",
-                "--NN=MnasNet56_",
+                "--NN=MobileNet_",
                 "--batchsize=32",
                 "--data-augmentation",
                 "--useOneDrive",
@@ -85,10 +85,10 @@
             "request": "launch",
             "program": "${workspaceFolder}/scripts/pytorch2onnx.py",
             "args": [
-                "--NN=MnasNet16_",
-                "--input=result/pytorch/checkpoint.pth.tar",
+                "--NN=MobileNet_",
+                "--input=result/pytorch/lastest.model",
                 "--onnx_output=result/onnx_output.onnx",
-                "--output=result/MnasNet16_.mlmodel"
+                "--output=result/MobileNet_.mlmodel"
             ]
         },        
         {

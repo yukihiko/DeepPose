@@ -67,7 +67,7 @@ model.load_state_dict(new_state_dict)
 model.eval()
 
 # export to ONNF
-dummy_input = Variable(torch.randn(1, 3, 256, 256))
+dummy_input = Variable(torch.randn(1, 3, 224, 224))
 
 print('converting to ONNX')
 torch.onnx.export(model, dummy_input, args.onnx_output)

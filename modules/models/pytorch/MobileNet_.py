@@ -3,6 +3,10 @@
 import torch.nn as nn
 import torch.nn.functional as F
 
+import sys
+sys.path.append("./")
+from modules.models.pytorch.ReLU6_ import ReLU6_
+
 class MobileNet_(nn.Module):
     def __init__(self):
         super(MobileNet_, self).__init__()
@@ -12,18 +16,18 @@ class MobileNet_(nn.Module):
         def conv_bn(inp, oup, stride):
             return nn.Sequential(
                 nn.Conv2d(inp, oup, 3, stride, 1, bias=False),
-                nn.BatchNorm2d(oup),
-                nn.ReLU(inplace=True)
+                nn.BatchNorm2d(oup, momentum=0.0, eps=0),
+                nn.ReLU(inplace=True),
             )
 
         def conv_dw(inp, oup, stride):
             return nn.Sequential(
                 nn.Conv2d(inp, inp, 3, stride, 1, groups=inp, bias=False),
-                nn.BatchNorm2d(inp),
+                nn.BatchNorm2d(inp, momentum=0.0, eps=0),
                 nn.ReLU(inplace=True),
     
                 nn.Conv2d(inp, oup, 1, 1, 0, bias=False),
-                nn.BatchNorm2d(oup),
+                nn.BatchNorm2d(oup, momentum=0.0, eps=0),
                 nn.ReLU(inplace=True),
             )
 

@@ -852,6 +852,26 @@ def _convert_upsample(builder, node, graph, err):  # type: (NeuralNetworkBuilder
         mode=mode,
     )
 
+def _convert_clip(builder, node, graph, err): # type: (NeuralNetworkBuilder, Node, Graph, ErrorHandling) -> None
+    max_limit = node.attrs.get('max',float(2^16-1))
+    min_limit = node.attrs.get('min',float(-(2^16-1)))
+    delta = max_limit - min_limit
+    builder.add_activation(name = node.name + '_scale_0_1', # type: ignore
+                           non_linearity = 'LINEAR',
+                           input_name = node.inputs[0],
+                           output_name = node.inputs[0] + '_scale_0_1',
+                           params = [1.0/delta, -min_limit/delta])
+    builder.add_activation(name = node.name + '_clip_0_1', # type: ignore
+                           non_linearity = 'SIGMOID_HARD',
+                           input_name = node.inputs[0] + '_scale_0_1',
+                           output_name = node.inputs[0] + '_clip_0_1',
+                           params = [1.0, 0.0])
+    builder.add_activation(name = node.name,
+                           non_linearity = 'LINEAR',
+                           input_name = node.inputs[0] + '_clip_0_1',
+                           output_name = node.outputs[0],
+                           params = [delta, min_limit])
+
 def _convert_lstm(builder, node, graph, err):  # type: (NeuralNetworkBuilder, Node, Graph, ErrorHandling) -> None
     W_name = node.inputs[1]
     R_name = node.inputs[2]
@@ -985,6 +1005,7 @@ _ONNX_NODE_REGISTRY = {
     "ReduceProd": _convert_reduce,
     "ReduceSum": _convert_reduce,
     "ReduceSumSquare": _convert_reduce,
+    "Clip": _convert_clip,
 }
 
 
