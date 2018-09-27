@@ -7,6 +7,7 @@ import argparse
 _sys.path.append("./")
 from modules.models.pytorch import AlexNet, VGG19Net, Inceptionv3, Resnet, MobileNet, MobileNetV2, MobileNet_, MobileNet_2, MobileNet_3
 from six import text_type as _text_type
+from mmdnn.conversion.pytorch.pytorch_parser import PytorchParser
 
 
 def _get_parser():
@@ -120,8 +121,13 @@ def main():
     model(dummy_input)
     torch.save(model.cpu(), args.dstPath)
 
-    mmdnn.conversion._script.convertToIR._convert(args)
-    _sys.exit(int(ret)) # cast to int or else the exit code is always 1
+    size=224
+    pytorchparser = PytorchParser(model, [1, size, size])
+    IR_file = 'MobileNetIR_'
+    pytorchparser.run(IR_file)
+
+    #mmdnn.conversion._script.convertToIR._convert(args)
+    #_sys.exit(int(ret)) # cast to int or else the exit code is always 1
 
 if __name__ == '__main__':
     main()
