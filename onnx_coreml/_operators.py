@@ -289,6 +289,9 @@ def _convert_bn(builder, node, graph, err):  # type: (NeuralNetworkBuilder, Node
     bias = node.input_tensors[node.inputs[2]]
     mean = node.input_tensors[node.inputs[3]]
     var = node.input_tensors[node.inputs[4]]
+    #scale = np.ones(node.input_tensors[node.inputs[1]].shape)
+    #mean = np.zeros(node.input_tensors[node.inputs[3]].shape)
+    #var = np.ones(node.input_tensors[node.inputs[4]].shape)
 
     builder.add_batchnorm(
         name=node.name,
