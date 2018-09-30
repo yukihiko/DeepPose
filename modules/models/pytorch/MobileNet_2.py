@@ -6,6 +6,8 @@ import torch.nn.functional as F
 class MobileNet_2(nn.Module):
     def __init__(self):
         super(MobileNet_2, self).__init__()
+        self.col = 14
+        self.Nj = 14
 
         def conv_bn(inp, oup, stride):
             return nn.Sequential(
@@ -43,7 +45,7 @@ class MobileNet_2(nn.Module):
             #nn.AvgPool2d(7),
         )
         #self.fc1= nn.AvgPool2d(14)
-        self.fc2 = nn.Conv2d(1024, 3, 1, 1)
+        self.fc2 = nn.Conv2d(1024, self.Nj*3, 1)
         #self.fc2 = nn.Linear(1024, 14)
 
     def forward(self, x):

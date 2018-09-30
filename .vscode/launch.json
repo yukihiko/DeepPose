@@ -44,10 +44,9 @@
             "args": [
                 "pytorch",
                 "-g0",
-                "--NN=MobileNet_",
+                "--NN=MobileNet_2",
                 "--batchsize=32",
                 "--data-augmentation",
-                "--useOneDrive",
                 "--use-visibility",
                 "--out=${workspaceFolder}/result",
                 "--opt=Adam",
@@ -104,9 +103,9 @@
             "program": "${workspaceFolder}/scripts/mmdnn_convert.py",
             "args": [
                 "--srcFramework=pytorch",
-                "--NN=MobileNet_3",
-                "--inputShape=3,244,244",
-                "--resume-model=${workspaceFolder}/result/pytorch/epoch-1.model",
+                "--NN=MobileNet_2",
+                "--input_size=224",
+                "--resume-model=${workspaceFolder}/result/pytorch/MobileNet_2.ptn.tar",
                 "-d${workspaceFolder}/result/non_state.model",
                 "-n${workspaceFolder}/result/non_state.model",
             ]

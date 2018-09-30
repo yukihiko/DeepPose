@@ -9,7 +9,28 @@ from modules.models.pytorch import AlexNet, VGG19Net, Inceptionv3, Resnet, Mobil
 from six import text_type as _text_type
 from mmdnn.conversion.pytorch.pytorch_parser import PytorchParser
 
+'''
+mmtocode -f tensorflow --IRModelPath MobileNetIR_.pb --IRWeightPath MobileNetIR_.npy --dstModelPath tf_MobileNetIR_.py
 
+mmtomodel -f tensorflow -in tf_MobileNetIR_.py -iw MobileNetIR_.npy -o tf_MobileNetIR_
+
+
+Convert to CoreML
+python -m mmdnn.conversion._script.IRToModel -f coreml -in MobileNetIR_.pb -iw MobileNetIR_.npy -o MobileNetIR_.mlmodel --scale 0.00392157 --redBias -0 --greenBias -0 --blueBias -0
+
+    # For CoreML
+    parser.add_argument('--inputNames', type=_text_type, nargs='*', help='Names of the feature (input) columns, in order (required for keras models).')
+    parser.add_argument('--outputNames', type=_text_type, nargs='*', help='Names of the target (output) columns, in order (required for keras models).')
+    parser.add_argument('--imageInputNames', type=_text_type, default=[], action='append', help='Label the named input as an image. Can be specified more than once for multiple image inputs.')
+    parser.add_argument('--isBGR', action='store_true', default=False, help='True if the image data in BGR order (RGB default)')
+    parser.add_argument('--redBias', type=float, default=0.0, help='Bias value to be added to the red channel (optional, default 0.0)')
+    parser.add_argument('--blueBias', type=float, default=0.0, help='Bias value to be added to the blue channel (optional, default 0.0)')
+    parser.add_argument('--greenBias', type=float, default=0.0, help='Bias value to be added to the green channel (optional, default 0.0)')
+    parser.add_argument('--grayBias', type=float, default=0.0, help='Bias value to be added to the gray channel for Grayscale images (optional, default 0.0)')
+    parser.add_argument('--scale', type=float, default=1.0, help='Value by which the image data must be scaled (optional, default 1.0)')
+    parser.add_argument('--classInputPath', type=_text_type, default='', help='Path to class labels (ordered new line separated) for treating the neural network as a classifier')
+    parser.add_argument('--predictedFeatureName', type=_text_type, default='class_output', help='Name of the output feature that captures the class name (for classifiers models).')
+'''
 def _get_parser():
     import argparse
 
@@ -54,10 +75,9 @@ def _get_parser():
         help="[Tensorflow] Output nodes' name of the graph.")
 
     parser.add_argument(
-        '--inputShape',
-        nargs='+',
-        type=_text_type,
-        default=None,
+        '--input_size',
+        type=int,
+        default=224,
         help='[Tensorflow/MXNet/Caffe2/Torch7] Input shape of model (channel, height, width)')
 
 
@@ -93,7 +113,6 @@ def main():
 
     parser = _get_parser()
     args = parser.parse_args()
-    args.inputShape = 3,224,224
 
     if args.NN == "VGG19":
         model = models.vgg19(pretrained=True)
@@ -114,15 +133,21 @@ def main():
     else :
         model = AlexNet(args.Nj)
     
-    model.load_state_dict(torch.load(args.resume_model))
-
+    #model.load_state_dict(torch.load(args.resume_model))
+    model = torch.load(args.resume_model)
     model.eval()
-    dummy_input = Variable(torch.randn(1, 3, 224, 224))
-    model(dummy_input)
-    torch.save(model.cpu(), args.dstPath)
+    model = model.cpu().float()
 
-    size=224
-    pytorchparser = PytorchParser(model, [1, size, size])
+    '''
+    model.eval()
+    dummy_input = Variable(torch.randn(1, 3, args.input_size, args.input_size))
+    model(dummy_input)
+    '''
+
+    pytorchparser = PytorchParser(model, [3, args.input_size, args.input_size])
+    #dummy_input = Variable(torch.randn(1, 3, args.input_size, args.input_size))
+    #model(dummy_input)
+
     IR_file = 'MobileNetIR_'
     pytorchparser.run(IR_file)
 

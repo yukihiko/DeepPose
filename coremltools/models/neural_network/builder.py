@@ -897,7 +897,7 @@ class NeuralNetworkBuilder(object):
             input_name = 'data', output_name = 'out', 
             dilation_factors = [1,1],
             padding_top = 0, padding_bottom = 0, padding_left = 0, padding_right = 0,
-            same_padding_asymmetry_mode = 'BOTTOM_RIGHT_HEAVY'):
+            same_padding_asymmetry_mode = 'BOTTOM_RIGHT_HEAVY', **kwargs):
         """
         Add a convolution layer to the network.
 
@@ -1024,8 +1024,39 @@ class NeuralNetworkBuilder(object):
         spec_layer_params.nGroups = groups
         spec_layer_params.hasBias = has_bias
 
-        # Assign weights
-        weights = spec_layer_params.weights
+        if len(kwargs) > 0:
+            _verify_quantization_arguments(weight = W, output_channels=output_channels, **kwargs)
+
+            nbits = kwargs.get('nbits', 8)
+            num_weights = (output_channels * kernel_channels * height * width) / groups
+            if nbits < 8:
+                byte_arr = np.frombuffer(W, dtype=np.uint8)
+                W = unpack_to_bytes(byte_arr, num_weights, nbits)
+            else:
+                W = np.frombuffer(W, dtype=np.uint8)
+
+            if is_deconv:
+                W = np.reshape(W, (height, width, kernel_channels, output_channels / groups))
+            else:
+                W = np.reshape(W, (height, width, kernel_channels, output_channels))
+
+
+        if len(kwargs) > 0:
+            _verify_quantization_arguments(weight = W, output_channels=output_channels, **kwargs)
+
+            nbits = kwargs.get('nbits', 8)
+            num_weights = (output_channels * kernel_channels * height * width) / groups
+            if nbits < 8:
+                byte_arr = np.frombuffer(W, dtype=np.uint8)
+                W = unpack_to_bytes(byte_arr, num_weights, nbits)
+            else:
+                W = np.frombuffer(W, dtype=np.uint8)
+
+            if is_deconv:
+                W = np.reshape(W, (height, width, kernel_channels, output_channels / groups))
+            else:
+                W = np.reshape(W, (height, width, kernel_channels, output_channels))
+
 
         # Weight alignment: MLModel Spec requires following weight arrangement: 
         # is_deconv == False ==> (output_channels, kernel_channels, height, width), where kernel_channel = input_channels / groups
@@ -1035,6 +1066,43 @@ class NeuralNetworkBuilder(object):
             Wt = Wt.flatten()
         else:
             Wt = W.transpose((2,3,0,1)).flatten()
+
+        # Assign weights
+        weights = spec_layer_params.weights
+        if len(kwargs) == 0: # no quantization
+            weights.floatValue.extend(map(float, Wt.flatten()))
+        else: # there is quantization
+            W_bytes = bytes()
+            if nbits == 8:
+                W_bytes += Wt.flatten().tobytes()
+            else:
+                W_bytes += _convert_array_to_nbit_quantized_bytes(Wt.flatten(), nbits).tobytes()
+            _fill_quantized_weights(weights_message = weights, W = W_bytes, **kwargs)
+
+        # Assign biases
+        if has_bias:
+            bias = spec_layer_params.bias
+            for f in range(output_channels):
+                bias.floatValue.append(float(b[f]))
+        
+        # add dilation factors
+        spec_layer_params.dilationFactor.append(dilation_factors[0])
+        spec_layer_params.dilationFactor.append(dilation_factors[1])
+
+        '''
+        # Assign weights
+        weights = spec_layer_params.weights
+        print('add_convolution is_deconv: {0}'.format(is_deconv))
+
+        # Weight alignment: MLModel Spec requires following weight arrangement: 
+        # is_deconv == False ==> (output_channels, kernel_channels, height, width), where kernel_channel = input_channels / groups
+        # is_deconv == True ==> (kernel_channels, output_channels / groups, height, width), where kernel_channel = input_channels        
+        if not is_deconv:
+            Wt = W.transpose((3,2,0,1))
+            Wt = Wt.flatten()
+        else:
+            Wt = W.transpose((2,3,0,1)).flatten()
+        print('add_convolution Wt.size: {0}'.format(Wt.size))
         for idx in range(Wt.size):
             weights.floatValue.append(float(Wt[idx]))
 
@@ -1047,6 +1115,7 @@ class NeuralNetworkBuilder(object):
         # add dilation factors
         spec_layer_params.dilationFactor.append(dilation_factors[0])
         spec_layer_params.dilationFactor.append(dilation_factors[1])
+        '''
 
     def add_pooling(self, name, height, width, stride_height, stride_width,
             layer_type, padding_type, input_name, output_name, exclude_pad_area = True, is_global = False,

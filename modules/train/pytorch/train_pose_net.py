@@ -248,6 +248,7 @@ class TrainPoseNet(object):
                     optimizer = optim.SGD(model.parameters(), lr=lr, momentum=0.9)
                 """
                 try:
+                    torch.save(model, 'D:/github/DeepPose/result/pytorch/lastest.ptn.tar')
                     torch.save(model.state_dict(), 'D:/github/DeepPose/result/pytorch/lastest.model')
                     if self.useOneDrive == True:
                         torch.save(model.state_dict(), 'C:/Users/aoyagi/OneDrive/pytorch/lastest.model')
