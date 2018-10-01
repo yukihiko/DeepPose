@@ -108,6 +108,8 @@
                 "--resume-model=${workspaceFolder}/result/pytorch/MobileNet_2.ptn.tar",
                 "-d${workspaceFolder}/result/non_state.model",
                 "-n${workspaceFolder}/result/non_state.model",
+                "--scale=0.00392157",
+                "--outpath=${workspaceFolder}/result/coreml/"
             ]
         },        
         {
