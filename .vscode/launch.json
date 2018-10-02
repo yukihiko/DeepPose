@@ -84,8 +84,8 @@
             "request": "launch",
             "program": "${workspaceFolder}/scripts/pytorch2onnx.py",
             "args": [
-                "--NN=MobileNet_",
-                "--input=result/pytorch/lastest.model",
+                "--NN=MobileNet16_",
+                "--input=result/pytorch/checkpoint.pth.tar",
                 "--onnx_output=result/onnx_output.onnx",
                 "--output=result/MobileNet_.mlmodel"
             ]
