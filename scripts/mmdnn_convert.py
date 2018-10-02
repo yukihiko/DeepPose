@@ -12,9 +12,9 @@ from mmdnn.conversion.pytorch.pytorch_parser import PytorchParser
 from mmdnn.conversion._script.IRToModel import _convert
 
 '''
-mmtocode -f tensorflow --IRModelPath MobileNetIR_.pb --IRWeightPath MobileNetIR_.npy --dstModelPath tf_MobileNetIR_.py
+mmtocode -f tensorflow --IRModelPath ./result/coreml/MobileNet_2.pb --IRWeightPath ./result/coreml/MobileNet_2.npy --dstModelPath ./result/tensorflow/tf_MobileNet_2.py
 
-mmtomodel -f tensorflow -in tf_MobileNetIR_.py -iw MobileNetIR_.npy -o tf_MobileNetIR_
+mmtomodel -f tensorflow -in result/tensorflow/tf_MobileNet_2.py -iw ./result/coreml/MobileNet_2.npy -o ./result/tensorflow/tf_MobileNet_2 --dump_tag SERVING
 
 
 Convert to CoreML
