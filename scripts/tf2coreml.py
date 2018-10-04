@@ -7,6 +7,7 @@ import tfcoreml
 import coremltools
 import yaml
 
+'''
 f = open("config.yaml", "r+")
 cfg = yaml.load(f)
 imageSize = cfg['imageSize']
@@ -14,6 +15,7 @@ checkpoints = cfg['checkpoints']
 chk = cfg['chk']
 chkpoint = checkpoints[chk]
 versionName = chkpoint.lstrip('mobilenet_')
+'''
 
 # Provide these to run freeze_graph:
 # Graph definition file, stored as protobuf TEXT
