@@ -57,7 +57,7 @@ coreml_model = tfcoreml.convert(
         red_bias = -1, 
         green_bias = -1, 
         blue_bias = -1, 
-        image_scale = 2./255)
+        image_scale = 0.00392157)
 
 
 coreml_model.author = 'Infocom TPO'
