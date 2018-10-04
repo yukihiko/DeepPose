@@ -43,7 +43,7 @@ freeze_graph(input_graph=graph_def_file,
 '''
 input_tensor_shapes = {"image:0":[1,224, 224, 3]} 
 coreml_model_file = './coremodel.mlmodel'
-frozen_model_file = './result/tensorflow/MobileNet_IR.pb'
+frozen_model_file = 'saved_model.pb'
 # output_tensor_names = ['output:0']
 output_tensor_names = ['heatmap:0','offset_2:0','displacement_fwd_2:0','displacement_bwd_2:0']
 
