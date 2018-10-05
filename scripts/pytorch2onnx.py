@@ -20,20 +20,20 @@ from modules.models.pytorch import AlexNet, VGG19Net, Inceptionv3, Resnet, Mobil
 from modules.dataset_indexing.pytorch import PoseDataset, Crop, RandomNoise, Scale
 from torchvision import transforms
 
-def fgraph(module, threshold):
-    print(module)
+'''
+再帰的に呼び出してpruningを行う
+'''
+def pruning(module, threshold):
     if module != None:
         if isinstance(module, torch.nn.Sequential):
             for child in module.children():
-                fgraph(child, threshold)
+                pruning(child, threshold)
 
-    if isinstance(module, torch.nn.Conv2d):
-        old_weights = module.weight.data.cpu().numpy()
-        new_weights = (np.absolute(old_weights) > threshold) * old_weights
-        #module.weight.data = torch.from_numpy(old_weights).cuda(async=True)
-        #module.weight.cuda(async=True)
-        module.weight.data = torch.from_numpy(new_weights)
-        #print(module.weight.data)
+        if isinstance(module, torch.nn.Conv2d):
+            old_weights = module.weight.data.cpu().numpy()
+            new_weights = (np.absolute(old_weights) > threshold) * old_weights
+            module.weight.data = torch.from_numpy(new_weights)
+
 
 print('ArgumentParser')
 parser = argparse.ArgumentParser(description='Convert PyTorch model to CoreML')
@@ -98,7 +98,7 @@ for p in model.parameters():
         all_weights += list(p.cpu().data.abs().numpy().flatten())
 threshold = np.percentile(np.array(all_weights), 50.)
 
-fgraph(model.model, threshold)
+pruning(model.model, threshold)
 '''
 for child in model.children():
     for param in child.parameters():
