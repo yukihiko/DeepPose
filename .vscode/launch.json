@@ -84,10 +84,10 @@
             "request": "launch",
             "program": "${workspaceFolder}/scripts/pytorch2onnx.py",
             "args": [
-                "--NN=MobileNet16_",
-                "--input=result/pytorch/checkpoint.pth.tar",
+                "--NN=MobileNet_",
+                "--input=result/pytorch/epoch-75.model",
                 "--onnx_output=result/onnx_output.onnx",
-                "--output=result/MobileNet_.mlmodel"
+                "--output=result/MobileNetpruning_.mlmodel"
             ]
         },        
         {

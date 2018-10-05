@@ -20,6 +20,21 @@ from modules.models.pytorch import AlexNet, VGG19Net, Inceptionv3, Resnet, Mobil
 from modules.dataset_indexing.pytorch import PoseDataset, Crop, RandomNoise, Scale
 from torchvision import transforms
 
+def fgraph(module, threshold):
+    print(module)
+    if module != None:
+        if isinstance(module, torch.nn.Sequential):
+            for child in module.children():
+                fgraph(child, threshold)
+
+    if isinstance(module, torch.nn.Conv2d):
+        old_weights = module.weight.data.cpu().numpy()
+        new_weights = (np.absolute(old_weights) > threshold) * old_weights
+        #module.weight.data = torch.from_numpy(old_weights).cuda(async=True)
+        #module.weight.cuda(async=True)
+        module.weight.data = torch.from_numpy(new_weights)
+        #print(module.weight.data)
+
 print('ArgumentParser')
 parser = argparse.ArgumentParser(description='Convert PyTorch model to CoreML')
 parser.add_argument('--input', '-i', required=True, type=str)
@@ -51,7 +66,6 @@ elif args.NN == "MobileNet16_":
 cudnn.benchmark = True
 torch.backends.cudnn.deterministic = False
 torch.backends.cudnn.enabled = True
-'''     
 
 model.load_state_dict(torch.load(args.input))
 '''    
@@ -59,6 +73,7 @@ checkpoint = torch.load(args.input)
 state_dict = checkpoint['state_dict']
 model.load_state_dict(state_dict)
 optimizer_state_dict = checkpoint['optimizer']
+'''     
 '''
 # create new OrderedDict that does not contain `module.`
 from collections import OrderedDict
@@ -73,10 +88,25 @@ model.load_state_dict(new_state_dict)
 model.eval()
 
 # export to ONNF
-dummy_input = Variable(torch.randn(1, 3, 256, 256))
+dummy_input = Variable(torch.randn(1, 3, 224, 224))
 ################
 _ = model(dummy_input)
-model.heatmap + model.offset
+
+all_weights = []
+for p in model.parameters():
+    if len(p.data.size()) != 1:
+        all_weights += list(p.cpu().data.abs().numpy().flatten())
+threshold = np.percentile(np.array(all_weights), 50.)
+
+fgraph(model.model, threshold)
+'''
+for child in model.children():
+    for param in child.parameters():
+        param.reguired_grand = False
+'''
+model.eval()
+#model.cuda()
+
 ##################
 print('converting to ONNX')
 torch.onnx.export(model, dummy_input, args.onnx_output)
@@ -131,3 +161,4 @@ print(out)
 # print(out[:, 0:1, 0:1])
 print(np.mean(out))
 '''
+
