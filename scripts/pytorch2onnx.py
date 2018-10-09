@@ -24,6 +24,8 @@ from torchvision import transforms
 再帰的に呼び出してpruningを行う
 '''
 def pruning(module, threshold):
+    print(module)
+
     if module != None:
         if isinstance(module, torch.nn.Sequential):
             for child in module.children():
@@ -33,6 +35,23 @@ def pruning(module, threshold):
             old_weights = module.weight.data.cpu().numpy()
             new_weights = (np.absolute(old_weights) > threshold) * old_weights
             module.weight.data = torch.from_numpy(new_weights)
+
+        if isinstance(module, torch.nn.BatchNorm2d):
+            #module.track_running_stats = False
+            print(module.weight)
+            module.eval()
+            module.weight.requires_grad = False
+            module.bias.requires_grad = False
+
+            '''
+            module.weight is gamma = 1
+            running_mean is mean = 0
+            running_var is variance = 1
+            bias is beta
+            '''
+            #module.weight.data = torch.from_numpy(np.ones_like(module.weight.data)) 
+            #module.running_mean.data = torch.from_numpy(np.zeros_like(module.running_mean.data)) 
+            #module.running_var.data = torch.from_numpy(np.ones_like(module.running_var.data)) 
 
 
 print('ArgumentParser')
@@ -96,7 +115,7 @@ all_weights = []
 for p in model.parameters():
     if len(p.data.size()) != 1:
         all_weights += list(p.cpu().data.abs().numpy().flatten())
-threshold = np.percentile(np.array(all_weights), 50.)
+threshold = np.percentile(np.array(all_weights), 80.)
 
 pruning(model.model, threshold)
 '''

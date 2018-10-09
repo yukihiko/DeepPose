@@ -14,7 +14,7 @@ from mmdnn.conversion._script.IRToModel import _convert
 '''
 mmtocode -f tensorflow --IRModelPath ./result/coreml/MobileNet_2.pb --IRWeightPath ./result/coreml/MobileNet_2.npy --dstModelPath ./result/tensorflow/tf_MobileNet_2.py
 
-mmtomodel -f tensorflow -in result/tensorflow/tf_MobileNet_2.py -iw ./result/coreml/MobileNet_2.npy -o ./result/tensorflow/tf_MobileNet_2 --dump_tag SERVING
+mmtomodel -f tensorflow -in ./result/tensorflow/tf_MobileNet_2.py -iw ./result/coreml/MobileNet_2.npy -o ./result/tensorflow/tf_MobileNet_2 --dump_tag SERVING
 
 
 Convert to CoreML

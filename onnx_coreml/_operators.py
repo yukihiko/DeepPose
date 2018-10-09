@@ -282,7 +282,7 @@ def _convert_fc(builder, node, graph, err):  # type: (NeuralNetworkBuilder, Node
 
 def _convert_bn(builder, node, graph, err):  # type: (NeuralNetworkBuilder, Node, Graph, ErrorHandling) -> None
     if len(node.outputs) > 1:
-        return err.unsupported_op_configuration(builder, node, graph, "This converter only supports BatchNormalization with one output")
+        return err.unsupported_op_configuration(builder, node, graph , "This converter only supports BatchNormalization with one output")
 
     epsilon = node.attrs.get("epsilon", 1e-5)
     scale = node.input_tensors[node.inputs[1]]
