@@ -1,13 +1,16 @@
-import tfcoreml as tf_converter
+#from tfcoreml import tfcoreml as tf_converter
 import numpy as np
 from tensorflow.python.tools.freeze_graph import freeze_graph
 from keras.preprocessing.image import load_img
+import sys
+sys.path.append("./")
+from tfcoreml._tf_coreml_converter import convert
 
-import tfcoreml
-import coremltools
+#import tfcoreml
+#import coremltools
 import yaml
 
-'''
+
 f = open("config.yaml", "r+")
 cfg = yaml.load(f)
 imageSize = cfg['imageSize']
@@ -15,7 +18,6 @@ checkpoints = cfg['checkpoints']
 chk = cfg['chk']
 chkpoint = checkpoints[chk]
 versionName = chkpoint.lstrip('mobilenet_')
-'''
 
 # Provide these to run freeze_graph:
 # Graph definition file, stored as protobuf TEXT
@@ -28,7 +30,7 @@ frozen_model_file = './models/frozen_model.pb'
 output_node_names = 'heatmap,offset_2,displacement_fwd_2,displacement_bwd_2'
 # output_node_names = 'Softmax' 
 
-'''
+
 # Call freeze graph
 freeze_graph(input_graph=graph_def_file,
              input_saver="",
@@ -40,14 +42,14 @@ freeze_graph(input_graph=graph_def_file,
              output_graph=frozen_model_file,
              clear_devices=True,
              initializer_nodes="")
-'''
-input_tensor_shapes = {"image:0":[1,224, 224, 3]} 
-coreml_model_file = './coremodel.mlmodel'
-frozen_model_file = 'saved_model.pb'
+
+input_tensor_shapes = {"image:0":[1,256, 256, 3]} 
+coreml_model_file = './tfcoremodel.mlmodel'
+#frozen_model_file = 'saved_model.pb'
 # output_tensor_names = ['output:0']
 output_tensor_names = ['heatmap:0','offset_2:0','displacement_fwd_2:0','displacement_bwd_2:0']
 
-coreml_model = tfcoreml.convert(
+coreml_model = convert(
         tf_model_path=frozen_model_file, 
         mlmodel_path=coreml_model_file, 
         input_name_shape_dict=input_tensor_shapes,
@@ -66,7 +68,7 @@ coreml_model.short_description = 'Ver.0.0.1'
 
 coreml_model.save('./models/posenet'+ str(imageSize) + '_' + versionName +'.mlmodel')
 
-img = load_img("./images/tennis_in_crowd.jpg", target_size=(imageSize, imageSize))
+img = load_img("./checkpoints/tennis_in_crowd.jpg", target_size=(imageSize, imageSize))
 print(img)
 out = coreml_model.predict({'image__0': img})['heatmap__0']
 print("#output coreml result.")
