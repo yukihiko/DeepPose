@@ -15,7 +15,7 @@ sys.path.append("./")
 from onnx_coreml.converter import convert
 #from pytorch2keras.converter import pytorch_to_keras
 from modules.errors import FileNotFoundError, GPUNotFoundError, UnknownOptimizationMethodError, NotSupportedError
-from modules.models.pytorch import AlexNet, VGG19Net, Inceptionv3, Resnet, MobileNet, MobileNetV2, MobileNet_, MobileNet_2, MobileNet_3, MobileNet___, MnasNet, MnasNet_,MnasNet56_,MnasNet16_,MobileNet16_
+from modules.models.pytorch import AlexNet, VGG19Net, Inceptionv3, Resnet, MobileNet, MobileNetV2, MobileNet_, MobileNet_2, MobileNet_3, MobileNet___, MnasNet, MnasNet_,MnasNet56_,MnasNet16_,MobileNet16_, MobileNet162_
 #from coremltools.converters.keras import convert
 from modules.dataset_indexing.pytorch import PoseDataset, Crop, RandomNoise, Scale
 from torchvision import transforms
@@ -81,10 +81,16 @@ elif args.NN == "MnasNet16_":
     model = MnasNet16_( )
 elif args.NN == "MobileNet16_":
     model = MobileNet16_( )
+elif args.NN == "MobileNet162_":
+    model = MobileNet162_( )
 
 cudnn.benchmark = True
 torch.backends.cudnn.deterministic = False
 torch.backends.cudnn.enabled = True
+
+print('load model')
+
+'''
 
 model.load_state_dict(torch.load(args.input))
 '''    
@@ -92,7 +98,7 @@ checkpoint = torch.load(args.input)
 state_dict = checkpoint['state_dict']
 model.load_state_dict(state_dict)
 optimizer_state_dict = checkpoint['optimizer']
-'''     
+
 '''
 # create new OrderedDict that does not contain `module.`
 from collections import OrderedDict
@@ -107,10 +113,12 @@ model.load_state_dict(new_state_dict)
 model.eval()
 
 # export to ONNF
-dummy_input = Variable(torch.randn(1, 3, 224, 224))
+dummy_input = Variable(torch.randn(1, 3, 256, 256))
 ################
 _ = model(dummy_input)
 
+'''
+##pruning##
 all_weights = []
 for p in model.parameters():
     if len(p.data.size()) != 1:
@@ -119,10 +127,7 @@ threshold = np.percentile(np.array(all_weights), 80.)
 
 pruning(model.model, threshold)
 '''
-for child in model.children():
-    for param in child.parameters():
-        param.reguired_grand = False
-'''
+
 model.eval()
 #model.cuda()
 

@@ -83,11 +83,12 @@
             "type": "python",
             "request": "launch",
             "program": "${workspaceFolder}/scripts/pytorch2onnx.py",
+            "console": "none",
             "args": [
-                "--NN=MobileNet_",
-                "--input=result/pytorch/epoch-75.model",
+                "--NN=MobileNet162_",
+                "--input=result/pytorch/checkpoint.pth.tar",
                 "--onnx_output=result/onnx_output.onnx",
-                "--output=result/MobileNetpruning_.mlmodel"
+                "--output=result/MobileNet162cutbn_.mlmodel"
             ]
         },        
         {
