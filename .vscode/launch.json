@@ -85,10 +85,10 @@
             "program": "${workspaceFolder}/scripts/pytorch2onnx.py",
             "console": "none",
             "args": [
-                "--NN=MobileNet162_",
-                "--input=result/pytorch/checkpoint.pth.tar",
+                "--NN=MobileNet_",
+                "--input=result/pytorch/MobileNet_.model",
                 "--onnx_output=result/onnx_output.onnx",
-                "--output=result/MobileNet162cutbn_.mlmodel"
+                "--output=result/MobileNet_.mlmodel"
             ]
         },        
         {

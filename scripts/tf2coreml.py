@@ -37,17 +37,19 @@ versionName = chkpoint.lstrip('mobilenet_')
 
 # Provide these to run freeze_graph:
 # Graph definition file, stored as protobuf TEXT
-graph_def_file = './models/model.pbtxt'
+graph_def_file = './result/tensorflow/tf_MobileNet_/model.pbtxt'
 # Trained model's checkpoint name
-checkpoint_file = './checkpoints/model.ckpt'
+checkpoint_file = './result/tensorflo/tf_MobileNet_/model.ckpt'
 # Frozen model's output name
 frozen_model_file = './models/frozen_model.pb'
 # Output nodes. If there're multiple output ops, use comma separated string, e.g. "out1,out2".
 #output_node_names = 'heatmap,offset_2,displacement_fwd_2,displacement_bwd_2'
-output_node_names = 'MobileNetn2nConv2dnfc2n219_bias'
+output_node_names = 'Sigmoid,Add_1'
 # output_node_names = 'Softmax' 
 
 #frozen_graph_maker('result/tensorflow/tf_MobileNet_2',frozen_model_file)
+'''
+
 image = tf.placeholder(tf.float32, shape=[1, 224, 224, 3],name='image')
 with tf.Session() as sess:  
         meta_graph = tf.saved_model.loader.load(sess, [tf.saved_model.tag_constants.SERVING], 'result/tensorflow/tf_MobileNet_2/')
@@ -75,6 +77,10 @@ with tf.Session() as sess:
         tf.train.write_graph(sess.graph,"./result/tensorflow/tf_MobileNet_2/","model.pbtxt")
 graph_def_file = 'result/tensorflow/tf_MobileNet_2/model.pbtxt'
 checkpoint_file = 'result/tensorflow/tf_MobileNet_2/model.ckpt'
+'''
+
+
+
 '''
 input_saved_model_dir = "result/tensorflow/tf_MobileNet_2"
 input_meta_graph = False

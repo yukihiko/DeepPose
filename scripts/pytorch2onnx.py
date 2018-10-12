@@ -90,7 +90,7 @@ torch.backends.cudnn.enabled = True
 
 print('load model')
 
-'''
+
 
 model.load_state_dict(torch.load(args.input))
 '''    
@@ -98,6 +98,7 @@ checkpoint = torch.load(args.input)
 state_dict = checkpoint['state_dict']
 model.load_state_dict(state_dict)
 optimizer_state_dict = checkpoint['optimizer']
+'''
 
 '''
 # create new OrderedDict that does not contain `module.`
@@ -113,7 +114,7 @@ model.load_state_dict(new_state_dict)
 model.eval()
 
 # export to ONNF
-dummy_input = Variable(torch.randn(1, 3, 256, 256))
+dummy_input = Variable(torch.randn(1, 3, 224, 224))
 ################
 _ = model(dummy_input)
 
