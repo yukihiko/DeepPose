@@ -15,7 +15,7 @@ sys.path.append("./")
 from onnx_coreml.converter import convert
 #from pytorch2keras.converter import pytorch_to_keras
 from modules.errors import FileNotFoundError, GPUNotFoundError, UnknownOptimizationMethodError, NotSupportedError
-from modules.models.pytorch import AlexNet, VGG19Net, Inceptionv3, Resnet, MobileNet, MobileNetV2, MobileNet_, MobileNet_2, MobileNet_3, MobileNet___, MnasNet, MnasNet_,MnasNet56_,MnasNet16_,MobileNet16_, MobileNet162_
+from modules.models.pytorch import AlexNet, VGG19Net, Inceptionv3, Resnet, MobileNet, MobileNetV2, MobileNet_, MobileNet_2, MobileNet_3, MobileNet___, MnasNet, MnasNet_,MnasNet56_,MnasNet16_,MobileNet16_
 #from coremltools.converters.keras import convert
 from modules.dataset_indexing.pytorch import PoseDataset, Crop, RandomNoise, Scale
 from torchvision import transforms
@@ -60,6 +60,8 @@ parser.add_argument('--input', '-i', required=True, type=str)
 parser.add_argument('--output', '-o', required=True, type=str)
 parser.add_argument('--NN', '-n', required=True, type=str)
 parser.add_argument('--onnx_output', required=True, type=str)
+parser.add_argument('--image_size', required=True, type=int)
+
 args = parser.parse_args()
 
 print('Set up model')
@@ -114,7 +116,7 @@ model.load_state_dict(new_state_dict)
 model.eval()
 
 # export to ONNF
-dummy_input = Variable(torch.randn(1, 3, 224, 224))
+dummy_input = Variable(torch.randn(1, 3, args.image_size, args.image_size))
 ################
 _ = model(dummy_input)
 

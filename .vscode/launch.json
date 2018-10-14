@@ -86,6 +86,7 @@
             "console": "none",
             "args": [
                 "--NN=MobileNet16_",
+                "--image_size=256",
                 "--input=result/pytorch/MobileNet_.model",
                 "--onnx_output=result/onnx_output.onnx",
                 "--output=result/MobileNet_.mlmodel"
