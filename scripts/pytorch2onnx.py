@@ -81,8 +81,8 @@ elif args.NN == "MnasNet16_":
     model = MnasNet16_( )
 elif args.NN == "MobileNet16_":
     model = MobileNet16_( )
-elif args.NN == "MobileNet162_":
-    model = MobileNet162_( )
+#elif args.NN == "MobileNet162_":
+#    model = MobileNet162_( )
 
 cudnn.benchmark = True
 torch.backends.cudnn.deterministic = False
@@ -92,7 +92,7 @@ print('load model')
 
 
 
-model.load_state_dict(torch.load(args.input))
+#model.load_state_dict(torch.load(args.input))
 '''    
 checkpoint = torch.load(args.input)
 state_dict = checkpoint['state_dict']

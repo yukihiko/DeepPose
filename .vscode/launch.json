@@ -85,7 +85,7 @@
             "program": "${workspaceFolder}/scripts/pytorch2onnx.py",
             "console": "none",
             "args": [
-                "--NN=MobileNet_",
+                "--NN=MobileNet16_",
                 "--input=result/pytorch/MobileNet_.model",
                 "--onnx_output=result/onnx_output.onnx",
                 "--output=result/MobileNet_.mlmodel"
@@ -112,6 +112,13 @@
                 "--scale=0.00392157",
                 "--outpath=${workspaceFolder}/result/coreml/"
             ]
+        },        
+        {
+            "name": "Python: mmdnn_coreml2ir",
+            "type": "python",
+            "request": "launch",
+            "program": "${workspaceFolder}/scripts/mmdnn_coreml2ir.py",
+            "console": "none",
         },        
         {
             "name": "Python: mmdnn_conversion",
