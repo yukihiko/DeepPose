@@ -87,9 +87,10 @@
             "args": [
                 "--NN=MobileNet16_",
                 "--image_size=256",
-                "--input=result/pytorch/MobileNet_.model",
+                "--is_checkpoint=1",
+                "--input=result/pytorch/checkpoint.pth.tar",
                 "--onnx_output=result/onnx_output.onnx",
-                "--output=result/MobileNet_.mlmodel"
+                "--output=result/MobileNet16_.mlmodel"
             ]
         },        
         {

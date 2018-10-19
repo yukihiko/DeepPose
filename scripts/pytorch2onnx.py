@@ -61,6 +61,7 @@ parser.add_argument('--output', '-o', required=True, type=str)
 parser.add_argument('--NN', '-n', required=True, type=str)
 parser.add_argument('--onnx_output', required=True, type=str)
 parser.add_argument('--image_size', required=True, type=int)
+parser.add_argument('--is_checkpoint', required=True, type=int)
 
 args = parser.parse_args()
 
@@ -92,15 +93,13 @@ torch.backends.cudnn.enabled = True
 
 print('load model')
 
-
-
-#model.load_state_dict(torch.load(args.input))
-'''    
-checkpoint = torch.load(args.input)
-state_dict = checkpoint['state_dict']
-model.load_state_dict(state_dict)
-optimizer_state_dict = checkpoint['optimizer']
-'''
+if args.is_checkpoint == 1:
+    checkpoint = torch.load(args.input)
+    state_dict = checkpoint['state_dict']
+    model.load_state_dict(state_dict)
+    optimizer_state_dict = checkpoint['optimizer']
+else:
+    model.load_state_dict(torch.load(args.input))
 
 '''
 # create new OrderedDict that does not contain `module.`
@@ -157,10 +156,11 @@ for i, output in enumerate(onnx_model.graph.output):
     print("[Output #{}]".format(i))
     print(output)
 
+scale = 1./ (args.image_size - 1.)
 print('converting coreml model')
 mlmodel = convert(
         onnx_model, 
-        preprocessing_args={'is_bgr':True, 'red_bias':0., 'green_bias':0., 'blue_bias':0., 'image_scale':0.00392157},
+        preprocessing_args={'is_bgr':True, 'red_bias':0., 'green_bias':0., 'blue_bias':0., 'image_scale':scale},
         image_input_names='0')
 mlmodel.save(args.output)
 

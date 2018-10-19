@@ -13,18 +13,18 @@ class MobileNet16_(nn.Module):
             return nn.Sequential(
                 nn.Conv2d(inp, oup, 3, stride, 1, bias=False),
                 nn.BatchNorm2d(oup),
-                nn.ReLU6(inplace=True),
+                nn.ReLU(inplace=True),
             )
 
         def conv_dw(inp, oup, stride):
             return nn.Sequential(
                 nn.Conv2d(inp, inp, 3, stride, 1, groups=inp, bias=False),
                 nn.BatchNorm2d(inp),
-                nn.ReLU6(inplace=True),
+                nn.ReLU(inplace=True),
     
                 nn.Conv2d(inp, oup, 1, 1, 0, bias=False),
                 nn.BatchNorm2d(oup),
-                nn.ReLU6(inplace=True),
+                nn.ReLU(inplace=True),
             )
 
         self.model = nn.Sequential(
