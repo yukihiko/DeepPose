@@ -3,6 +3,8 @@
 import torch.nn as nn
 import torch.nn.functional as F
 
+import sys
+
 class MobileNet16_(nn.Module):
     def __init__(self):
         super(MobileNet16_, self).__init__()
@@ -43,8 +45,8 @@ class MobileNet16_(nn.Module):
             conv_dw(512, 1024, 1),
             conv_dw(1024, 1024, 1),
         )
-        self.heatmap = nn.Conv2d(1024, self.Nj, 1)
-        self.offset = nn.Conv2d(1024, self.Nj*2, 1)
+        self.heatmap = nn.Conv2d(1024, self.Nj, 1, bias=False)
+        self.offset = nn.Conv2d(1024, self.Nj*2, 1, bias=False)
 
     def forward(self, x):
         x = self.model(x)

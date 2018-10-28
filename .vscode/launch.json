@@ -86,12 +86,12 @@
             "program": "${workspaceFolder}/scripts/pytorch2onnx.py",
             "console": "none",
             "args": [
-                "--NN=MobileNet16_",
-                "--image_size=256",
+                "--NN=MobileNet14_",
+                "--image_size=224",
                 "--is_checkpoint=1",
                 "--input=result/pytorch/checkpoint.pth.tar",
                 "--onnx_output=result/onnx_output.onnx",
-                "--output=result/MobileNet16_.mlmodel"
+                "--output=result/MobileNet14_.mlmodel"
             ]
         },        
         {
