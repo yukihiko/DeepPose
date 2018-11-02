@@ -89,9 +89,10 @@
                 "--NN=MobileNet14_",
                 "--image_size=224",
                 "--is_checkpoint=1",
-                "--input=result/pytorch/checkpoint.pth.tar",
+                "--input=../human-pose-estimation.pytorch/output/mpii/MobileNet14_/MobileNet14_/checkpoint.pth.tar",
                 "--onnx_output=result/onnx_output.onnx",
-                "--output=result/MobileNet14_.mlmodel"
+                "--output=result/MobileNet14_.mlmodel",
+                "--onedrive=C:/Users/aoyag/OneDrive/pytorch/MobileNet14_.mlmodel"
             ]
         },        
         {

@@ -62,6 +62,7 @@ parser.add_argument('--NN', '-n', required=True, type=str)
 parser.add_argument('--onnx_output', required=True, type=str)
 parser.add_argument('--image_size', required=True, type=int)
 parser.add_argument('--is_checkpoint', required=True, type=int)
+parser.add_argument('--onedrive', required=False, type=str)
 
 args = parser.parse_args()
 
@@ -128,7 +129,7 @@ all_weights = []
 for p in model.parameters():
     if len(p.data.size()) != 1:
         all_weights += list(p.cpu().data.abs().numpy().flatten())
-threshold = np.percentile(np.array(all_weights), 80.)
+threshold = np.percentile(np.array(all_weights), 10.)
 
 pruning(model.model, threshold)
 '''
@@ -167,7 +168,11 @@ mlmodel = convert(
         image_input_names='0')
 mlmodel.save(args.output)
 
-print('checking converted model')
+if args.onedrive != "":
+    print('save  onedrive')
+    mlmodel.save(args.onedrive)
+
+print('Finish convert')
 #onnx.checker.check_model(onnx_model)
 '''
 # 画像の読み込み
