@@ -45,7 +45,7 @@
             "args": [
                 "pytorch",
                 "-g0",
-                "--NN=MobileNet_2",
+                "--NN=MobileNet_",
                 "--batchsize=32",
                 "--data-augmentation",
                 "--use-visibility",
@@ -101,6 +101,12 @@
             "request": "launch",
             "program": "${workspaceFolder}/scripts/onnx_check.py",
         },        
+        {
+            "name": "Python: onnx_tf_run",
+            "type": "python",
+            "request": "launch",
+            "program": "${workspaceFolder}/scripts/onnx_tf_run.py"
+        },
         {
             "name": "Python: mmdnn_convert",
             "type": "python",

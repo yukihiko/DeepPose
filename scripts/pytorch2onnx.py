@@ -19,6 +19,7 @@ from modules.models.pytorch import AlexNet, VGG19Net, Inceptionv3, Resnet, Mobil
 #from coremltools.converters.keras import convert
 from modules.dataset_indexing.pytorch import PoseDataset, Crop, RandomNoise, Scale
 from torchvision import transforms
+from PIL import Image
 
 '''
 再帰的に呼び出してpruningを行う
@@ -119,9 +120,27 @@ model.load_state_dict(new_state_dict)
 model.eval()
 
 # export to ONNF
-dummy_input = Variable(torch.randn(1, 3, args.image_size, args.image_size))
+img_path = "im07276.jpg"
+img = Image.open(img_path).convert('RGB')
+img = img.resize((args.image_size, args.image_size))
+arr = np.asarray(img, dtype=np.float32)[np.newaxis, :, :, :]
+dummy_input = Variable(torch.from_numpy(arr.transpose(0, 3, 1, 2)/255.))
+#dummy_input = Variable(torch.randn(1, 3, args.image_size, args.image_size))
 ################
-_ = model(dummy_input)
+offset, heatmap = model.forward(dummy_input)
+print("pytorch heatmap")
+col = 14
+for i in range(col):
+    str = ""
+    for j in range(col):
+        str = str + ",{:.3f}".format(heatmap[0, 9, i, j]) 
+    print(str)
+print("pytorch offset")
+for i in range(col):
+    str = ""
+    for j in range(col):
+        str = str + ",{:.3f}".format(offset[0, 9, i, j]) 
+    print(str)
 
 '''
 ##pruning##
@@ -142,6 +161,16 @@ print('converting to ONNX')
 torch.onnx.export(model, dummy_input, args.onnx_output)
 onnx_model = onnx.load(args.onnx_output)
 
+
+onnx.checker.check_model(onnx_model)
+'''
+print("pytorch heatmap")
+for i in range(14):
+    print(offset[0, 9, i])
+print("pytorch offset")
+for i in range(14):
+    print(offset[0, 9, i])
+
 # モデル（グラフ）を構成するノードを全て出力する
 print("====== Nodes ======")
 for i, node in enumerate(onnx_model.graph.node):
@@ -159,12 +188,13 @@ print("====== Outputs ======")
 for i, output in enumerate(onnx_model.graph.output):
     print("[Output #{}]".format(i))
     print(output)
-
-scale = 1./ (args.image_size - 1.)
+'''
+#scale = 1./ (args.image_size - 1.)
+scale = 1./ 255.
 print('converting coreml model')
 mlmodel = convert(
         onnx_model, 
-        preprocessing_args={'is_bgr':True, 'red_bias':0., 'green_bias':0., 'blue_bias':0., 'image_scale':scale},
+        preprocessing_args={'is_bgr':False, 'red_bias':0., 'green_bias':0., 'blue_bias':0., 'image_scale':scale},
         image_input_names='0')
 mlmodel.save(args.output)
 
@@ -187,13 +217,14 @@ dataset = PoseDataset(
 
 img, pose, _, _ = dataset[0]
 arr = img.unsqueeze(0)
-out = mlmodel.predict({'img__0': img})['out__0']
-print("#output coreml result.")
 
-print(out.shape)
-print(np.transpose(out))
-print(out)
-# print(out[:, 0:1, 0:1])
-print(np.mean(out))
+os, hm = mlmodel.predict({'0': dummy_input})
+print("coreml heatmap")
+for i in range(14):
+    print(offset[0, 9, i])
+print("coreml offset")
+for i in range(14):
+    print(offset[0, 9, i])
+
 '''
 
