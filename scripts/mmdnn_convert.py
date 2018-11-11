@@ -6,7 +6,7 @@ import mmdnn
 import mmdnn.conversion._script.convertToIR as start
 import argparse
 _sys.path.append("./")
-from modules.models.pytorch import AlexNet, VGG19Net, Inceptionv3, Resnet, MobileNet, MobileNetV2, MobileNet_, MobileNet_2, MobileNet_3
+from modules.models.pytorch import AlexNet, VGG19Net, Inceptionv3, Resnet, MobileNet, MobileNetV2, MobileNet_, MobileNet_2, MobileNet_3, MobileNet14_
 from six import text_type as _text_type
 from mmdnn.conversion.pytorch.pytorch_parser import PytorchParser
 from mmdnn.conversion._script.IRToModel import _convert
@@ -112,6 +112,11 @@ def _get_parser():
 
     # path
     parser.add_argument(
+        '--resume',
+        type=_text_type)
+
+    # path
+    parser.add_argument(
         '--outpath',
         type=_text_type)
 
@@ -134,6 +139,11 @@ def _get_parser():
         '--output',
         type=_text_type,
         help='Path to save the destination model')
+
+    parser.add_argument(
+        '--is_checkpoint',
+        type=int,
+        help='')
 
     # For CoreML
     parser.add_argument('--inputNames', type=_text_type, nargs='*', help='Names of the feature (input) columns, in order (required for keras models).')
@@ -171,7 +181,7 @@ def main():
     elif args.NN == "MobileNetV2":
         model = MobileNetV2( )
     else :
-        model = AlexNet(args.Nj)
+        model = eval(args.NN)()
     
     if args.framework == None:
         args.framework = "coreml"
@@ -188,7 +198,14 @@ def main():
     IR_file = args.NN
 
     #model.load_state_dict(torch.load(args.resume_model))
-    model = torch.load(args.resume_model)
+    if args.is_checkpoint == 1:
+        checkpoint = torch.load(args.resume)
+        state_dict = checkpoint['state_dict']
+        model.load_state_dict(state_dict)
+        optimizer_state_dict = checkpoint['optimizer']
+    else:
+        model.load_state_dict(torch.load(args.input))
+
     model.eval()
     model = model.cpu().float()
 

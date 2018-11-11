@@ -58,39 +58,15 @@ def pruning(module, threshold):
 print('ArgumentParser')
 parser = argparse.ArgumentParser(description='Convert PyTorch model to CoreML')
 parser.add_argument('--input', '-i', required=True, type=str)
-parser.add_argument('--output', '-o', required=True, type=str)
 parser.add_argument('--NN', '-n', required=True, type=str)
-parser.add_argument('--onnx_output', required=True, type=str)
+parser.add_argument('--NJ', required=True, type=int)
+parser.add_argument('--Col', required=True, type=int)
 parser.add_argument('--image_size', required=True, type=int)
 parser.add_argument('--is_checkpoint', required=True, type=int)
-parser.add_argument('--onedrive', required=False, type=str)
 
 args = parser.parse_args()
 
-print('Set up model')
-if args.NN == "MobileNet":
-    model = MobileNet( )
-elif args.NN == "MobileNet_":
-    model = MobileNet_( )
-elif args.NN == "MobileNet___":
-    model = MobileNet___( )
-elif args.NN == "MobileNet_3":
-    model = MobileNet_3( )
-elif args.NN == "MnasNet":
-    model = MnasNet( )
-elif args.NN == "MnasNet_":
-    model = MnasNet_( )
-elif args.NN == "MnasNet56_":
-    model = MnasNet56_( )
-elif args.NN == "MnasNet16_":
-    model = MnasNet16_( )
-elif args.NN == "MobileNet16_":
-    model = MobileNet16_( )
-else:
-    model = eval(args.NN)()
-
-#elif args.NN == "MobileNet162_":
-#    model = MobileNet162_( )
+model = eval(args.NN)()
 
 cudnn.benchmark = True
 torch.backends.cudnn.deterministic = False
@@ -106,16 +82,6 @@ if args.is_checkpoint == 1:
 else:
     model.load_state_dict(torch.load(args.input))
 
-'''
-# create new OrderedDict that does not contain `module.`
-from collections import OrderedDict
-new_state_dict = OrderedDict()
-for k, v in state_dict.items():
-    name = k[7:] # remove `module.`
-    new_state_dict[name] = v
-# load params
-model.load_state_dict(new_state_dict)
-'''
 #model = model.cpu()
 model.eval()
 
@@ -127,92 +93,47 @@ arr = np.asarray(img, dtype=np.float32)[np.newaxis, :, :, :]
 dummy_input = Variable(torch.from_numpy(arr.transpose(0, 3, 1, 2)/255.))
 #dummy_input = Variable(torch.randn(1, 3, args.image_size, args.image_size))
 ################
-offset = model.forward(dummy_input)
+output = model.forward(dummy_input)
+heatmap = output[:, 0:16, :, :]
+offset = output[:, 16:48, :, :] 
 
-
-'''
-##pruning##
-all_weights = []
-for p in model.parameters():
-    if len(p.data.size()) != 1:
-        all_weights += list(p.cpu().data.abs().numpy().flatten())
-threshold = np.percentile(np.array(all_weights), 10.)
-
-pruning(model.model, threshold)
-'''
-
-model.eval()
-#model.cuda()
-
-##################
-print('converting to ONNX')
-torch.onnx.export(model, dummy_input, args.onnx_output)
-onnx_model = onnx.load(args.onnx_output)
-
-
-onnx.checker.check_model(onnx_model)
-'''
 print("pytorch heatmap")
-for i in range(14):
-    print(offset[0, 9, i])
+for k in range(args.NJ):
+    x = -1
+    y = -1
+    max = -1.0
+    print("{}: ".format(k,))
+    for i in range(args.Col):
+        str = ""
+        for j in range(args.Col):
+            v =  heatmap[0, k, i, j]
+            str = str + ",{:.3f}".format(v) 
+        print(str)
+
 print("pytorch offset")
-for i in range(14):
-    print(offset[0, 9, i])
+for k in range(args.NJ):
+    x = -1
+    y = -1
+    max = -1.0
+    print("{}: ".format(k,))
+    for i in range(args.Col):
+        str = ""
+        for j in range(args.Col):
+            v =  offset[0, k, i, j]
+            str = str + ",{:.3f}".format(v) 
+        print(str)
 
-# モデル（グラフ）を構成するノードを全て出力する
-print("====== Nodes ======")
-for i, node in enumerate(onnx_model.graph.node):
-    print("[Node #{}]".format(i))
-    print(node)
-
-# モデルの入力データ一覧を出力する
-print("====== Inputs ======")
-for i, input in enumerate(onnx_model.graph.input):
-    print("[Input #{}]".format(i))
-    print(input)
-
-# モデルの出力データ一覧を出力する
-print("====== Outputs ======")
-for i, output in enumerate(onnx_model.graph.output):
-    print("[Output #{}]".format(i))
-    print(output)
-'''
-#scale = 1./ (args.image_size - 1.)
-scale = 1./ 255.
-print('converting coreml model')
-mlmodel = convert(
-        onnx_model, 
-        preprocessing_args={'is_bgr':False, 'red_bias':0., 'green_bias':0., 'blue_bias':0., 'image_scale':scale},
-        image_input_names='0')
-mlmodel.save(args.output)
-
-if args.onedrive != "":
-    print('save  onedrive')
-    mlmodel.save(args.onedrive)
-
-print('Finish convert')
-#onnx.checker.check_model(onnx_model)
-'''
-# 画像の読み込み
-filename = "data/test"
-dataset = PoseDataset(
-    filename,
-    input_transform=transforms.Compose([
-        transforms.ToTensor(),
-        RandomNoise()]),
-    output_transform=Scale(),
-    transform=Crop(data_augmentation=False))
-
-img, pose, _, _ = dataset[0]
-arr = img.unsqueeze(0)
-
-os, hm = mlmodel.predict({'0': dummy_input})
-print("coreml heatmap")
-for i in range(14):
-    print(offset[0, 9, i])
-print("coreml offset")
-for i in range(14):
-    print(offset[0, 9, i])
-
-'''
-
+print("pytorch Index")
+for k in range(args.NJ):
+    x = -1
+    y = -1
+    max = -1.0
+    for i in range(args.Col):
+        str = ""
+        for j in range(args.Col):
+            v =  heatmap[0, k, i, j]
+            if v > 0.5 and v > max:
+                x = j
+                y = i
+                max = v
+    print("{}: {}, {}".format(k, x, y))
