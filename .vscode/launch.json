@@ -89,10 +89,12 @@
                 "--NN=MobileNet14_",
                 "--image_size=224",
                 "--is_checkpoint=0",
-                "--input=../human-pose-estimation.pytorch/output/mpii/MobileNet14_/MobileNet14_/epoch-124.model",
+                "--NJ=16",
+                "--Col=14",
+                "--input=result/pytorch/epoch-124.model",
                 "--onnx_output=result/onnx_output.onnx",
                 "--output=result/MobileNet14_.mlmodel",
-                "--onedrive=C:/Users/aoyag/OneDrive/pytorch/MobileNet14_.mlmodel"
+                "--onedrive="
             ]
         },        
         {
@@ -107,7 +109,7 @@
                 "--NJ=16",
                 "--Col=14",
                 "--is_checkpoint=0",
-                "--input=../human-pose-estimation.pytorch/output/mpii/MobileNet14_/MobileNet14_/epoch-124.model",
+                "--input=result/pytorch/epoch-124.model",
             ]
         },        
         {
@@ -129,10 +131,10 @@
             "program": "${workspaceFolder}/scripts/mmdnn_convert.py",
             "args": [
                 "--srcFramework=pytorch",
-                "--NN=MobileNet14_",
+                "--NN=MobileNet_2",
                 "--input_size=224",
-                "--is_checkpoint=1",
-                "--resume=../human-pose-estimation.pytorch/output/mpii/MobileNet14_/MobileNet14_/checkpoint.pth.tar",
+                "--is_checkpoint=0",
+                "--resume=${workspaceFolder}/result/pytorch/MobileNet_2.model",
                 "-d${workspaceFolder}/result/non_state.model",
                 "-n${workspaceFolder}/result/non_state.model",
                 "--scale=0.00392157",

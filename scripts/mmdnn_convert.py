@@ -204,16 +204,20 @@ def main():
         model.load_state_dict(state_dict)
         optimizer_state_dict = checkpoint['optimizer']
     else:
-        model.load_state_dict(torch.load(args.input))
+        model.load_state_dict(torch.load(args.resume))
 
     model.eval()
     model = model.cpu().float()
-
+    '''
+    for p in model.model.parameters():
+        p.requires_grad = False
+    for p in model.output.parameters():
+        p.requires_grad = False
     '''
     model.eval()
     dummy_input = Variable(torch.randn(1, 3, args.input_size, args.input_size))
     model(dummy_input)
-    '''
+    
 
     pytorchparser = PytorchParser(model, [3, args.input_size, args.input_size])
     #dummy_input = Variable(torch.randn(1, 3, args.input_size, args.input_size))

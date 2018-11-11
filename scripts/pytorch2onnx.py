@@ -20,6 +20,7 @@ from modules.models.pytorch import AlexNet, VGG19Net, Inceptionv3, Resnet, Mobil
 from modules.dataset_indexing.pytorch import PoseDataset, Crop, RandomNoise, Scale
 from torchvision import transforms
 from PIL import Image
+from onnx_tf.backend import prepare
 
 '''
 再帰的に呼び出してpruningを行う
@@ -64,6 +65,8 @@ parser.add_argument('--onnx_output', required=True, type=str)
 parser.add_argument('--image_size', required=True, type=int)
 parser.add_argument('--is_checkpoint', required=True, type=int)
 parser.add_argument('--onedrive', required=False, type=str)
+parser.add_argument('--NJ', required=True, type=int)
+parser.add_argument('--Col', required=True, type=int)
 
 args = parser.parse_args()
 
@@ -127,7 +130,22 @@ arr = np.asarray(img, dtype=np.float32)[np.newaxis, :, :, :]
 dummy_input = Variable(torch.from_numpy(arr.transpose(0, 3, 1, 2)/255.))
 #dummy_input = Variable(torch.randn(1, 3, args.image_size, args.image_size))
 ################
-offset = model.forward(dummy_input)
+heatmap = model.forward(dummy_input)
+
+print("pytorch Index")
+for k in range(args.NJ):
+    x = -1
+    y = -1
+    max = -1.0
+    for i in range(args.Col):
+        str = ""
+        for j in range(args.Col):
+            v =  heatmap[0, k, i, j]
+            if v > 0.5 and v > max:
+                x = j
+                y = i
+                max = v
+    print("{}: {}, {}".format(k, x, y))
 
 
 '''
@@ -149,6 +167,24 @@ print('converting to ONNX')
 torch.onnx.export(model, dummy_input, args.onnx_output)
 onnx_model = onnx.load(args.onnx_output)
 
+# run the loaded model at Tensorflow
+output = prepare(onnx_model).run(dummy_input)
+out = np.array(output).squeeze()
+
+print("Onnx Index")
+for k in range(args.NJ):
+    x = -1
+    y = -1
+    max = -1.0
+    for i in range(args.Col):
+        str = ""
+        for j in range(args.Col):
+            v =  out[k, i, j]
+            if v > 0.5 and v > max:
+                x = j
+                y = i
+                max = v
+    print("{}: {}, {}".format(k, x, y))
 
 onnx.checker.check_model(onnx_model)
 '''
