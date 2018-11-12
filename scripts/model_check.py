@@ -87,15 +87,20 @@ model.eval()
 
 # export to ONNF
 img_path = "im07276.jpg"
-img = Image.open(img_path).convert('RGB')
+img = Image.open(img_path)
 img = img.resize((args.image_size, args.image_size))
 arr = np.asarray(img, dtype=np.float32)[np.newaxis, :, :, :]
 dummy_input = Variable(torch.from_numpy(arr.transpose(0, 3, 1, 2)/255.))
 #dummy_input = Variable(torch.randn(1, 3, args.image_size, args.image_size))
 ################
-output = model.forward(dummy_input)
-heatmap = output[:, 0:16, :, :]
-offset = output[:, 16:48, :, :] 
+
+if args.NN == "MobileNet14_":
+    output = model.forward(dummy_input)
+    heatmap = output[:, 0:16, :, :]
+    offset = output[:, 16:48, :, :] 
+elif  args.NN == "MobileNet_":
+    offset, heatmap = model.forward(dummy_input)
+
 
 print("pytorch heatmap")
 for k in range(args.NJ):

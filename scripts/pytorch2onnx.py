@@ -132,22 +132,6 @@ dummy_input = Variable(torch.from_numpy(arr.transpose(0, 3, 1, 2)/255.))
 ################
 heatmap = model.forward(dummy_input)
 
-print("pytorch Index")
-for k in range(args.NJ):
-    x = -1
-    y = -1
-    max = -1.0
-    for i in range(args.Col):
-        str = ""
-        for j in range(args.Col):
-            v =  heatmap[0, k, i, j]
-            if v > 0.5 and v > max:
-                x = j
-                y = i
-                max = v
-    print("{}: {}, {}".format(k, x, y))
-
-
 '''
 ##pruning##
 all_weights = []
@@ -167,52 +151,8 @@ print('converting to ONNX')
 torch.onnx.export(model, dummy_input, args.onnx_output)
 onnx_model = onnx.load(args.onnx_output)
 
-# run the loaded model at Tensorflow
-output = prepare(onnx_model).run(dummy_input)
-out = np.array(output).squeeze()
-
-print("Onnx Index")
-for k in range(args.NJ):
-    x = -1
-    y = -1
-    max = -1.0
-    for i in range(args.Col):
-        str = ""
-        for j in range(args.Col):
-            v =  out[k, i, j]
-            if v > 0.5 and v > max:
-                x = j
-                y = i
-                max = v
-    print("{}: {}, {}".format(k, x, y))
-
 onnx.checker.check_model(onnx_model)
-'''
-print("pytorch heatmap")
-for i in range(14):
-    print(offset[0, 9, i])
-print("pytorch offset")
-for i in range(14):
-    print(offset[0, 9, i])
 
-# モデル（グラフ）を構成するノードを全て出力する
-print("====== Nodes ======")
-for i, node in enumerate(onnx_model.graph.node):
-    print("[Node #{}]".format(i))
-    print(node)
-
-# モデルの入力データ一覧を出力する
-print("====== Inputs ======")
-for i, input in enumerate(onnx_model.graph.input):
-    print("[Input #{}]".format(i))
-    print(input)
-
-# モデルの出力データ一覧を出力する
-print("====== Outputs ======")
-for i, output in enumerate(onnx_model.graph.output):
-    print("[Output #{}]".format(i))
-    print(output)
-'''
 #scale = 1./ (args.image_size - 1.)
 scale = 1./ 255.
 print('converting coreml model')
@@ -227,28 +167,5 @@ if args.onedrive != "":
     mlmodel.save(args.onedrive)
 
 print('Finish convert')
-#onnx.checker.check_model(onnx_model)
-'''
-# 画像の読み込み
-filename = "data/test"
-dataset = PoseDataset(
-    filename,
-    input_transform=transforms.Compose([
-        transforms.ToTensor(),
-        RandomNoise()]),
-    output_transform=Scale(),
-    transform=Crop(data_augmentation=False))
 
-img, pose, _, _ = dataset[0]
-arr = img.unsqueeze(0)
-
-os, hm = mlmodel.predict({'0': dummy_input})
-print("coreml heatmap")
-for i in range(14):
-    print(offset[0, 9, i])
-print("coreml offset")
-for i in range(14):
-    print(offset[0, 9, i])
-
-'''
 
