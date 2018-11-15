@@ -45,7 +45,7 @@ class TrainLogger(object):
 
     def write_oneDrive(self, log):
         """ Write log. """
-        self.file = open('C:/Users/aoyagi/OneDrive/pytorch/log.txt', 'a')
+        self.file = open('C:/Users/aoyag/OneDrive/pytorch/log.txt', 'a')
         tqdm.write(log, file=self.file)
         self.file.flush()
         self.file.close()
@@ -154,6 +154,10 @@ class TrainPoseNet(object):
                 offset, heatmap = model(image)
                 loss = mean_squared_error2(offset, heatmap, pose, visibility, self.use_visibility)
                 loss.backward()
+            elif self.NN == "MobileNet_3":
+                offset, heatmap = model(image)
+                loss = mean_squared_error2(offset, heatmap, pose, visibility, self.use_visibility)
+                loss.backward()
             elif self.NN == "MobileNet__":
                 offset, heatmap, output = model(image)
                 loss = mean_squared_error2_(offset, heatmap, output.view(-1, self.Nj, 3), pose, visibility, self.use_visibility)
@@ -251,12 +255,12 @@ class TrainPoseNet(object):
                     torch.save(model, 'D:/github/DeepPose/result/pytorch/lastest.ptn.tar')
                     torch.save(model.state_dict(), 'D:/github/DeepPose/result/pytorch/lastest.model')
                     if self.useOneDrive == True:
-                        torch.save(model.state_dict(), 'C:/Users/aoyagi/OneDrive/pytorch/lastest.model')
+                        torch.save(model.state_dict(), 'C:/Users/aoyag/OneDrive/pytorch/lastest.model')
                         logger.write_oneDrive(log)
                     if discriminator != None:
                         torch.save(discriminator.state_dict(), 'D:/github/DeepPose/result/pytorch/lastest_d.model')
                         if self.useOneDrive == True:
-                            torch.save(discriminator.state_dict(), 'C:/Users/aoyagi/OneDrive/pytorch/lastest_d.model')
+                            torch.save(discriminator.state_dict(), 'C:/Users/aoyag/OneDrive/pytorch/lastest_d.model')
                             logger.write_oneDrive(log_d)
                 except:
                     print("Unexpected error:")
@@ -264,39 +268,43 @@ class TrainPoseNet(object):
     def _test(self, model, test_iter, logger, start_time):
         model.eval()
         test_loss = 0
-        for batch in test_iter:
-            image, pose, visibility = Variable(batch[0]), Variable(batch[1]), Variable(batch[2])
-            if self.gpu:
-                image, pose, visibility = image.cuda(), pose.cuda(), visibility.cuda()
-            
-            if self.NN == "MobileNet_":
-                offset, heatmap = model(image)
-                test_loss += mean_squared_error2(offset, heatmap, pose, visibility, self.use_visibility).data[0]
-            elif self.NN == "MobileNet__":
-                offset, heatmap, output = model(image)
-                test_loss += mean_squared_error2_(offset, heatmap, output.view(-1, self.Nj, 3), pose, visibility, self.use_visibility).data[0]
-            elif self.NN == "MobileNet___":
-                offset, heatmap = model(image)
-                test_loss += mean_squared_error2__(offset, heatmap, pose, visibility, self.use_visibility).data[0]
-            elif self.NN == "MobileNet":
-                output = model(image)
-                test_loss += mean_squared_error3(output, pose, visibility, self.use_visibility).data[0]
-            elif self.NN == "MnasNet":
-                output = model(image)
-                test_loss += mean_squared_error_FC3(output.view(-1, self.Nj, 3), pose, visibility, self.use_visibility).data[0]
-            elif self.NN == "MnasNet_":
-                offset, heatmap = model(image)
-                test_loss += mean_squared_error2(offset, heatmap, pose, visibility, self.use_visibility).data[0]
-            elif self.NN == "MnasNet56_":
-                offset, heatmap = model(image)
-                test_loss += mean_squared_error2(offset, heatmap, pose, visibility, self.use_visibility, col=56).data[0]
-            elif self.NN == "MnasNet_+Discriminator":
-                offset, heatmap = model(image)
-                loss, _ = mean_squared_error2GAN(offset, heatmap, pose, visibility, self.use_visibility)
-                test_loss += loss.data[0]
-            else :
-                output = model(image)
-                test_loss += mean_squared_error(output.view(-1, self.Nj, 2), pose, visibility, self.use_visibility).data[0]
+        with torch.no_grad():
+            for batch in test_iter:
+                image, pose, visibility = Variable(batch[0], volatile=True), Variable(batch[1], volatile=True), Variable(batch[2], volatile=True)
+                if self.gpu:
+                    image, pose, visibility = image.cuda(), pose.cuda(), visibility.cuda()
+                
+                if self.NN == "MobileNet_":
+                    offset, heatmap = model(image)
+                    test_loss += mean_squared_error2(offset, heatmap, pose, visibility, self.use_visibility)
+                elif self.NN == "MobileNet_3":
+                    offset, heatmap = model(image)
+                    test_loss += mean_squared_error2(offset, heatmap, pose, visibility, self.use_visibility)
+                elif self.NN == "MobileNet__":
+                    offset, heatmap, output = model(image)
+                    test_loss += mean_squared_error2_(offset, heatmap, output.view(-1, self.Nj, 3), pose, visibility, self.use_visibility)
+                elif self.NN == "MobileNet___":
+                    offset, heatmap = model(image)
+                    test_loss += mean_squared_error2__(offset, heatmap, pose, visibility, self.use_visibility)
+                elif self.NN == "MobileNet":
+                    output = model(image)
+                    test_loss += mean_squared_error3(output, pose, visibility, self.use_visibility)
+                elif self.NN == "MnasNet":
+                    output = model(image)
+                    test_loss += mean_squared_error_FC3(output.view(-1, self.Nj, 3), pose, visibility, self.use_visibility)
+                elif self.NN == "MnasNet_":
+                    offset, heatmap = model(image)
+                    test_loss += mean_squared_error2(offset, heatmap, pose, visibility, self.use_visibility)
+                elif self.NN == "MnasNet56_":
+                    offset, heatmap = model(image)
+                    test_loss += mean_squared_error2(offset, heatmap, pose, visibility, self.use_visibility, col=56)
+                elif self.NN == "MnasNet_+Discriminator":
+                    offset, heatmap = model(image)
+                    loss, _ = mean_squared_error2GAN(offset, heatmap, pose, visibility, self.use_visibility)
+                    test_loss += loss.data[0]
+                else :
+                    output = model(image)
+                    test_loss += mean_squared_error(output.view(-1, self.Nj, 2), pose, visibility, self.use_visibility)
 
         test_loss /= len(test_iter)
         log = 'elapsed_time: {0}, validation/loss: {1}'.format(time.time() - start_time, test_loss)
@@ -379,6 +387,25 @@ class TrainPoseNet(object):
             #torch.save(model.state_dict(), 'del.model')
         if self.resume_discriminator:
             discriminator.load_state_dict(torch.load(self.resume_discriminator))
+        
+        '''
+        def conv_last(inp, oup, stride):
+            return nn.Sequential(
+                nn.Conv2d(inp, inp, 3, stride, 1, groups=inp, bias=False),
+                nn.BatchNorm2d(inp),
+                nn.ReLU(inplace=True),
+    
+                nn.Conv2d(inp, oup, 1, 1, 0, bias=False),
+            )
+        model.heatmap = conv_last(1024, 14, 1)
+        model.offset = conv_last(1024, 14*2, 1)
+        #model.output = None
+        
+        for p in model.model.parameters():
+            p.requires_grad = False
+        for p in model.heatmap.parameters():
+            p.requires_grad = False
+        '''
 
         # prepare gpu.
         if self.gpu:

@@ -100,6 +100,8 @@ if args.NN == "MobileNet14_":
     offset = output[:, 16:48, :, :] 
 elif  args.NN == "MobileNet_":
     offset, heatmap = model.forward(dummy_input)
+elif  args.NN == "MobileNet_3":
+    offset, heatmap = model.forward(dummy_input)
 
 
 print("pytorch heatmap")

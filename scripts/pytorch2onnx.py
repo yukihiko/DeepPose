@@ -158,7 +158,7 @@ scale = 1./ 255.
 print('converting coreml model')
 mlmodel = convert(
         onnx_model, 
-        preprocessing_args={'is_bgr':False, 'red_bias':0., 'green_bias':0., 'blue_bias':0., 'image_scale':scale},
+        preprocessing_args={'is_bgr':True, 'red_bias':0., 'green_bias':0., 'blue_bias':0., 'image_scale':scale},
         image_input_names='0')
 mlmodel.save(args.output)
 

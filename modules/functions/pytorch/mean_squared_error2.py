@@ -99,7 +99,7 @@ class MeanSquaredError2(nn.Module):
         for i in range(s[0]):
             for j in range(self.Nj):
                 if int(v[i, j, 0]) == 0:
-                    diff1[i, j].data[0] = diff1[i, j].data[0]*0
+                    diff1[i, j] = diff1[i, j]*0
                 else:
                     cnt = cnt + 1
      
