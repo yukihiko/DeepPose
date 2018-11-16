@@ -10,6 +10,7 @@ from modules.models.pytorch.MobileNetV2 import MobileNetV2
 from modules.models.pytorch.MobileNet_ import MobileNet_
 from modules.models.pytorch.MobileNet_2 import MobileNet_2
 from modules.models.pytorch.MobileNet_3 import MobileNet_3
+from modules.models.pytorch.MobileNet_4 import MobileNet_4
 from modules.models.pytorch.Lin_View import Lin_View
 from modules.models.pytorch.MobileNet__ import MobileNet__
 from modules.models.pytorch.MobileNet___ import MobileNet___
@@ -22,4 +23,4 @@ from modules.models.pytorch.MobileNet16_ import MobileNet16_
 from modules.models.pytorch.MobileNet14_ import MobileNet14_
 
 
-__all__ = ['AlexNet', 'VGG19Net', 'Inceptionv3', 'Resnet', 'MobileNet', 'MobileNetV2', 'MobileNet_', 'MobileNet_2', 'MobileNet_3', 'Lin_View', 'MobileNet__', 'MobileNet___', 'MnasNet', 'MnasNet_', 'MnasNet56_', 'MnasNet16_', 'Discriminator', 'MobileNet16_', 'MobileNet14_']
+__all__ = ['AlexNet', 'VGG19Net', 'Inceptionv3', 'Resnet', 'MobileNet', 'MobileNetV2', 'MobileNet_', 'MobileNet_2', 'MobileNet_3', 'MobileNet_4','Lin_View', 'MobileNet__', 'MobileNet___', 'MnasNet', 'MnasNet_', 'MnasNet56_', 'MnasNet16_', 'Discriminator', 'MobileNet16_', 'MobileNet14_']

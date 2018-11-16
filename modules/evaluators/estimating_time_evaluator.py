@@ -55,7 +55,7 @@ class EstimatingTimeEvaluator(object):
                 start = time.time()
 
 
-                if self.NN == "MobileNet_" or self.NN == "MobileNet_3" :
+                if self.NN == "MobileNet_" or self.NN == "MobileNet_3" or self.NN == "MobileNet_4" :
                     image, offset, heatmap, testPose = estimator.estimate_(index)
                     _, size, _ = image.shape
                     scale = float(size)/float(self.col)

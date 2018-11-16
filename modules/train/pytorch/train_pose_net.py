@@ -13,7 +13,7 @@ import torch.nn as nn
 import subprocess
 
 from modules.errors import FileNotFoundError, GPUNotFoundError, UnknownOptimizationMethodError, NotSupportedError
-from modules.models.pytorch import AlexNet, VGG19Net, Inceptionv3, Resnet, MobileNet, MobileNetV2, MobileNet_, MobileNet_2, MobileNet_3, MobileNet__, MobileNet___, MnasNet, MnasNet_, MnasNet56_, Discriminator, MobileNet16_
+from modules.models.pytorch import AlexNet, VGG19Net, Inceptionv3, Resnet, MobileNet, MobileNetV2, MobileNet_, MobileNet_2, MobileNet_3, MobileNet_4, MobileNet__, MobileNet___, MnasNet, MnasNet_, MnasNet56_, Discriminator, MobileNet16_
 from modules.dataset_indexing.pytorch import PoseDataset, Crop, RandomNoise, Scale
 from modules.functions.pytorch import mean_squared_error, mean_squared_error2,mean_squared_error3, mean_squared_error2_, mean_squared_error2__, mean_squared_error_FC3, mean_squared_error2GAN
 
@@ -158,6 +158,10 @@ class TrainPoseNet(object):
                 offset, heatmap = model(image)
                 loss = mean_squared_error2(offset, heatmap, pose, visibility, self.use_visibility)
                 loss.backward()
+            elif self.NN == "MobileNet_4":
+                offset, heatmap = model(image)
+                loss = mean_squared_error2(offset, heatmap, pose, visibility, self.use_visibility)
+                loss.backward()
             elif self.NN == "MobileNet__":
                 offset, heatmap, output = model(image)
                 loss = mean_squared_error2_(offset, heatmap, output.view(-1, self.Nj, 3), pose, visibility, self.use_visibility)
@@ -280,6 +284,9 @@ class TrainPoseNet(object):
                 elif self.NN == "MobileNet_3":
                     offset, heatmap = model(image)
                     test_loss += mean_squared_error2(offset, heatmap, pose, visibility, self.use_visibility)
+                elif self.NN == "MobileNet_4":
+                    offset, heatmap = model(image)
+                    test_loss += mean_squared_error2(offset, heatmap, pose, visibility, self.use_visibility)
                 elif self.NN == "MobileNet__":
                     offset, heatmap, output = model(image)
                     test_loss += mean_squared_error2_(offset, heatmap, output.view(-1, self.Nj, 3), pose, visibility, self.use_visibility)
@@ -367,6 +374,8 @@ class TrainPoseNet(object):
             model = MobileNet_2( )
         elif self.NN == "MobileNet_3":
             model = MobileNet_3( )
+        elif self.NN == "MobileNet_4":
+            model = MobileNet_4( )
         elif self.NN == "MobileNetV2":
             model = MobileNetV2( )
         elif self.NN == "MnasNet":
@@ -397,16 +406,32 @@ class TrainPoseNet(object):
     
                 nn.Conv2d(inp, oup, 1, 1, 0, bias=False),
             )
-        model.heatmap = conv_last(1024, 14, 1)
-        model.offset = conv_last(1024, 14*2, 1)
+        def conv_dw(inp, oup, stride):
+            return nn.Sequential(
+                nn.Conv2d(inp, inp, 3, stride, 1, groups=inp, bias=False),
+                nn.BatchNorm2d(inp),
+                nn.ReLU(inplace=True),
+    
+                nn.Conv2d(inp, oup, 1, 1, 0, bias=False),
+                nn.BatchNorm2d(oup),
+                nn.ReLU(inplace=True),
+            )
+
+        model.model2 = conv_dw(1024, 1024, 1)
         #model.output = None
         
         for p in model.model.parameters():
             p.requires_grad = False
         for p in model.heatmap.parameters():
             p.requires_grad = False
+        for p in model.offset.parameters():
+            p.requires_grad = False
         '''
-
+        '''
+        removed = list(model.model.children())[:-1]
+        model.model1_14= list(model.model.children())[13]
+        model.model= torch.nn.Sequential(*removed)
+        '''
         # prepare gpu.
         if self.gpu:
             model.cuda()

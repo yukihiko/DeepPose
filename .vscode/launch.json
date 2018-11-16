@@ -21,8 +21,8 @@
             "args": [
                 "10000",
                 "\"plot_estimating_time\"",
-                "--NN=MobileNet_3",
-                "--pytorch-model-file=${workspaceFolder}/result/pytorch/epoch-2.model",
+                "--NN=MobileNet_4",
+                "--pytorch-model-file=${workspaceFolder}/result/pytorch/epoch-1.model",
                 "-g0"
             ]
         },              
@@ -62,9 +62,9 @@
             "args": [
                 "pytorch",
                 "-g0",
-                "--NN=MobileNet_3",
-                "--batchsize=128",
-                "--resume-model=${workspaceFolder}/result/pytorch/epoch-2.model",
+                "--NN=MobileNet_4",
+                "--batchsize=100",
+                "--resume-model=${workspaceFolder}/result/pytorch/epoch-1.model",
                 "--out=${workspaceFolder}/result",
                 "--data-augmentation",
                 "--useOneDrive",
@@ -86,15 +86,15 @@
             "program": "${workspaceFolder}/scripts/pytorch2onnx.py",
             "console": "none",
             "args": [
-                "--NN=MobileNet_3",
+                "--NN=MobileNet_4",
                 "--image_size=224",
                 "--is_checkpoint=0",
                 "--NJ=14",
                 "--Col=14",
-                "--input=result/pytorch/epoch-2.model",
-                "--onnx_output=result/MobileNet_3.onnx",
-                "--output=result/MobileNet_3.mlmodel",
-                "--onedrive=C:/Users/aoyag/OneDrive/pytorch/MobileNet_3.mlmodel"
+                "--input=result/pytorch/epoch-1.model",
+                "--onnx_output=result/MobileNet_4.onnx",
+                "--output=result/MobileNet_4.mlmodel",
+                "--onedrive=C:/Users/aoyag/OneDrive/pytorch/MobileNet_4.mlmodel"
             ]
         },        
         {
@@ -104,12 +104,12 @@
             "program": "${workspaceFolder}/scripts/model_check.py",
             "console": "none",
             "args": [
-                "--NN=MobileNet_3",
+                "--NN=MobileNet_4",
                 "--image_size=224",
                 "--NJ=14",
                 "--Col=14",
                 "--is_checkpoint=0",
-                "--input=result/pytorch/epoch-2.model",
+                "--input=result/pytorch/epoch-1.model",
             ]
         },        
         {
