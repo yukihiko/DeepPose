@@ -22,7 +22,7 @@
                 "10000",
                 "\"plot_estimating_time\"",
                 "--NN=MobileNet_3",
-                "--pytorch-model-file=${workspaceFolder}/result/pytorch/epoch-6.model",
+                "--pytorch-model-file=${workspaceFolder}/result/pytorch/epoch-2.model",
                 "-g0"
             ]
         },              
@@ -64,7 +64,7 @@
                 "-g0",
                 "--NN=MobileNet_3",
                 "--batchsize=128",
-                "--resume-model=${workspaceFolder}/result/pytorch/epoch-1.model",
+                "--resume-model=${workspaceFolder}/result/pytorch/epoch-2.model",
                 "--out=${workspaceFolder}/result",
                 "--data-augmentation",
                 "--useOneDrive",
@@ -91,7 +91,7 @@
                 "--is_checkpoint=0",
                 "--NJ=14",
                 "--Col=14",
-                "--input=result/pytorch/epoch-1.model",
+                "--input=result/pytorch/epoch-2.model",
                 "--onnx_output=result/MobileNet_3.onnx",
                 "--output=result/MobileNet_3.mlmodel",
                 "--onedrive=C:/Users/aoyag/OneDrive/pytorch/MobileNet_3.mlmodel"
@@ -109,7 +109,7 @@
                 "--NJ=14",
                 "--Col=14",
                 "--is_checkpoint=0",
-                "--input=result/pytorch/epoch-1.model",
+                "--input=result/pytorch/epoch-2.model",
             ]
         },        
         {

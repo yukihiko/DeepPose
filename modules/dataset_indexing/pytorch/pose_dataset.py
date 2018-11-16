@@ -69,7 +69,7 @@ class PoseDataset(data.Dataset):
             poses.append(pose)
             visibilities.append(visibility)
             image_types.append("N")
-            '''
+            
             # 画像の転置
             images.append(line_split[0])
             p = torch.stack([pose[:,1], pose[:,0]], dim=1)
@@ -119,7 +119,7 @@ class PoseDataset(data.Dataset):
             poses.append(p7[[5, 4, 3, 2, 1, 0, 11, 10, 9, 8, 7, 6, 12, 13]])
             visibilities.append(v[[5, 4, 3, 2, 1, 0, 11, 10, 9, 8, 7, 6, 12, 13]])
             image_types.append("B")
-            '''
+            
         return images, poses, visibilities, image_types
 
     @staticmethod
