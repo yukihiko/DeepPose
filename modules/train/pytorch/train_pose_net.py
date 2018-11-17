@@ -428,8 +428,17 @@ class TrainPoseNet(object):
             p.requires_grad = False
         '''
         '''
-        removed = list(model.model.children())[:-1]
-        model.model1_14= list(model.model.children())[13]
+        removed = list(model.model.children())[:-9]
+        
+        model.model1_1 = list(model.model.children())[5]
+        model.model1_2 = list(model.model.children())[6]
+        model.model1_3 = list(model.model.children())[7]
+        model.model1_4 = list(model.model.children())[8]
+        model.model1_5 = list(model.model.children())[9]
+        model.model1_6 = list(model.model.children())[10]
+        model.model1_7 = list(model.model.children())[11]
+        model.model1_8 = list(model.model.children())[12]
+        model.model1_9 = list(model.model.children())[13]
         model.model= torch.nn.Sequential(*removed)
         '''
         # prepare gpu.

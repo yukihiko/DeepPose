@@ -39,7 +39,7 @@ class MobileNet_4(nn.Module):
     
                 nn.Conv2d(inp, oup, 1, 1, 0, bias=False),
             )
-
+        '''
         self.model = nn.Sequential(
             conv_bn(  3,  32, 2), 
             conv_dw( 32,  64, 1),
@@ -56,21 +56,50 @@ class MobileNet_4(nn.Module):
             conv_dw(512, 1024, 1),
             conv_dw(1024, 1024, 1),
         )
+        '''
+        self.model = nn.Sequential(
+            conv_bn(  3,  32, 2), 
+            conv_dw( 32,  64, 1),
+            conv_dw( 64, 128, 2),
+            conv_dw(128, 128, 1),
+            conv_dw(128, 256, 2),
+        )
+        self.model1_1 = conv_dw(256, 256, 1)
+        self.model1_2 = conv_dw(256, 512, 2)
+        self.model1_3 = conv_dw(512, 512, 1)
+        self.model1_4 = conv_dw(512, 512, 1)
+        self.model1_5 = conv_dw(512, 512, 1)
+        self.model1_6 = conv_dw(512, 512, 1)
+        self.model1_7 = conv_dw(512, 512, 1)
+        self.model1_8 = conv_dw(512, 1024, 1)
+        self.model1_9 = conv_dw(1024, 1024, 1)
+        
         #self.heatmap = nn.Conv2d(1024, self.Nj, 1)
         #self.offset = nn.Conv2d(1024, self.Nj*2, 1)
-        #self.model1_14 = conv_dw(1024, 1024, 1)
-        self.model2 = conv_dw(1024, 1024, 1)
+        #self.model2 = conv_dw(1024, 1024, 1)
         self.heatmap = conv_last(1024, self.Nj, 1)
         self.offset = conv_last(1024, self.Nj*2, 1)
 
     def forward(self, x):
         x = self.model(x)
-        #x = self.model1_14(x) + x
-        x = self.model2(x) + x
+        x = self.model1_1(x) + x
+        x12 = self.model1_2(x)
+
+        x13 = self.model1_3(x12) + x12
+        x14 = self.model1_4(x13) + x13 + x12
+        x15 = self.model1_5(x14) + x14 + x13
+        x16 = self.model1_6(x15) + x15 + x14
+        x17 = self.model1_7(x16) + x16 + x15 + x12
+
+        x18 = self.model1_8(x17)
+
+        x19 = self.model1_9(x18) + x18
+
+        #x2 = self.model2(x19) + x19
         #x = x.view(-1, 1024)
-        h = self.heatmap(x)
+        h = self.heatmap(x19)
         h = F.sigmoid(h)
-        o = self.offset(x)
+        o = self.offset(x19)
         #print(h[0, 1])
 
         return o, h
