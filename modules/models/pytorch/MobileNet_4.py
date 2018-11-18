@@ -40,6 +40,7 @@ class MobileNet_4(nn.Module):
                 nn.Conv2d(inp, oup, 1, 1, 0, bias=False),
             )
         '''
+        +
         self.model = nn.Sequential(
             conv_bn(  3,  32, 2), 
             conv_dw( 32,  64, 1),

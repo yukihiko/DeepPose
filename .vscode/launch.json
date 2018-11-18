@@ -22,7 +22,7 @@
                 "10000",
                 "\"plot_estimating_time\"",
                 "--NN=MobileNet_4",
-                "--pytorch-model-file=${workspaceFolder}/result/pytorch/epoch-1.model",
+                "--pytorch-model-file=${workspaceFolder}/result/pytorch/epoch-2.model",
                 "-g0"
             ]
         },              
@@ -46,7 +46,7 @@
                 "pytorch",
                 "-g0",
                 "--NN=MobileNet_3",
-                "--batchsize=100",
+                "--batchsize=64",
                 "--data-augmentation",
                 "--use-visibility",
                 "--out=${workspaceFolder}/result",
@@ -64,7 +64,7 @@
                 "-g0",
                 "--NN=MobileNet_4",
                 "--batchsize=100",
-                "--resume-model=${workspaceFolder}/result/pytorch/epoch-2.model",
+                "--resume-model=${workspaceFolder}/result/pytorch/epoch-8.model",
                 "--out=${workspaceFolder}/result",
                 "--data-augmentation",
                 "--use-visibility",
