@@ -85,12 +85,18 @@ class MobileNet_4(nn.Module):
         x = self.model(x)
         x = self.model1_1(x) + x
         x12 = self.model1_2(x)
-
+        '''
         x13 = self.model1_3(x12) + x12
         x14 = self.model1_4(x13) + x13 + x12
         x15 = self.model1_5(x14) + x14 + x13
         x16 = self.model1_6(x15) + x15 + x14
         x17 = self.model1_7(x16) + x16 + x15 + x12
+        '''
+        x13 = self.model1_3(x12) + x12
+        x14 = self.model1_4(x13) + x13
+        x15 = self.model1_5(x14) + x14
+        x16 = self.model1_6(x15) + x15
+        x17 = self.model1_7(x16) + x16 + x12
 
         x18 = self.model1_8(x17)
 

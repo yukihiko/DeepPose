@@ -21,6 +21,7 @@ from modules.models.pytorch.MnasNet16_ import MnasNet16_
 from modules.models.pytorch.Discriminator import Discriminator
 from modules.models.pytorch.MobileNet16_ import MobileNet16_
 from modules.models.pytorch.MobileNet14_ import MobileNet14_
+from modules.models.pytorch.MobileNet14_4 import MobileNet14_4
 
 
-__all__ = ['AlexNet', 'VGG19Net', 'Inceptionv3', 'Resnet', 'MobileNet', 'MobileNetV2', 'MobileNet_', 'MobileNet_2', 'MobileNet_3', 'MobileNet_4','Lin_View', 'MobileNet__', 'MobileNet___', 'MnasNet', 'MnasNet_', 'MnasNet56_', 'MnasNet16_', 'Discriminator', 'MobileNet16_', 'MobileNet14_']
+__all__ = ['AlexNet', 'VGG19Net', 'Inceptionv3', 'Resnet', 'MobileNet', 'MobileNetV2', 'MobileNet_', 'MobileNet_2', 'MobileNet_3', 'MobileNet_4','Lin_View', 'MobileNet__', 'MobileNet___', 'MnasNet', 'MnasNet_', 'MnasNet56_', 'MnasNet16_', 'Discriminator', 'MobileNet16_', 'MobileNet14_', 'MobileNet14_4']

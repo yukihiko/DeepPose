@@ -64,7 +64,7 @@
                 "-g0",
                 "--NN=MobileNet_4",
                 "--batchsize=100",
-                "--resume-model=${workspaceFolder}/result/pytorch/epoch-8.model",
+                "--resume-model=${workspaceFolder}/result/pytorch/epoch-6.model",
                 "--out=${workspaceFolder}/result",
                 "--data-augmentation",
                 "--use-visibility",
@@ -85,15 +85,15 @@
             "program": "${workspaceFolder}/scripts/pytorch2onnx.py",
             "console": "none",
             "args": [
-                "--NN=MobileNet_4",
+                "--NN=MobileNet14_4",
                 "--image_size=224",
                 "--is_checkpoint=0",
-                "--NJ=14",
+                "--NJ=16",
                 "--Col=14",
-                "--input=result/pytorch/epoch-1.model",
-                "--onnx_output=result/MobileNet_4.onnx",
-                "--output=result/MobileNet_4.mlmodel",
-                "--onedrive=C:/Users/aoyag/OneDrive/pytorch/MobileNet_4.mlmodel"
+                "--input=result/pytorch/epoch-11.model",
+                "--onnx_output=result/MobileNet14_4.onnx",
+                "--output=result/MobileNet14_4.mlmodel",
+                "--onedrive=C:/Users/aoyag/OneDrive/pytorch/MobileNet14_4.mlmodel"
             ]
         },        
         {
@@ -103,12 +103,12 @@
             "program": "${workspaceFolder}/scripts/model_check.py",
             "console": "none",
             "args": [
-                "--NN=MobileNet_4",
+                "--NN=MobileNet14_4",
                 "--image_size=224",
-                "--NJ=14",
+                "--NJ=16",
                 "--Col=14",
                 "--is_checkpoint=0",
-                "--input=result/pytorch/epoch-1.model",
+                "--input=result/pytorch/epoch-11.model",
             ]
         },        
         {
