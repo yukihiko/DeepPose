@@ -159,8 +159,8 @@ class TrainPoseNet(object):
         model.train()
         if discriminator != None:
             discriminator.train()
-            #loss_f = nn.BCEWithLogitsLoss()
-            loss_f = nn.BCELoss()
+            loss_f = nn.BCEWithLogitsLoss()
+            #loss_f = nn.BCELoss()
             
         if discriminator2 != None:
             discriminator2.train()
