@@ -11,11 +11,14 @@ from torch.autograd import Variable
 from torchvision import transforms, models
 import torch.nn as nn
 import subprocess
+import scipy.ndimage.filters as fi
 
 from modules.errors import FileNotFoundError, GPUNotFoundError, UnknownOptimizationMethodError, NotSupportedError
-from modules.models.pytorch import AlexNet, VGG19Net, Inceptionv3, Resnet, MobileNet, MobileNetV2, MobileNet_, MobileNet_2, MobileNet_3, MobileNet_4, MobileNet__, MobileNet___, MnasNet, MnasNet_, MnasNet56_, Discriminator, MobileNet16_
+from modules.models.pytorch import AlexNet, VGG19Net, Inceptionv3, Resnet
+from modules.models.pytorch import MobileNet, MobileNetV2, MobileNet_, MobileNet_2, MobileNet_3, MobileNet_4, MobileNet__, MobileNet___, MobileNet16_
+from modules.models.pytorch import MnasNet, MnasNet_, MnasNet56_, Discriminator, Discriminator2
 from modules.dataset_indexing.pytorch import PoseDataset, Crop, RandomNoise, Scale
-from modules.functions.pytorch import mean_squared_error, mean_squared_error2,mean_squared_error3, mean_squared_error2_, mean_squared_error2__, mean_squared_error_FC3, mean_squared_error2GAN
+from modules.functions.pytorch import mean_squared_error, mean_squared_error2,mean_squared_error3, mean_squared_error2_, mean_squared_error2__, mean_squared_error_FC3, mean_squared_error2GAN, mean_squared_error224GAN
 
 class TrainLogger(object):
     """ Logger of training pose net.
@@ -134,20 +137,45 @@ class TrainPoseNet(object):
             optimizer = optim.Adam(model.parameters())
         return optimizer
 
-    def _train(self, model, optimizer, train_iter, log_interval, logger, start_time, discriminator=None, optimizer_d=None):
+    def min_max(self, x, axis=None, maxV=1.0):
+        min = x.min(axis=axis, keepdims=True)
+        max = x.max(axis=axis, keepdims=True)
+        result = (x-min)/(max-min)
+        return torch.Tensor(result)
+
+    def checkMatrix(self, xi, yi):
+        f = False
+        if xi >= 0 and xi <= 13 and yi >= 0 and yi <= 13:
+            f = True
+        return xi, yi, f
+
+    def checkSize(self, xi, yi, size=224):
+        f = False
+        if xi >= 0 and xi < size and yi >= 0 and yi < size:
+            f = True
+        return xi, yi, f
+
+    def _train(self, model, optimizer, train_iter, log_interval, logger, start_time, discriminator=None, optimizer_d=None, discriminator2=None, optimizer_d2=None):
         model.train()
         if discriminator != None:
             discriminator.train()
-            loss_f = nn.BCEWithLogitsLoss()
+            #loss_f = nn.BCEWithLogitsLoss()
+            loss_f = nn.BCELoss()
+            
+        if discriminator2 != None:
+            discriminator2.train()
         lr = 0.1
-        ones= Variable(torch.ones(self.batchsize)).cuda()
-        zero= Variable(torch.zeros(self.batchsize)).cuda()
 
         for iteration, batch in enumerate(tqdm(train_iter, desc='this epoch'), 1):
             image, pose, visibility = Variable(batch[0]), Variable(batch[1]), Variable(batch[2])
             if self.gpu:
                 image, pose, visibility = image.cuda(), pose.cuda(), visibility.cuda()
             
+            if discriminator != None:
+                s = image.size()
+                ones= Variable(torch.ones(s[0])).cuda()
+                zero= Variable(torch.zeros(s[0])).cuda()
+
             optimizer.zero_grad()
 
             if self.NN == "MobileNet_":
@@ -186,17 +214,49 @@ class TrainPoseNet(object):
                 offset, heatmap = model(image)
                 loss = mean_squared_error2(offset, heatmap, pose, visibility, self.use_visibility, col=56)
                 loss.backward()
-            elif self.NN == "MnasNet_+Discriminator":
+            elif self.NN == "MnasNet_+Discriminator" or self.NN == "MobileNet_3+Discriminator":
                 # fake data
+                model.zero_grad()
+                discriminator.zero_grad()
+                optimizer_d.zero_grad()
                 offset, heatmap = model(image)
+                
                 heatmap_tensor = heatmap.data
                 out = discriminator(heatmap)
-                loss_m, tt = mean_squared_error2GAN(offset, heatmap, pose, visibility, self.use_visibility)
-                #loss = loss_m + loss_f(out, ones[:heatmap.size()[0]]) * 0.1
+                #loss_m, tt = mean_squared_error2GAN(offset, Variable(heatmap.data), pose, visibility, self.use_visibility)
+                #loss = loss_m + loss_f(out, ones)
                 loss = loss_f(out, ones) 
                 loss.backward()
+                
+                s = heatmap.data.size()
+                tt = torch.zeros(s).float()
+                ti = pose*14
+                v = visibility
+                for i in range(s[0]):
+                    for j in range(14):
+
+                        if int(v[i, j, 0]) == 1:
+                            xi, yi, f = self.checkMatrix(int(ti[i, j, 0]), int(ti[i, j, 1]))
+                            
+                            if f == True:
+                                # 正規分布に近似したサンプルを得る
+                                # 平均は 100 、標準偏差を 1 
+                                tt[i, j, yi, xi]  = 1
+                                tt[i, j] = self.min_max(fi.gaussian_filter(tt[i, j], 1.0))
+                tt = tt.cuda()
+                diff1 = heatmap.data - tt
+                cnt = 0
+                for i in range(s[0]):
+                    for j in range(self.Nj):
+                        if int(v[i, j, 0]) == 0:
+                            diff1[i, j].data[0] = diff1[i, j].data[0]*0
+                        else:
+                            cnt = cnt + 1
+                diff1 = diff1.view(-1)
+                loss_m = diff1.dot(diff1) / cnt
+                
                 '''
-                s = heatmap.size()
+                s = heatmap.data.size()
                 tt = torch.zeros(s).float()
                 ti = pose*14
                 v = visibility
@@ -217,6 +277,19 @@ class TrainPoseNet(object):
                             #    v[i, j, 0] = 0
                             #    v[i, j, 1] = 0
                 '''
+            elif self.NN == "MobileNet_3+Discriminator2":
+                # fake data
+                model.zero_grad()
+                discriminator.zero_grad()
+                optimizer_d.zero_grad()
+                offset, heatmap = model(image)
+                heatmap_tensor = heatmap.data
+                loss_m, lossf1, lossf2, tt, tt224, xx_tensor = mean_squared_error224GAN(offset, heatmap, pose, visibility, discriminator, discriminator2, self.use_visibility)
+                #loss_m = mean_squared_error224GAN(offset, heatmap, pose, visibility, discriminator, discriminator2, self.use_visibility)
+
+                #loss = loss_m
+                loss = loss_m + lossf1 + lossf2
+                loss.backward()
             else :
                 output = model(image)
                 loss = mean_squared_error(output.view(-1, self.Nj, 2), pose, visibility, self.use_visibility)
@@ -225,22 +298,46 @@ class TrainPoseNet(object):
             optimizer.step()
             
             if discriminator != None:
+                model.zero_grad()
+                discriminator.zero_grad()
+                optimizer.zero_grad()
                 optimizer_d.zero_grad()
-                real_out = discriminator(tt)
+                real_out = discriminator(tt224)
                 loss_d_real = loss_f(real_out, ones[:heatmap.size()[0]]) 
-                hm = Variable(heatmap_tensor)
+                hm = Variable(xx_tensor)
                 fake_out = discriminator(hm)
                 loss_d_fake = loss_f(fake_out, zero[:heatmap.size()[0]]) 
                 loss_d = loss_d_real + loss_d_fake
                 loss_d.backward()
                 optimizer_d.step()
+
+            if discriminator2 != None:
+                model.zero_grad()
+                discriminator.zero_grad()
+                discriminator2.zero_grad()
+                optimizer.zero_grad()
+                optimizer_d2.zero_grad()
+                real_out2 = discriminator2(tt.cuda())
+                loss_d_real2 = loss_f(real_out2, ones[:heatmap.size()[0]]) 
+                hm = Variable(heatmap_tensor)
+                fake_out2 = discriminator2(hm)
+                loss_d_fake2 = loss_f(fake_out2, zero[:heatmap.size()[0]]) 
+                loss_d2 = loss_d_real2 + loss_d_fake2
+                loss_d2.backward()
+                optimizer_d2.step()
             
             if iteration % log_interval == 0:
-                log = 'elapsed_time: {0}, loss: {1}'.format(time.time() - start_time, loss.data[0])
-                logger.write(log, self.colab)
-                if discriminator != None:
-                    log_d = 'elapsed_time: {0}, loss_d: {1}'.format(time.time() - start_time, loss_d.data[0])
+                if discriminator2 != None:
+                    #log_d = 'elapsed_time: {0}, loss: {1}'.format(time.time() - start_time, loss)
+                    log_d = 'elapsed_time: {0:.3f}, loss_m: {1:.5f}, loss_f1: {2:.3f}, loss_f2: {3:.3f}, loss: {4:.3f}, _d1: {5:.4f}, _d2: {6:.4f}'.format(time.time() - start_time, loss_m, lossf1, lossf2, loss, loss_d, loss_d2)
                     logger.write(log_d, self.colab)
+                elif discriminator != None:
+                    log_d = 'elapsed_time: {0:.3f}, loss_m: {1:.3f}, loss_f: {2:.3f}, loss: {3:.3f}, _d_real: {4:.5f}, _d_fake: {5:.5f}, _d: {6:.5f}'.format(time.time() - start_time, loss_m, lossf, loss, loss_d_real, loss_d_fake, loss_d)
+                    #log_d = 'elapsed_time: {0}, loss: {1}'.format(time.time() - start_time, loss)
+                    logger.write(log_d, self.colab)
+                else:
+                    log = 'elapsed_time: {0}, loss: {1}'.format(time.time() - start_time, loss)
+                    logger.write(log, self.colab)
                 """
                 if loss.data[0] < 0.15 and lr > 0.001:
                     lr = 0.001
@@ -305,10 +402,14 @@ class TrainPoseNet(object):
                 elif self.NN == "MnasNet56_":
                     offset, heatmap = model(image)
                     test_loss += mean_squared_error2(offset, heatmap, pose, visibility, self.use_visibility, col=56)
-                elif self.NN == "MnasNet_+Discriminator":
+                elif self.NN == "MnasNet_+Discriminator" or self.NN == "MobileNet_3+Discriminator":
                     offset, heatmap = model(image)
                     loss, _ = mean_squared_error2GAN(offset, heatmap, pose, visibility, self.use_visibility)
-                    test_loss += loss.data[0]
+                    test_loss += loss.data
+                elif self.NN == "MobileNet_3+Discriminator2":
+                    offset, heatmap = model(image)
+                    loss = mean_squared_error2(offset, heatmap, pose, visibility, self.use_visibility)
+                    test_loss += loss.data
                 else :
                     output = model(image)
                     test_loss += mean_squared_error(output.view(-1, self.Nj, 2), pose, visibility, self.use_visibility)
@@ -319,7 +420,7 @@ class TrainPoseNet(object):
         if self.useOneDrive == True:
             logger.write_oneDrive(log)
 
-    def _checkpoint(self, epoch, model, optimizer, logger, discriminator=None):
+    def _checkpoint(self, epoch, model, optimizer, logger, discriminator=None, discriminator2=None):
         filename = os.path.join(self.out, 'pytorch', 'epoch-{0}'.format(epoch + 1))
         torch.save({'epoch': epoch + 1, 'logger': logger.state_dict()}, filename + '.iter')
         torch.save(model.state_dict(), filename + '.model')
@@ -327,6 +428,9 @@ class TrainPoseNet(object):
                             
         if discriminator != None:
             torch.save(discriminator.state_dict(), filename + '_d.model')
+                            
+        if discriminator2 != None:
+            torch.save(discriminator2.state_dict(), filename + '_d2.model')
 
         if self.colab == True:
             subprocess.run(["cp", "./result/pytorch/epoch-{0}.model".format(epoch + 1), "../drive/result/pytorch/epoch-{0}.model".format(epoch + 1)])
@@ -336,6 +440,8 @@ class TrainPoseNet(object):
         """ Train pose net. """
         discriminator = None
         optimizer_d = None
+        discriminator2 = None
+        optimizer_d2 = None
 
         # set random seed.
         if self.seed is not None:
@@ -387,6 +493,13 @@ class TrainPoseNet(object):
         elif self.NN == "MnasNet_+Discriminator":
             model = MnasNet_( )
             discriminator = Discriminator( )
+        elif self.NN == "MobileNet_3+Discriminator":
+            model = MobileNet_3( )
+            discriminator = Discriminator( )
+        elif self.NN == "MobileNet_3+Discriminator2":
+            model = MobileNet_3( )
+            discriminator = Discriminator2( )
+            discriminator2 = Discriminator( )
         else :
              model = AlexNet(self.Nj)
            
@@ -444,8 +557,10 @@ class TrainPoseNet(object):
         # prepare gpu.
         if self.gpu:
             model.cuda()
-            if self.NN == "MnasNet_+Discriminator":
+            if discriminator != None:
                 discriminator.cuda()
+            if discriminator2 != None:
+                discriminator2.cuda()
 
         # load the datasets.
         input_transforms = [transforms.ToTensor()]
@@ -466,12 +581,19 @@ class TrainPoseNet(object):
         train_iter = torch.utils.data.DataLoader(train, batch_size=self.batchsize, shuffle=True)
         val_iter = torch.utils.data.DataLoader(val, batch_size=self.batchsize, shuffle=False)
         # set up an optimizer.
-        optimizer = self._get_optimizer(model)
+        if discriminator != None:
+            optimizer = optim.Adam(model.parameters(), lr=0.0002, betas=(0.5, 0.999))
+        else:
+            optimizer = self._get_optimizer(model)
+
         if self.resume_opt:
             optimizer.load_state_dict(torch.load(self.resume_opt))
         
         if discriminator != None:
-            optimizer_d = self._get_optimizer(discriminator)
+            optimizer_d = optim.Adam(discriminator.parameters(), lr=0.0002, betas=(0.5, 0.999))
+
+        if discriminator2 != None:
+            optimizer_d2 = optim.Adam(discriminator2.parameters(), lr=0.0002, betas=(0.5, 0.999))
 
         # set intervals.
         val_interval = 1
@@ -489,8 +611,8 @@ class TrainPoseNet(object):
         # start training.
         start_time = time.time()
         for epoch in trange(start_epoch, self.epoch, initial=start_epoch, total=self.epoch, desc='     total'):
-            self._train(model, optimizer, train_iter, log_interval, logger, start_time, discriminator, optimizer_d)
+            self._train(model, optimizer, train_iter, log_interval, logger, start_time, discriminator, optimizer_d, discriminator2, optimizer_d2)
             if (epoch + 1) % val_interval == 0:
                 self._test(model, val_iter, logger, start_time)
             if (epoch + 1) % resume_interval == 0:
-                self._checkpoint(epoch, model, optimizer, logger, discriminator)
+                self._checkpoint(epoch, model, optimizer, logger, discriminator, discriminator2)

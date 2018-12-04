@@ -19,6 +19,7 @@ from modules.models.pytorch.MnasNet_ import MnasNet_
 from modules.models.pytorch.MnasNet56_ import MnasNet56_
 from modules.models.pytorch.MnasNet16_ import MnasNet16_
 from modules.models.pytorch.Discriminator import Discriminator
+from modules.models.pytorch.Discriminator2 import Discriminator2
 from modules.models.pytorch.MobileNet16_ import MobileNet16_
 from modules.models.pytorch.MobileNet14_ import MobileNet14_
 from modules.models.pytorch.MobileNet14_4 import MobileNet14_4
