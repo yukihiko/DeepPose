@@ -101,7 +101,7 @@ class MeanSquaredError2GAN(nn.Module):
         #N1 = (v.sum()/2)
 
         diff1 = diff1.view(-1)
-        d1 = diff1.dot(diff1) / (cnt * self.col*self.col)
+        d1 = diff1.dot(diff1) / cnt
         return d1, tt
 
         diff2 = x - t
