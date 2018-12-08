@@ -15,10 +15,10 @@ import scipy.ndimage.filters as fi
 
 from modules.errors import FileNotFoundError, GPUNotFoundError, UnknownOptimizationMethodError, NotSupportedError
 from modules.models.pytorch import AlexNet, VGG19Net, Inceptionv3, Resnet
-from modules.models.pytorch import MobileNet, MobileNetV2, MobileNet_, MobileNet_2, MobileNet_3, MobileNet_4, MobileNet__, MobileNet___, MobileNet16_
+from modules.models.pytorch import MobileNet, MobileNetV2, MobileNet_, MobileNet_2, MobileNet_3, MobileNet_4, MobileNet__, MobileNet___, MobileNet16_, MobileNet3D, MobileNet224HM
 from modules.models.pytorch import MnasNet, MnasNet_, MnasNet56_, Discriminator, Discriminator2
 from modules.dataset_indexing.pytorch import PoseDataset, Crop, RandomNoise, Scale
-from modules.functions.pytorch import mean_squared_error, mean_squared_error2,mean_squared_error3, mean_squared_error2_, mean_squared_error2__, mean_squared_error_FC3, mean_squared_error2GAN, mean_squared_error224GAN
+from modules.functions.pytorch import mean_squared_error, mean_squared_error2,mean_squared_error3, mean_squared_error2_, mean_squared_error2__, mean_squared_error_FC3, mean_squared_error2GAN, mean_squared_error224GAN, mean_squared_error224HM
 
 class TrainLogger(object):
     """ Logger of training pose net.
@@ -48,7 +48,7 @@ class TrainLogger(object):
 
     def write_oneDrive(self, log):
         """ Write log. """
-        self.file = open('C:/Users/aoyag/OneDrive/pytorch/log.txt', 'a')
+        self.file = open('C:/Users/aoyag/OneDrive/pytorch/log_dp.txt', 'a')
         tqdm.write(log, file=self.file)
         self.file.flush()
         self.file.close()
@@ -108,6 +108,7 @@ class TrainPoseNet(object):
         self.resume = kwargs['resume']
         self.resume_model = kwargs['resume_model']
         self.resume_discriminator = kwargs['resume_discriminator']
+        self.resume_discriminator2 = kwargs['resume_discriminator2']
         self.resume_opt = kwargs['resume_opt']
         self.colab = kwargs['colab']
         self.useOneDrive = kwargs['useOneDrive']
@@ -284,11 +285,18 @@ class TrainPoseNet(object):
                 optimizer_d.zero_grad()
                 offset, heatmap = model(image)
                 heatmap_tensor = heatmap.data
-                loss_m, lossf1, lossf2, tt, tt224, xx_tensor = mean_squared_error224GAN(offset, heatmap, pose, visibility, discriminator, discriminator2, self.use_visibility)
-                #loss_m = mean_squared_error224GAN(offset, heatmap, pose, visibility, discriminator, discriminator2, self.use_visibility)
+                #loss_m, lossf1, tt, tt224, xx_tensor = mean_squared_error224GAN(offset, heatmap, pose, visibility, discriminator, discriminator2, self.use_visibility)
+                #loss_m, lossf1, lossf2, tt, tt224, xx_tensor = mean_squared_error224GAN(offset, heatmap, pose, visibility, discriminator, discriminator2, self.use_visibility)
+                loss_m = mean_squared_error224GAN(offset, heatmap, pose, visibility, discriminator, discriminator2, self.use_visibility)
 
-                #loss = loss_m
-                loss = loss_m + lossf1 + lossf2
+                loss = loss_m
+                #loss = loss_m + lossf1 + lossf2
+                #loss = loss_m + lossf1 
+                loss.backward()
+                
+            elif self.NN == "MobileNet224HM":
+                heatmap = model(image)
+                loss = mean_squared_error224HM(heatmap, pose, visibility, self.use_visibility, col=224)
                 loss.backward()
             else :
                 output = model(image)
@@ -325,11 +333,12 @@ class TrainPoseNet(object):
                 loss_d2 = loss_d_real2 + loss_d_fake2
                 loss_d2.backward()
                 optimizer_d2.step()
-            
+
             if iteration % log_interval == 0:
                 if discriminator2 != None:
-                    #log_d = 'elapsed_time: {0}, loss: {1}'.format(time.time() - start_time, loss)
-                    log_d = 'elapsed_time: {0:.3f}, loss_m: {1:.5f}, loss_f1: {2:.3f}, loss_f2: {3:.3f}, loss: {4:.3f}, _d1: {5:.4f}, _d2: {6:.4f}'.format(time.time() - start_time, loss_m, lossf1, lossf2, loss, loss_d, loss_d2)
+                    log_d = 'elapsed_time: {0}, loss: {1}'.format(time.time() - start_time, loss)
+                    #log_d = 'elapsed_time: {0:.3f}, loss_m: {1:.5f}, loss_f1: {2:.6f}, loss_f2: {3:.6f}, loss: {4:.5f}, _d1: {5:.6f}, _d2: {6:.6f}'.format(time.time() - start_time, loss_m, lossf1, lossf2, loss, loss_d, loss_d2)
+                    #log_d = 'elapsed_time: {0:.3f}, loss_m: {1:.5f}, loss_f1: {2:.6f}, loss: {3:.5f}, _d1: {4:.6f}'.format(time.time() - start_time, loss_m, lossf1, loss, loss_d)
                     logger.write(log_d, self.colab)
                 elif discriminator != None:
                     log_d = 'elapsed_time: {0:.3f}, loss_m: {1:.3f}, loss_f: {2:.3f}, loss: {3:.3f}, _d_real: {4:.5f}, _d_fake: {5:.5f}, _d: {6:.5f}'.format(time.time() - start_time, loss_m, lossf, loss, loss_d_real, loss_d_fake, loss_d)
@@ -356,13 +365,16 @@ class TrainPoseNet(object):
                     torch.save(model, 'D:/github/DeepPose/result/pytorch/lastest.ptn.tar')
                     torch.save(model.state_dict(), 'D:/github/DeepPose/result/pytorch/lastest.model')
                     if self.useOneDrive == True:
-                        torch.save(model.state_dict(), 'C:/Users/aoyag/OneDrive/pytorch/lastest.model')
-                        logger.write_oneDrive(log)
+                        if discriminator2 != None:
+                            logger.write_oneDrive(log_d)
+                        else:
+                            torch.save(model.state_dict(), 'C:/Users/aoyag/OneDrive/pytorch/lastest.model')
+                            logger.write_oneDrive(log)
                     if discriminator != None:
                         torch.save(discriminator.state_dict(), 'D:/github/DeepPose/result/pytorch/lastest_d.model')
-                        if self.useOneDrive == True:
-                            torch.save(discriminator.state_dict(), 'C:/Users/aoyag/OneDrive/pytorch/lastest_d.model')
-                            logger.write_oneDrive(log_d)
+                        #if self.useOneDrive == True:
+                        #    torch.save(discriminator.state_dict(), 'C:/Users/aoyag/OneDrive/pytorch/lastest_d.model')
+                        #    logger.write_oneDrive(log_d)
                 except:
                     print("Unexpected error:")
 
@@ -409,6 +421,10 @@ class TrainPoseNet(object):
                 elif self.NN == "MobileNet_3+Discriminator2":
                     offset, heatmap = model(image)
                     loss = mean_squared_error2(offset, heatmap, pose, visibility, self.use_visibility)
+                    test_loss += loss.data
+                elif self.NN == "MobileNet224HM":
+                    heatmap = model(image)
+                    loss = mean_squared_error224HM(heatmap, pose, visibility, self.use_visibility, col=224)
                     test_loss += loss.data
                 else :
                     output = model(image)
@@ -500,6 +516,8 @@ class TrainPoseNet(object):
             model = MobileNet_3( )
             discriminator = Discriminator2( )
             discriminator2 = Discriminator( )
+        elif self.NN == "MobileNet224HM":
+            model = MobileNet224HM( )
         else :
              model = AlexNet(self.Nj)
            
@@ -509,6 +527,8 @@ class TrainPoseNet(object):
             #torch.save(model.state_dict(), 'del.model')
         if self.resume_discriminator:
             discriminator.load_state_dict(torch.load(self.resume_discriminator))
+        if self.resume_discriminator2:
+            discriminator2.load_state_dict(torch.load(self.resume_discriminator2))
         
         '''
         def conv_last(inp, oup, stride):

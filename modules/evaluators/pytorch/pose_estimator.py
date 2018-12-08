@@ -86,6 +86,15 @@ class PoseEstimator(object):
             offset, heatmap = self.model.forward(v_image)
         return image, offset, heatmap, pose
 
+    def estimate224(self, index):
+        """ Estimate pose of i-th image. """
+        image, pose, _, _ = self.dataset[index]
+        v_image = Variable(image.unsqueeze(0))
+        if self.gpu:
+            v_image = v_image.cuda()
+            heatmap = self.model.forward(v_image)
+        return image, heatmap, pose
+
     def estimate__(self, index):
         """ Estimate pose of i-th image. """
         image, pose, _, _ = self.dataset[index]

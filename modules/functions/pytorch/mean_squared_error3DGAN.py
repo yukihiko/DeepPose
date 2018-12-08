@@ -7,16 +7,16 @@ import numpy as np
 from torch.autograd import Variable
 import scipy.ndimage.filters as fi
 
-class MeanSquaredError224GAN(nn.Module):
+class MeanSquaredError3DGAN(nn.Module):
     """ Mean squared error (a.k.a. Euclidean loss) function. """
 
     def __init__(self, use_visibility=False, Nj=14, col=14, image_size=224):
-        super(MeanSquaredError224GAN, self).__init__()
+        super(MeanSquaredError3DGAN, self).__init__()
         self.use_visibility = use_visibility
         self.Nj = Nj
         self.col = col
         self.image_size = image_size
-        self.gaussian = 4.0
+        self.gaussian = 1.0
         self.loss_f = nn.BCEWithLogitsLoss()
 
     def min_max(self, x, axis=None, maxV=1.0):
@@ -35,7 +35,7 @@ class MeanSquaredError224GAN(nn.Module):
         offset, heatmap, pose, visibility, discriminator, discriminator2 = inputs
         
         s = heatmap.size()
-        scale = 1./float(self.col)
+        scale = 1./float(self.col)*self.image_size
         reshaped = heatmap.view(-1, self.Nj, self.col*self.col)
         _, argmax = reshaped.max(-1)
         yCoords = argmax/self.col
@@ -55,21 +55,15 @@ class MeanSquaredError224GAN(nn.Module):
                 ax[i, j, 0] = (offset[i, j, yc, xc] + xc.float()) * scale
                 ax[i, j, 1] = (offset[i, j + self.Nj, yc, xc] + yc.float()) * scale
                 
-                for hy in range(self.col):
-                    hyy = hy*16
-                    for hx in range(self.col):
-                        hxx = hx*16
-                        xx[i, j, hyy:hyy+16, hxx:hxx+16] = heatmap[i, j, hy, hx]
-                
-                x = (ax[i, j, 0]*self.image_size + 0.5).int()
-                y = (ax[i, j, 1]*self.image_size + 0.5).int()
+                x = (ax[i, j, 0] + 0.5).int()
+                y = (ax[i, j, 1] + 0.5).int()
                 x, y, f = self.checkSize(x, y)
 
-                hm = heatmap[i, j, yc, xc]
                 if f == True:
+                    hm = heatmap[i, j, yc, xc]
                     xx[i, j, y, x] = 1
-                xx[i, j] = Variable(self.min_max(fi.gaussian_filter(xx[i, j].data, 1.0)).data, requires_grad=True).cuda() * hm
-
+                    xx[i, j] = Variable(self.min_max(fi.gaussian_filter(xx[i, j].data, self.gaussian)).data, requires_grad=True).cuda() * hm
+                
                 if int(v[i, j, 0]) == 1:
                     
                     xi, yi, f = self.checkSize((ti[i, j, 0] + 0.5).int(), (ti[i, j, 1] + 0.5).int(), size=self.col)
@@ -92,15 +86,15 @@ class MeanSquaredError224GAN(nn.Module):
         #print(xx[0,0])
         xx_tensor = xx.data
 
-        '''
+        
         out = discriminator(xx)
         ones = Variable(torch.ones(s[0])).cuda()
         lossf1 = self.loss_f(out, ones) 
-
+        
         out2 = discriminator2(heatmap)
         ones2 = Variable(torch.ones(s[0])).cuda()
         lossf2 = self.loss_f(out2, ones2) 
-        '''
+        
         
         '''
         diff1 = xx - tt224
@@ -125,50 +119,16 @@ class MeanSquaredError224GAN(nn.Module):
         diff1 = diff1.view(-1)
         loss_m1 = diff1.dot(diff1) / cnt
 
-        diff2 = xx - tt224
-        cnt = 0
-        for i in range(s[0]):
-            for j in range(self.Nj):
-                if int(v[i, j, 0]) == 0:
-                    diff2[i, j] = diff2[i, j]*0
-                else:
-                    cnt = cnt + 1
-        diff2 = diff2.view(-1)
-        loss_m2 = diff2.dot(diff2) / cnt
-
-        '''
-        #diff2 = (ax - ti224)/224.
-        diff2 = ax - pose
+        diff2 = (ax - ti224)/224.
         diff2 = diff2*v
         N2 = (v.sum()/2)
         diff2 = diff2.view(-1)
         loss_m2 = diff2.dot(diff2)/N2
         #loss_m = torch.Tensor.sqrt(diff2.dot(diff2))/N2
-        '''
-        '''
-        for i in range(223):
-            str = ""
-            for j in range(223):
-                v =  xx[0, 0, i, j]
-                str = str + "{:.0f}".format(v*10) 
-            print(str)
-        '''
-        return loss_m1 + loss_m2
-        #return loss_m1 + loss_m2, lossf1, lossf2, tt, tt224, xx_tensor
-        #return loss_m1 + loss_m2, lossf1, tt, tt224, xx_tensor
+
+        #return loss_m1 + loss_m2
+        return loss_m1 + loss_m2, lossf1, lossf2, tt, tt224, xx_tensor
         
 
-def mean_squared_error224GAN(o, h, t, v, discriminator, discriminator2, use_visibility=False):
-    """ Computes mean squared error over the minibatch.
-
-    Args:
-        x (Variable): Variable holding an float32 vector of estimated pose.
-        t (Variable): Variable holding an float32 vector of ground truth pose.
-        v (Variable): Variable holding an int32 vector of ground truth pose's visibility.
-            (0: invisible, 1: visible)
-        use_visibility (bool): When it is ``True``,
-            the function uses visibility to compute mean squared error.
-    Returns:
-        Variable: A variable holding a scalar of the mean squared error loss.
-    """
-    return MeanSquaredError224GAN(use_visibility)(o, h, t, v, discriminator, discriminator2)
+def mean_squared_error3DGAN(o, h, t, v, discriminator, discriminator2, use_visibility=False):
+    return MeanSquaredError3DGAN(use_visibility)(o, h, t, v, discriminator, discriminator2)

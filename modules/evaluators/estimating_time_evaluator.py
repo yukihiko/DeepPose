@@ -55,7 +55,7 @@ class EstimatingTimeEvaluator(object):
                 start = time.time()
 
 
-                if self.NN == "MobileNet_" or self.NN == "MobileNet_3" or self.NN == "MobileNet_4" :
+                if self.NN == "MobileNet_" or self.NN == "MobileNet_4" :
                     image, offset, heatmap, testPose = estimator.estimate_(index)
                     _, size, _ = image.shape
                     scale = float(size)/float(self.col)
@@ -256,7 +256,27 @@ class EstimatingTimeEvaluator(object):
                     for j in range(14):   
                         if heatmap[0, j, int(yc[j]), int(xc[j])] > 0.3:
                             plt.scatter(dat_x[j], dat_y[j], color=cm.hsv(j/14.0),  s=10)
+                elif self.NN == self.NN == "MobileNet_3":
+                    self.col = 224
+                    image, heatmap, testPose = estimator.estimate224(index)
+                    _, size, _ = image.shape
 
+                    reshaped = heatmap.view(-1, self.Nj, self.col*self.col)
+                    _, argmax = reshaped.max(-1)
+                    yCoords = argmax/self.col
+                    xCoords = argmax - yCoords*self.col
+                    xc = np.squeeze(xCoords.cpu().data.numpy()).astype(np.float32)
+                    yc = np.squeeze(yCoords.cpu().data.numpy()).astype(np.float32)
+                    dat_x = xc
+                    dat_y = yc
+
+                    fig = plt.figure(figsize=(2.24, 2.24))
+
+                    img = image.numpy().transpose(1, 2, 0)
+                    plt.imshow(img, vmin=0., vmax=1.)
+                    for j in range(14):   
+                        #if heatmap[0, j, int(yc[j]), int(xc[j])] > 0.1:
+                        plt.scatter(dat_x[j], dat_y[j], color=cm.hsv(j/14.0),  s=10)
                 else:
                     image, pose, testPose = estimator.estimate(index)
                     _, size, _ = image.shape

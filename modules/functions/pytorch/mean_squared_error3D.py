@@ -7,7 +7,7 @@ import numpy as np
 from torch.autograd import Variable
 import scipy.ndimage.filters as fi
 
-class MeanSquaredError2(nn.Module):
+class MeanSquaredError3D(nn.Module):
     """ Mean squared error (a.k.a. Euclidean loss) function. """
 
     def __init__(self, use_visibility=False, Nj=14, col=14):
@@ -107,7 +107,7 @@ class MeanSquaredError2(nn.Module):
 
         diff1 = diff1.view(-1)
         d1 = diff1.dot(diff1) / cnt
-        #return d1
+        return d1
 
         diff2 = x - t
         diff2 = diff2*v
@@ -335,17 +335,5 @@ class MeanSquaredError2(nn.Module):
         '''
 
 
-def mean_squared_error2(o, h, t, v, use_visibility=False, col=14):
-    """ Computes mean squared error over the minibatch.
-
-    Args:
-        x (Variable): Variable holding an float32 vector of estimated pose.
-        t (Variable): Variable holding an float32 vector of ground truth pose.
-        v (Variable): Variable holding an int32 vector of ground truth pose's visibility.
-            (0: invisible, 1: visible)
-        use_visibility (bool): When it is ``True``,
-            the function uses visibility to compute mean squared error.
-    Returns:
-        Variable: A variable holding a scalar of the mean squared error loss.
-    """
-    return MeanSquaredError2(use_visibility, col=col)(o, h, t, v)
+def mean_squared_error3D(o, h, t, v, use_visibility=False, col=14):
+    return MeanSquaredError3D(use_visibility, col=col)(o, h, t, v)

@@ -58,15 +58,16 @@ class MobileNet_3(nn.Module):
         )
         #self.heatmap = nn.Conv2d(1024, self.Nj, 1)
         #self.offset = nn.Conv2d(1024, self.Nj*2, 1)
-        self.heatmap = conv_last(1024, self.Nj, 1)
-        self.offset = conv_last(1024, self.Nj*2, 1)
+        self.heatmap = nn.ConvTranspose2d(1024, self.Nj, 16, 16, 0)
+        #self.heatmap = conv_last(1024, self.Nj, 1)
+        #self.offset = conv_last(1024, self.Nj*2, 1)
 
     def forward(self, x):
         x = self.model(x)
         #x = x.view(-1, 1024)
         h = self.heatmap(x)
         h = F.sigmoid(h)
-        o = self.offset(x)
+        #o = self.offset(x)
         #print(h[0, 1])
 
-        return o, h
+        return h

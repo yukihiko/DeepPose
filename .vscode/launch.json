@@ -21,8 +21,8 @@
             "args": [
                 "10000",
                 "\"plot_estimating_time\"",
-                "--NN=MobileNet_4",
-                "--pytorch-model-file=${workspaceFolder}/result/pytorch/epoch-2.model",
+                "--NN=MobileNet_3",
+                "--pytorch-model-file=${workspaceFolder}/result/pytorch/epoch-117.model",
                 "-g0"
             ]
         },              
@@ -48,6 +48,7 @@
                 "--batchsize=30",
                 "--data-augmentation",
                 "--use-visibility",
+                "--useOneDrive",
                 "--out=${workspaceFolder}/result",
                 "--opt=Adam",
                 "-e5000"
@@ -61,10 +62,29 @@
             "args": [
                 "pytorch",
                 "-g0",
+                "--NN=MobileNet224HM",
+                "--batchsize=20",
+                "--resume-model=${workspaceFolder}/result/pytorch/epoch-117.model",
+                "--out=${workspaceFolder}/result",
+                "--data-augmentation",
+                "--use-visibility",
+                "--opt=Adam",
+                "-e5000"
+            ]
+        },
+        {
+            "name": "Python: tran GAN",
+            "type": "python",
+            "request": "launch",
+            "program": "${workspaceFolder}/scripts/train.py",
+            "args": [
+                "pytorch",
+                "-g0",
                 "--NN=MobileNet_3+Discriminator2",
                 "--batchsize=20",
-                "--resume-model=${workspaceFolder}/result/pytorch/MobileNet_3.model",
-                "--resume-discriminator=${workspaceFolder}/result/pytorch/epoch-1_d.model",
+                "--resume-model=${workspaceFolder}/result/pytorch/epoch-30.model",
+                "--resume-discriminator=${workspaceFolder}/result/pytorch/epoch-30_d.model",
+                "--resume-discriminator2=${workspaceFolder}/result/pytorch/epoch-30_d2.model",
                 "--out=${workspaceFolder}/result",
                 "--data-augmentation",
                 "--use-visibility",
@@ -85,15 +105,15 @@
             "program": "${workspaceFolder}/scripts/pytorch2onnx.py",
             "console": "none",
             "args": [
-                "--NN=MobileNet14_4",
+                "--NN=MobileNet14_5",
                 "--image_size=224",
                 "--is_checkpoint=0",
                 "--NJ=16",
                 "--Col=14",
-                "--input=result/pytorch/epoch-11.model",
-                "--onnx_output=result/MobileNet14_4.onnx",
-                "--output=result/MobileNet14_4.mlmodel",
-                "--onedrive=C:/Users/aoyag/OneDrive/pytorch/MobileNet14_4.mlmodel"
+                "--input=result/pytorch/epoch-142.model",
+                "--onnx_output=result/MobileNet14_5.onnx",
+                "--output=result/MobileNet14_5.mlmodel",
+                "--onedrive=C:/Users/aoyag/OneDrive/pytorch/MobileNet14_5.mlmodel"
             ]
         },        
         {
