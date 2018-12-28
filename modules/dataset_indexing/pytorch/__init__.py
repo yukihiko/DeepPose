@@ -2,7 +2,8 @@
 """ Dataset indexing module. """
 
 from modules.dataset_indexing.pytorch.pose_dataset import PoseDataset
+from modules.dataset_indexing.pytorch.pose_dataset3D import PoseDataset3D
 from modules.dataset_indexing.pytorch.transforms import Crop, RandomNoise, Scale
 
 
-__all__ = ['PoseDataset', 'Crop', 'RandomNoise', 'Scale']
+__all__ = ['PoseDataset', 'PoseDataset3D', 'Crop', 'RandomNoise', 'Scale']

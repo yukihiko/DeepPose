@@ -26,6 +26,7 @@ from modules.models.pytorch.MobileNet14_4 import MobileNet14_4
 from modules.models.pytorch.MobileNet14_5 import MobileNet14_5
 from modules.models.pytorch.MobileNet3D import MobileNet3D
 from modules.models.pytorch.MobileNet224HM import MobileNet224HM
+from modules.models.pytorch.MobileNetCoco14_5 import MobileNetCoco14_5
 
 
-__all__ = ['AlexNet', 'VGG19Net', 'Inceptionv3', 'Resnet', 'MobileNet', 'MobileNetV2', 'MobileNet_', 'MobileNet_2', 'MobileNet_3', 'MobileNet_4','Lin_View', 'MobileNet__', 'MobileNet___', 'MnasNet', 'MnasNet_', 'MnasNet56_', 'MnasNet16_', 'Discriminator', 'MobileNet16_', 'MobileNet14_', 'MobileNet14_4', 'MobileNet14_5', 'MobileNet3D', 'MobileNet224HM']
+__all__ = ['AlexNet', 'VGG19Net', 'Inceptionv3', 'Resnet', 'MobileNet', 'MobileNetV2', 'MobileNet_', 'MobileNet_2', 'MobileNet_3', 'MobileNet_4','Lin_View', 'MobileNet__', 'MobileNet___', 'MnasNet', 'MnasNet_', 'MnasNet56_', 'MnasNet16_', 'Discriminator', 'MobileNet16_', 'MobileNet14_', 'MobileNet14_4', 'MobileNet14_5', 'MobileNet3D', 'MobileNet224HM', 'MobileNetCoco14_5']

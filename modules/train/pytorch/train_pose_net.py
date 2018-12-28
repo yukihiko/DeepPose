@@ -17,8 +17,8 @@ from modules.errors import FileNotFoundError, GPUNotFoundError, UnknownOptimizat
 from modules.models.pytorch import AlexNet, VGG19Net, Inceptionv3, Resnet
 from modules.models.pytorch import MobileNet, MobileNetV2, MobileNet_, MobileNet_2, MobileNet_3, MobileNet_4, MobileNet__, MobileNet___, MobileNet16_, MobileNet3D, MobileNet224HM
 from modules.models.pytorch import MnasNet, MnasNet_, MnasNet56_, Discriminator, Discriminator2
-from modules.dataset_indexing.pytorch import PoseDataset, Crop, RandomNoise, Scale
-from modules.functions.pytorch import mean_squared_error, mean_squared_error2,mean_squared_error3, mean_squared_error2_, mean_squared_error2__, mean_squared_error_FC3, mean_squared_error2GAN, mean_squared_error224GAN, mean_squared_error224HM
+from modules.dataset_indexing.pytorch import PoseDataset, PoseDataset3D, Crop, RandomNoise, Scale
+from modules.functions.pytorch import mean_squared_error, mean_squared_error2,mean_squared_error3, mean_squared_error2_, mean_squared_error2__, mean_squared_error_FC3, mean_squared_error2GAN, mean_squared_error224GAN, mean_squared_error224HM,mean_squared_error3D
 
 class TrainLogger(object):
     """ Logger of training pose net.
@@ -112,6 +112,7 @@ class TrainPoseNet(object):
         self.resume_opt = kwargs['resume_opt']
         self.colab = kwargs['colab']
         self.useOneDrive = kwargs['useOneDrive']
+        self.dataset3D = kwargs['Dataset3D']
         # validate arguments.
         self._validate_arguments()
 
@@ -298,6 +299,10 @@ class TrainPoseNet(object):
                 heatmap = model(image)
                 loss = mean_squared_error224HM(heatmap, pose, visibility, self.use_visibility, col=224)
                 loss.backward()
+            elif self.NN == "MobileNet3D":
+                offset, heatmap = model(image)
+                loss = mean_squared_error3D(offset, heatmap, pose, visibility, self.use_visibility)
+                loss.backward()
             else :
                 output = model(image)
                 loss = mean_squared_error(output.view(-1, self.Nj, 2), pose, visibility, self.use_visibility)
@@ -426,6 +431,10 @@ class TrainPoseNet(object):
                     heatmap = model(image)
                     loss = mean_squared_error224HM(heatmap, pose, visibility, self.use_visibility, col=224)
                     test_loss += loss.data
+                elif self.NN == "MobileNet3D":
+                    offset, heatmap = model(image)
+                    loss = mean_squared_error3D(offset, heatmap, pose, visibility, self.use_visibility)
+                    test_loss += loss.data
                 else :
                     output = model(image)
                     test_loss += mean_squared_error(output.view(-1, self.Nj, 2), pose, visibility, self.use_visibility)
@@ -518,6 +527,8 @@ class TrainPoseNet(object):
             discriminator2 = Discriminator( )
         elif self.NN == "MobileNet224HM":
             model = MobileNet224HM( )
+        elif self.NN == "MobileNet3D":
+            model = MobileNet3D( )
         else :
              model = AlexNet(self.Nj)
            
@@ -586,17 +597,28 @@ class TrainPoseNet(object):
         input_transforms = [transforms.ToTensor()]
         if self.data_augmentation:
             input_transforms.append(RandomNoise())
-        train = PoseDataset(
-            self.train,
-            input_transform=transforms.Compose(input_transforms),
-            output_transform=Scale(),
-            transform=Crop(data_augmentation=self.data_augmentation))
-        val = PoseDataset(
-            self.val,
-            input_transform=transforms.Compose([
-                transforms.ToTensor()]),
-            output_transform=Scale(),
-            transform=Crop(data_augmentation=False))
+        
+        if self.dataset3D:
+            train = PoseDataset3D(
+                self.train,
+                input_transform=transforms.Compose(input_transforms))
+            val = PoseDataset3D(
+                self.val,
+                input_transform=transforms.Compose([
+                    transforms.ToTensor()]))
+        else:
+            train = PoseDataset(
+                self.train,
+                input_transform=transforms.Compose(input_transforms),
+                output_transform=Scale(),
+                transform=Crop(data_augmentation=self.data_augmentation))
+            val = PoseDataset(
+                self.val,
+                input_transform=transforms.Compose([
+                    transforms.ToTensor()]),
+                output_transform=Scale(),
+                transform=Crop(data_augmentation=False))
+                
         # training/validation iterators.
         train_iter = torch.utils.data.DataLoader(train, batch_size=self.batchsize, shuffle=True)
         val_iter = torch.utils.data.DataLoader(val, batch_size=self.batchsize, shuffle=False)

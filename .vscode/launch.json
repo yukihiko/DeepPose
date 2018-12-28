@@ -21,8 +21,10 @@
             "args": [
                 "10000",
                 "\"plot_estimating_time\"",
-                "--NN=MobileNet_3",
-                "--pytorch-model-file=${workspaceFolder}/result/pytorch/epoch-117.model",
+                "--NN=MobileNet3D",
+                "--filename=data/test3D",
+                "--Dataset3D",
+                "--pytorch-model-file=${workspaceFolder}/result/pytorch/epoch-15.model",
                 "-g0"
             ]
         },              
@@ -73,6 +75,49 @@
             ]
         },
         {
+            "name": "Python: tran3D_restart",
+            "type": "python",
+            "request": "launch",
+            "program": "${workspaceFolder}/scripts/train.py",
+            "args": [
+                "pytorch",
+                "-g0",
+                "--Dataset3D",
+                "--train=${workspaceFolder}/data/train3D",
+                "--val=${workspaceFolder}/data/test3D",
+                "--NN=MobileNet3D",
+                "--batchsize=30",
+                "--data-augmentation",
+                "--use-visibility",
+                "--useOneDrive",
+                "--out=${workspaceFolder}/result",
+                "--opt=Adam",
+                "-e5000"
+            ]
+        },        
+        {
+            "name": "Python: tran3D",
+            "type": "python",
+            "request": "launch",
+            "program": "${workspaceFolder}/scripts/train.py",
+            "args": [
+                "pytorch",
+                "-g0",
+                "--Dataset3D",
+                "--train=${workspaceFolder}/data/train3D",
+                "--val=${workspaceFolder}/data/test3D",
+                "--NN=MobileNet3D",
+                "--batchsize=50",
+                "--data-augmentation",
+                "--use-visibility",
+                "--useOneDrive",
+                "--resume-model=${workspaceFolder}/result/pytorch/epoch-9.model",
+                "--out=${workspaceFolder}/result",
+                "--opt=Adam",
+                "-e5000"
+            ]
+        },
+        {
             "name": "Python: tran GAN",
             "type": "python",
             "request": "launch",
@@ -105,15 +150,15 @@
             "program": "${workspaceFolder}/scripts/pytorch2onnx.py",
             "console": "none",
             "args": [
-                "--NN=MobileNet14_5",
+                "--NN=MobileNetCoco14_5",
                 "--image_size=224",
                 "--is_checkpoint=0",
-                "--NJ=16",
+                "--NJ=17",
                 "--Col=14",
-                "--input=result/pytorch/epoch-142.model",
-                "--onnx_output=result/MobileNet14_5.onnx",
-                "--output=result/MobileNet14_5.mlmodel",
-                "--onedrive=C:/Users/aoyag/OneDrive/pytorch/MobileNet14_5.mlmodel"
+                "--input=result/pytorch/epoch-29.model",
+                "--onnx_output=result/MobileNetCoco14_5.onnx",
+                "--output=result/MobileNetCoco14_5.mlmodel",
+                "--onedrive=C:/Users/aoyag/OneDrive/pytorch/MobileNetCoco14_5.mlmodel"
             ]
         },        
         {

@@ -6,8 +6,8 @@ from torch.autograd import Variable
 from torchvision import transforms
 
 from modules.errors import GPUNotFoundError
-from modules.dataset_indexing.pytorch import PoseDataset, Crop, RandomNoise, Scale
-from modules.models.pytorch import AlexNet, VGG19Net, Inceptionv3, Resnet, MobileNet, MobileNet_, MobileNet_3, MobileNet_4, MobileNet__, MobileNet___, MnasNet, MnasNet_, MnasNet56_
+from modules.dataset_indexing.pytorch import PoseDataset, PoseDataset3D, Crop, RandomNoise, Scale
+from modules.models.pytorch import AlexNet, VGG19Net, Inceptionv3, Resnet, MobileNet, MobileNet_, MobileNet_3, MobileNet_4, MobileNet__, MobileNet___, MnasNet, MnasNet_, MnasNet56_, MobileNet3D
 
 
 class PoseEstimator(object):
@@ -20,7 +20,7 @@ class PoseEstimator(object):
         filename (str): Image-pose list file.
     """
 
-    def __init__(self, Nj, NN, gpu, model_file, filename, isEval=True):
+    def __init__(self, Nj, NN, gpu, model_file, filename, Dataset3D, isEval=True):
         # validate arguments.
         self.gpu = (gpu >= 0)
         self.NN = NN
@@ -47,6 +47,8 @@ class PoseEstimator(object):
             self.model = MnasNet56_()
         elif self.NN == "AlexNet":
             self.model = AlexNet(Nj)
+        elif self.NN == "MobileNet3D":
+            self.model = MobileNet3D()
         else:
             self.model = Resnet()
 
@@ -57,13 +59,25 @@ class PoseEstimator(object):
         if self.gpu:
             self.model.cuda()
         # load dataset to estimate.
-        self.dataset = PoseDataset(
-            filename,
-            input_transform=transforms.Compose([
-                transforms.ToTensor(),
-                RandomNoise()]),
-            output_transform=Scale(),
-            transform=Crop(data_augmentation=False))
+        if Dataset3D:
+            self.dataset = PoseDataset3D(
+                filename,
+                input_transform=transforms.ToTensor())
+            '''
+            self.dataset = PoseDataset3D(
+                filename,
+                input_transform=transforms.Compose([
+                    transforms.ToTensor(),
+                    RandomNoise()]))
+            '''
+        else:
+            self.dataset = PoseDataset(
+                filename,
+                input_transform=transforms.Compose([
+                    transforms.ToTensor(),
+                    RandomNoise()]),
+                output_transform=Scale(),
+                transform=Crop(data_augmentation=False))
 
     def get_dataset_size(self):
         """ Get size of dataset. """

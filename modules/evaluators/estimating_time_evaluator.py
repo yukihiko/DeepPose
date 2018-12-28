@@ -8,6 +8,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib.cm as cm
 import torch
+from mpl_toolkits.mplot3d import Axes3D
 
 from modules.evaluators import chainer, pytorch
 
@@ -38,7 +39,7 @@ class EstimatingTimeEvaluator(object):
             #'chainer': chainer.PoseEstimator(
             #    kwargs['Nj'], kwargs['gpu'], kwargs['chainer_model_file'], kwargs['filename']),
             'pytorch': pytorch.PoseEstimator(
-                kwargs['Nj'], kwargs['NN'], kwargs['gpu'], kwargs['pytorch_model_file'], kwargs['filename'])}
+                kwargs['Nj'], kwargs['NN'], kwargs['gpu'], kwargs['pytorch_model_file'], kwargs['filename'], kwargs['Dataset3D'])}
         self.debug = kwargs['debug']
 
     def plot(self, samples, title):
@@ -277,6 +278,40 @@ class EstimatingTimeEvaluator(object):
                     for j in range(14):   
                         #if heatmap[0, j, int(yc[j]), int(xc[j])] > 0.1:
                         plt.scatter(dat_x[j], dat_y[j], color=cm.hsv(j/14.0),  s=10)
+                elif self.NN == "MobileNet3D":
+                    self.col = 14
+                    self.Nj = 23
+                    image, offset, heatmap, testPose = estimator.estimate_(index)
+                    _, size, _ = image.shape
+                    #scale = float(size)/float(self.col)
+                    scale = 1.0
+
+                    reshaped = heatmap.view(-1, self.Nj, self.col*self.col)
+                    _, argmax = reshaped.max(-1)
+                    yCoords = argmax/self.col
+                    xCoords = argmax - yCoords*self.col
+                    xc = np.squeeze(xCoords.cpu().data.numpy()).astype(np.float32)
+                    yc = np.squeeze(yCoords.cpu().data.numpy()).astype(np.float32)
+                    dat_x = xc * scale
+                    dat_y = yc * scale
+                    dat_z = yc * scale
+               
+                    # 最終
+                    offset_reshaped = offset.view(-1, self.Nj * 3, self.col,self.col)
+                    op = np.squeeze(offset_reshaped.cpu().data.numpy())
+                    for j in range(self.Nj):
+                            dat_x[j] = (op[j, int(yc[j]), int(xc[j])] + dat_x[j]/self.col) * 224
+                            dat_y[j] = -1*((op[j + self.Nj, int(yc[j]), int(xc[j])] + dat_y[j]/self.col) * 224)
+                            dat_z[j] = (op[j + self.Nj*2, int(yc[j]), int(xc[j])]) * 224
+
+                    fig = plt.figure(figsize=(2.24, 2.24))
+                    plt.subplots_adjust(left=0, right=1, bottom=0, top=1)
+
+                    img = image.numpy().transpose(1, 2, 0)
+                    plt.imshow(img, vmin=0., vmax=1.12)
+                    for j in range(self.Nj):   
+                        plt.scatter(dat_x[j], dat_y[j], color=cm.hsv(j/self.Nj),  s=10)
+                                        
                 else:
                     image, pose, testPose = estimator.estimate(index)
                     _, size, _ = image.shape
@@ -304,8 +339,20 @@ class EstimatingTimeEvaluator(object):
                         plt.scatter(dat_x[i], dat_y[i], color=cm.hsv(i/14.0),  s=8)
 
                 plt.axis("off")
-                plt.savefig(os.path.join(self.output, '{}.png'.format(index)))
+                plt.savefig(os.path.join(self.output, '{}_1.png'.format(index)))
                 plt.close(fig)
+
+                fig3D = plt.figure()
+                ax = fig3D.add_subplot(111, projection='3d')
+                for j in range(self.Nj):   
+                    ax.scatter(dat_x[j], dat_z[j], 224 - dat_y[j], color=cm.hsv(j/self.Nj),  s=5)
+                    
+                ax.set_xlim(0, 224)
+                ax.set_ylim(-112, 112)
+                ax.set_zlim(0, 224)
+                #plt.show()
+                plt.savefig(os.path.join(self.output, '{}_2.png'.format(index)))
+                plt.close(fig3D)
 
                 compute_time.append(time.time() - start)
             # calculate mean and std.

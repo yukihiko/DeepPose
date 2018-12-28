@@ -46,6 +46,8 @@ def main():
     parser.add_argument(
         '--useOneDrive',  action='store_true')
     parser.add_argument(
+        '--Dataset3D',  action='store_true')
+    parser.add_argument(
         '--resume', default=None,
         help='Initialize the trainer from given file. \
         The file name is "epoch-{epoch number}.iter".')

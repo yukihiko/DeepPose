@@ -34,6 +34,8 @@ def main():
     parser.add_argument(
         '--output', '-o', type=str, default='result', help='Output directory.')
     parser.add_argument(
+        '--Dataset3D',  action='store_true')
+    parser.add_argument(
         '--debug', action='store_true', help='Debug mode.')
     args = parser.parse_args()
     args_dict = vars(args)
