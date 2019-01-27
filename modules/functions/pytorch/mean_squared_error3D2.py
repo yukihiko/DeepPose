@@ -94,6 +94,8 @@ class MeanSquaredError3D2(nn.Module):
 
                     tt[i, j][img_y[0]:img_y[1], img_x[0]:img_x[1]] = torch.Tensor(self.gaussian2DM[g_y[0]:g_y[1], g_x[0]:g_x[1]]) 
 
+                if d <= -990:
+                    continue
                 
                 # 3D判定
                 jj = j * self.col
@@ -174,7 +176,8 @@ class MeanSquaredError3D2(nn.Module):
         diff2 = diff2.view(-1)
         d2 = torch.sqrt(diff2.dot(diff2))/N2
 
-        #return d1 + d2
+        if d <= -990:
+            return d1 + d2
 
         #3D
 

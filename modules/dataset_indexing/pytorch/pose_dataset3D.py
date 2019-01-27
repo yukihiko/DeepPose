@@ -61,7 +61,7 @@ class PoseDataset3D(data.Dataset):
                 pose2D[i] = affine_transform(pose2D[i]*224.0, trans)/224.0
                 pose3D[i, 0:2] = affine_transform(pose3D[i, 0:2]*224.0, trans)/224.0
         
-        image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
+        #image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
         image = image.transpose(2,0,1)/255.0
         
         '''
@@ -82,6 +82,25 @@ class PoseDataset3D(data.Dataset):
         poses2D = []
         visibilities = []
         image_types = []
+        for line in open('data/train'):
+
+            line_split = line[:-1].split(',')
+            # 通常の画像
+            images.append(line_split[0])
+            x = torch.Tensor(list(map(float, line_split[1:])))
+            x = x.view(-1, 3)
+            p = x[:, :2]
+            pose2D = p[[5, 4, 3, 2, 1, 0, 11, 10, 9, 8, 7, 6, 12, 13]]
+            pose3D = torch.zeros(poses2D.size()[0], 3).float()
+            visibility = x[:, 2].clone().view(-1, 1).expand_as(pose3D)
+            
+            images.append(line_split[0])
+            dists.append(float(-999))
+            poses3D.append(pose3D)
+            poses2D.append(pose2D)
+            visibilities.append(visibility)
+            image_types.append("L")
+
         for line in open(self.path):
 
             line_split = line[:-1].split(',')
