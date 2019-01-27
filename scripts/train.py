@@ -38,6 +38,8 @@ def main():
     parser.add_argument(
         '--val', type=str, default='data/test', help='Path to validation image-pose list file.')
     parser.add_argument(
+        '--test', type=str, default='data/test', help='Path to validation image-pose list file.')
+    parser.add_argument(
         '--batchsize', type=int, default=32, help='Learning minibatch size.')
     parser.add_argument(
         '--out', default='result', help='Output directory')
@@ -51,6 +53,8 @@ def main():
         '--resume', default=None,
         help='Initialize the trainer from given file. \
         The file name is "epoch-{epoch number}.iter".')
+    parser.add_argument(
+        '--target3DIndex', type=int, default=1, help='.')
     parser.add_argument(
         '--resume-model', type=str, default=None,
         help='Load model definition file to use for resuming training \
@@ -71,6 +75,8 @@ def main():
         help='Load optimization states from this file \
         (it\'s necessary when you resume a training). \
         The file name is "epoch-{epoch number}.state"')
+    parser.add_argument(
+        '--testout', default='result', help='Output directory')
     args = parser.parse_args()
     args_dict = vars(args)
     if args.mode == 'chainer':

@@ -12,13 +12,18 @@ from torchvision import transforms, models
 import torch.nn as nn
 import subprocess
 import scipy.ndimage.filters as fi
+from time import sleep
+import numpy as np
+import matplotlib.pyplot as plt
+import matplotlib.cm as cm
+from mpl_toolkits.mplot3d import Axes3D
 
 from modules.errors import FileNotFoundError, GPUNotFoundError, UnknownOptimizationMethodError, NotSupportedError
 from modules.models.pytorch import AlexNet, VGG19Net, Inceptionv3, Resnet
-from modules.models.pytorch import MobileNet, MobileNetV2, MobileNet_, MobileNet_2, MobileNet_3, MobileNet_4, MobileNet__, MobileNet___, MobileNet16_, MobileNet3D, MobileNet224HM
-from modules.models.pytorch import MnasNet, MnasNet_, MnasNet56_, Discriminator, Discriminator2
+from modules.models.pytorch import MobileNet, MobileNetV2, MobileNet_, MobileNet_2, MobileNet_3, MobileNet_4, MobileNet__, MobileNet___, MobileNet16_, MobileNet3D, MobileNet3D2, MobileNet224HM
+from modules.models.pytorch import MnasNet, MnasNet_, MnasNet56_, MnasNet3D, Discriminator, Discriminator2
 from modules.dataset_indexing.pytorch import PoseDataset, PoseDataset3D, Crop, RandomNoise, Scale
-from modules.functions.pytorch import mean_squared_error, mean_squared_error2,mean_squared_error3, mean_squared_error2_, mean_squared_error2__, mean_squared_error_FC3, mean_squared_error2GAN, mean_squared_error224GAN, mean_squared_error224HM,mean_squared_error3D
+from modules.functions.pytorch import mean_squared_error, mean_squared_error2,mean_squared_error3, mean_squared_error2_, mean_squared_error2__, mean_squared_error_FC3, mean_squared_error2GAN, mean_squared_error224GAN, mean_squared_error224HM,mean_squared_error3D,mean_squared_error3D2
 
 class TrainLogger(object):
     """ Logger of training pose net.
@@ -103,6 +108,7 @@ class TrainPoseNet(object):
         self.seed = kwargs['seed']
         self.train = kwargs['train']
         self.val = kwargs['val']
+        self.test = kwargs['test']
         self.batchsize = kwargs['batchsize']
         self.out = kwargs['out']
         self.resume = kwargs['resume']
@@ -113,6 +119,8 @@ class TrainPoseNet(object):
         self.colab = kwargs['colab']
         self.useOneDrive = kwargs['useOneDrive']
         self.dataset3D = kwargs['Dataset3D']
+        self.target3DIndex = kwargs['target3DIndex']
+        self.testout = kwargs['testout']
         # validate arguments.
         self._validate_arguments()
 
@@ -121,9 +129,9 @@ class TrainPoseNet(object):
             raise NotSupportedError('It is not supported to fix random seed for data augmentation.')
         if self.gpu and not torch.cuda.is_available():
             raise GPUNotFoundError('GPU is not found.')
-        for path in (self.train, self.val):
-            if not os.path.isfile(path):
-                raise FileNotFoundError('{0} is not found.'.format(path))
+        #for path in (self.train, self.val):
+        #    if not os.path.isfile(path):
+        #        raise FileNotFoundError('{0} is not found.'.format(path))
         if self.opt not in ('MomentumSGD', 'Adam'):
             raise UnknownOptimizationMethodError(
                 '{0} is unknown optimization method.'.format(self.opt))
@@ -169,7 +177,12 @@ class TrainPoseNet(object):
         lr = 0.1
 
         for iteration, batch in enumerate(tqdm(train_iter, desc='this epoch'), 1):
-            image, pose, visibility = Variable(batch[0]), Variable(batch[1]), Variable(batch[2])
+            if self.NN == "MobileNet3D2":
+                image, dist, pose, pose3D, visibility = Variable(batch[0]), batch[1], Variable(batch[2]), Variable(batch[3]), Variable(batch[4])
+                pose3D = pose3D.cuda()
+            else :
+                image, pose, visibility = Variable(batch[0]), Variable(batch[1]), Variable(batch[2])
+
             if self.gpu:
                 image, pose, visibility = image.cuda(), pose.cuda(), visibility.cuda()
             
@@ -299,9 +312,13 @@ class TrainPoseNet(object):
                 heatmap = model(image)
                 loss = mean_squared_error224HM(heatmap, pose, visibility, self.use_visibility, col=224)
                 loss.backward()
-            elif self.NN == "MobileNet3D":
+            elif self.NN == "MobileNet3D" or self.NN == "MnasNet3D":
                 offset, heatmap = model(image)
                 loss = mean_squared_error3D(offset, heatmap, pose, visibility, self.use_visibility)
+                loss.backward()
+            elif self.NN == "MobileNet3D2":
+                offset, heatmap, offset3D, heatmap3D = model(image)
+                loss = mean_squared_error3D2(offset, heatmap, offset3D, heatmap3D, dist, pose, pose3D, visibility, self.use_visibility, batch[6])
                 loss.backward()
             else :
                 output = model(image)
@@ -383,12 +400,17 @@ class TrainPoseNet(object):
                 except:
                     print("Unexpected error:")
 
-    def _test(self, model, test_iter, logger, start_time):
+    def _val(self, model, test_iter, logger, start_time):
         model.eval()
         test_loss = 0
         with torch.no_grad():
             for batch in test_iter:
-                image, pose, visibility = Variable(batch[0], volatile=True), Variable(batch[1], volatile=True), Variable(batch[2], volatile=True)
+                if self.NN == "MobileNet3D2":
+                    image, dist, pose, pose3D, visibility = Variable(batch[0]), batch[1], Variable(batch[2]), Variable(batch[3]), Variable(batch[4])
+                    pose3D = pose3D.cuda()
+                else :
+                    image, pose, visibility = Variable(batch[0], volatile=True), Variable(batch[1], volatile=True), Variable(batch[2], volatile=True)
+                
                 if self.gpu:
                     image, pose, visibility = image.cuda(), pose.cuda(), visibility.cuda()
                 
@@ -431,9 +453,13 @@ class TrainPoseNet(object):
                     heatmap = model(image)
                     loss = mean_squared_error224HM(heatmap, pose, visibility, self.use_visibility, col=224)
                     test_loss += loss.data
-                elif self.NN == "MobileNet3D":
+                elif self.NN == "MobileNet3D" or self.NN == "MnasNet3D":
                     offset, heatmap = model(image)
                     loss = mean_squared_error3D(offset, heatmap, pose, visibility, self.use_visibility)
+                    test_loss += loss.data
+                elif self.NN == "MobileNet3D2":
+                    offset, heatmap, offset3D, heatmap3D = model(image)
+                    loss = mean_squared_error3D2(offset, heatmap, offset3D, heatmap3D, dist, pose, pose3D, visibility, self.use_visibility, batch[6])
                     test_loss += loss.data
                 else :
                     output = model(image)
@@ -441,6 +467,117 @@ class TrainPoseNet(object):
 
         test_loss /= len(test_iter)
         log = 'elapsed_time: {0}, validation/loss: {1}'.format(time.time() - start_time, test_loss)
+        logger.write(log, self.colab)
+        if self.useOneDrive == True:
+            logger.write_oneDrive(log)
+
+    def _test(self, model, test, logger, start_time, epoch):
+        model.eval()
+        index = 0
+        with torch.no_grad():
+            for item in test:
+                index = index + 1
+                image, dist, pose, pose3D, visibility = Variable(item[0]), item[1], Variable(item[2]), Variable(item[3]), Variable(item[4])
+                v_image = Variable(image.unsqueeze(0))
+
+                if self.gpu:
+                    v_image = v_image.cuda()
+                #    image, pose, visibility = image.cuda(), pose.cuda(), visibility.cuda()
+                
+                if self.NN == "MobileNet3D2":
+                    self.col = 14
+                    self.Nj = 24
+                    offset2D, heatmap2D, offset3D, heatmap3D = model(v_image)
+                    imgSize = 224
+                    #scale = float(size)/float(self.col)
+                    reshaped = heatmap2D.view(-1, self.Nj, self.col*self.col)
+                    _, argmax = reshaped.max(-1)
+                    yCoords = argmax/self.col
+                    xCoords = argmax - yCoords*self.col
+                    xc = np.squeeze(xCoords.cpu().data.numpy())
+                    yc = np.squeeze(yCoords.cpu().data.numpy())
+                    dat_x = xc.astype(np.float32)
+                    dat_y = yc.astype(np.float32)
+                    # 最終
+                    offset_reshaped = offset2D.view(-1, self.Nj * 2, self.col,self.col)
+                    op = np.squeeze(offset_reshaped.cpu().data.numpy())
+                    for j in range(self.Nj):
+                        dat_x[j] = (op[j, int(yc[j]), int(xc[j])] + dat_x[j]/float(self.col)) * imgSize
+                        dat_y[j] = (op[j + 14, int(yc[j]), int(xc[j])] + dat_y[j]/float(self.col)) * imgSize
+
+                    fig = plt.figure(figsize=(2.24, 2.24))
+
+                    plt.subplots_adjust(left=0, right=1, bottom=0, top=1)
+
+                    img = image.numpy().transpose(1, 2, 0)
+                    plt.imshow(img, vmin=0., vmax=1.12)
+                    for j in range(self.Nj):   
+                        plt.scatter(dat_x[j], dat_y[j], color=cm.hsv(j/self.Nj),  s=10)
+
+                    plt.axis("off")
+                    plt.savefig(os.path.join(self.testout, '{}_1.png'.format(index)))
+                    plt.close(fig)
+
+                    #3D
+                    scale = 1.0
+                    dat_x = np.zeros(self.Nj, dtype=np.float32)
+                    dat_y = np.zeros(self.Nj, dtype=np.float32)
+                    dat_z = np.zeros(self.Nj, dtype=np.float32)
+                    offset_reshaped = offset3D.view(-1, self.Nj*self.col * 3, self.col,self.col)
+                    op = np.squeeze(offset_reshaped.cpu().data.numpy())
+
+                    for j in range(self.Nj):
+
+                        jj = j * self.col
+        
+                        hp = heatmap3D[:, jj:jj+self.col].squeeze()
+                        reshaped = hp.view(self.col*self.col*self.col)
+                        _, argmax = reshaped.max(-1)
+                        qrt = self.col*self.col
+                        zCoords = argmax/qrt
+                        yCoords = (argmax - zCoords*qrt)/self.col
+                        xCoords = argmax - (zCoords*qrt + yCoords*self.col)
+
+                        dat_x[j] = (op[jj + zCoords, yCoords, xCoords] + xCoords.float()/float(self.col))*imgSize
+                        dat_y[j] = (op[jj + self.Nj*self.col + zCoords, yCoords, xCoords] + yCoords.float()/float(self.col))*imgSize
+                        dat_z[j] = (op[jj + self.Nj*self.col*2 + zCoords, yCoords, xCoords] + (zCoords - 7).float()/float(self.col))*imgSize
+
+                    '''
+                    fig = plt.figure(figsize=(2.24, 2.24))
+                    plt.subplots_adjust(left=0, right=1, bottom=0, top=1)
+
+                    img = image.numpy().transpose(1, 2, 0)
+                    plt.imshow(img, vmin=0., vmax=1.12)
+                    for j in range(self.Nj):   
+                        plt.scatter(dat_x[j], dat_y[j], color=cm.hsv(j/self.Nj),  s=10)
+
+                    plt.axis("off")
+                    plt.savefig(os.path.join(self.testout, '{}_1.png'.format(index)))
+                    plt.close(fig)
+                    '''
+
+                    fig3D = plt.figure()
+                    ax = fig3D.add_subplot(111, projection='3d')
+                    l = np.array([[0,1],[1,2],[2,3],[2,4],[5,6],[6,7],[7,8],[7,9],[10,11],[11,14],[14,13],[13,12],[15,16],[16,17],[17,18],[19,20],[20,21],[21,22],[10,0],[12,5],[0,23],[5,23],[15,23],[19,23],[0,15],[5,19],[0,5],[15,19]])
+                    for j in range(l.shape[0]):   
+                        ax.plot([dat_x[l[j][0]], dat_x[l[j][1]]], [dat_z[l[j][0]], dat_z[l[j][1]]], [dat_y[l[j][0]], dat_y[l[j][1]]], "o", color=cm.hsv(j/l.shape[0]), linestyle='-', linewidth=1, ms=2)
+
+                    ax.set_xlim(0, 224)
+                    ax.set_ylim(-112, 112)
+                    ax.set_zlim(224, 0)
+                    #plt.show()
+                    plt.savefig(os.path.join(self.testout, '{}_2.png'.format(index)))
+                    plt.close(fig3D)
+
+                elif self.NN == "MobileNet3D" or self.NN == "MnasNet3D":
+                    offset, heatmap = model(image)
+                    loss = mean_squared_error3D(offset, heatmap, pose, visibility, self.use_visibility)
+                    test_loss += loss.data
+                else :
+                    output = model(image)
+                    test_loss += mean_squared_error(output.view(-1, self.Nj, 2), pose, visibility, self.use_visibility)
+
+        log = 'Test epoch: {0}'.format(epoch)
         logger.write(log, self.colab)
         if self.useOneDrive == True:
             logger.write_oneDrive(log)
@@ -529,6 +666,10 @@ class TrainPoseNet(object):
             model = MobileNet224HM( )
         elif self.NN == "MobileNet3D":
             model = MobileNet3D( )
+        elif self.NN == "MnasNet3D":
+            model = MnasNet3D( )
+        elif self.NN == "MobileNet3D2":
+            model = MobileNet3D2( )
         else :
              model = AlexNet(self.Nj)
            
@@ -599,13 +740,10 @@ class TrainPoseNet(object):
             input_transforms.append(RandomNoise())
         
         if self.dataset3D:
-            train = PoseDataset3D(
-                self.train,
-                input_transform=transforms.Compose(input_transforms))
-            val = PoseDataset3D(
-                self.val,
-                input_transform=transforms.Compose([
-                    transforms.ToTensor()]))
+            target3D = self.target3DIndex
+
+            while os.path.exists(self.train + "_2") == False:
+                sleep(10)
         else:
             train = PoseDataset(
                 self.train,
@@ -619,9 +757,10 @@ class TrainPoseNet(object):
                 output_transform=Scale(),
                 transform=Crop(data_augmentation=False))
                 
-        # training/validation iterators.
-        train_iter = torch.utils.data.DataLoader(train, batch_size=self.batchsize, shuffle=True)
-        val_iter = torch.utils.data.DataLoader(val, batch_size=self.batchsize, shuffle=False)
+            # training/validation iterators.
+            train_iter = torch.utils.data.DataLoader(train, batch_size=self.batchsize, shuffle=True)
+            val_iter = torch.utils.data.DataLoader(val, batch_size=self.batchsize, shuffle=False)
+       
         # set up an optimizer.
         if discriminator != None:
             optimizer = optim.Adam(model.parameters(), lr=0.0002, betas=(0.5, 0.999))
@@ -652,9 +791,72 @@ class TrainPoseNet(object):
             logger.load_state_dict(resume['logger'])
         # start training.
         start_time = time.time()
-        for epoch in trange(start_epoch, self.epoch, initial=start_epoch, total=self.epoch, desc='     total'):
-            self._train(model, optimizer, train_iter, log_interval, logger, start_time, discriminator, optimizer_d, discriminator2, optimizer_d2)
-            if (epoch + 1) % val_interval == 0:
-                self._test(model, val_iter, logger, start_time)
-            if (epoch + 1) % resume_interval == 0:
-                self._checkpoint(epoch, model, optimizer, logger, discriminator, discriminator2)
+
+        if self.dataset3D:
+            cnt = 0
+            for epoch in trange(start_epoch, self.epoch, initial=start_epoch, total=self.epoch, desc='     total'):
+            
+                if target3D == 1:
+                    fileP = "_1"
+                    if cnt == 0:
+                        cnt = 0
+                        target3D = 2
+                    else:
+                        cnt = cnt + 1
+                elif target3D == 2:
+                    fileP = "_2"
+                    if cnt == 0:
+                        cnt = 0
+                        target3D = 3
+                    else:
+                        cnt = cnt + 1
+                elif target3D == 3:
+                    fileP = "_3"
+                    if cnt == 0:
+                        cnt = 0
+                        target3D = 1
+                    else:
+                        cnt = cnt + 1
+
+                train = PoseDataset3D(
+                    self.train + fileP,
+                    #input_transform=transforms.Compose(input_transforms),
+                    input_transform=transforms.Compose(input_transforms),
+                    output_transform=Scale(),
+                    transform=Crop(data_augmentation=True))
+                val = PoseDataset3D(
+                    self.val + fileP,
+                    #input_transform=transforms.Compose(input_transforms),
+                    input_transform=transforms.Compose([transforms.ToTensor()]))
+                test = PoseDataset3D(
+                    self.test,
+                    input_transform=transforms.Compose([transforms.ToTensor()]))
+                
+                # training/validation iterators.
+                train_iter = torch.utils.data.DataLoader(train, batch_size=self.batchsize, shuffle=True)
+                val_iter = torch.utils.data.DataLoader(val, batch_size=self.batchsize, shuffle=False)
+
+                self._train(model, optimizer, train_iter, log_interval, logger, start_time, discriminator, optimizer_d, discriminator2, optimizer_d2)
+                if (epoch + 1) % val_interval == 0:
+                    self._val(model, val_iter, logger, start_time)
+                    self._test(model, test, logger, start_time, epoch)
+                if (epoch + 1) % resume_interval == 0:
+                    self._checkpoint(epoch, model, optimizer, logger, discriminator, discriminator2)
+                
+                '''
+                if cnt == 0:
+                    os.remove(self.val + fileP)
+                    os.remove(self.train + fileP)
+                    sleep(5)
+
+                    while os.path.exists(self.train + fileP) == False:
+                        sleep(10)
+                '''
+
+        else:
+            for epoch in trange(start_epoch, self.epoch, initial=start_epoch, total=self.epoch, desc='     total'):
+                self._train(model, optimizer, train_iter, log_interval, logger, start_time, discriminator, optimizer_d, discriminator2, optimizer_d2)
+                if (epoch + 1) % val_interval == 0:
+                    self._val(model, val_iter, logger, start_time)
+                if (epoch + 1) % resume_interval == 0:
+                    self._checkpoint(epoch, model, optimizer, logger, discriminator, discriminator2)

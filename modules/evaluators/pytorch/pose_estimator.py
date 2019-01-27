@@ -7,7 +7,7 @@ from torchvision import transforms
 
 from modules.errors import GPUNotFoundError
 from modules.dataset_indexing.pytorch import PoseDataset, PoseDataset3D, Crop, RandomNoise, Scale
-from modules.models.pytorch import AlexNet, VGG19Net, Inceptionv3, Resnet, MobileNet, MobileNet_, MobileNet_3, MobileNet_4, MobileNet__, MobileNet___, MnasNet, MnasNet_, MnasNet56_, MobileNet3D
+from modules.models.pytorch import AlexNet, VGG19Net, Inceptionv3, Resnet, MobileNet, MobileNet_, MobileNet_3, MobileNet_4, MobileNet__, MobileNet___, MnasNet, MnasNet_, MnasNet56_, MobileNet3D, MobileNet3D2, MnasNet3D
 
 
 class PoseEstimator(object):
@@ -49,6 +49,10 @@ class PoseEstimator(object):
             self.model = AlexNet(Nj)
         elif self.NN == "MobileNet3D":
             self.model = MobileNet3D()
+        elif self.NN == "MnasNet3D":
+            self.model = MnasNet3D()
+        elif self.NN == "MobileNet3D2":
+            self.model = MobileNet3D2()
         else:
             self.model = Resnet()
 
@@ -60,6 +64,7 @@ class PoseEstimator(object):
             self.model.cuda()
         # load dataset to estimate.
         if Dataset3D:
+            '''
             self.dataset = PoseDataset3D(
                 filename,
                 input_transform=transforms.ToTensor())
@@ -69,7 +74,7 @@ class PoseEstimator(object):
                 input_transform=transforms.Compose([
                     transforms.ToTensor(),
                     RandomNoise()]))
-            '''
+            
         else:
             self.dataset = PoseDataset(
                 filename,
@@ -117,4 +122,13 @@ class PoseEstimator(object):
             v_image = v_image.cuda()
             offset, heatmap, output = self.model.forward(v_image)
         return image, offset, heatmap, output, pose
-        
+   
+    def estimate3D(self, index):
+        """ Estimate pose of i-th image. """
+        image, dist, pose2D, pose3D, v, typ, path = self.dataset[index]
+        v_image = Variable(image.unsqueeze(0))
+        if self.gpu:
+            v_image = v_image.cuda()
+            offset, heatmap, offset3D, heatmap3D = self.model.forward(v_image)
+        return image, offset, heatmap, offset3D, heatmap3D, pose2D, pose3D, path
+     

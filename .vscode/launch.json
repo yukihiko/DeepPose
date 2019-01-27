@@ -21,10 +21,11 @@
             "args": [
                 "10000",
                 "\"plot_estimating_time\"",
-                "--NN=MobileNet3D",
-                "--filename=data/test3D",
+                "--NN=MobileNet3D2",
+                "--filename=D:/work/3D_dataset/test/test3D_1",
+                "--data-augmentation",
                 "--Dataset3D",
-                "--pytorch-model-file=${workspaceFolder}/result/pytorch/epoch-15.model",
+                "--pytorch-model-file=${workspaceFolder}/result/pytorch/epoch-2.model",
                 "-g0"
             ]
         },              
@@ -83,14 +84,17 @@
                 "pytorch",
                 "-g0",
                 "--Dataset3D",
-                "--train=${workspaceFolder}/data/train3D",
-                "--val=${workspaceFolder}/data/test3D",
-                "--NN=MobileNet3D",
+                "--train=D:/work/3D_dataset/test/train3D",
+                "--val=D:/work/3D_dataset/test/test3D",
+                "--test=D:/work/3D_dataset/test/test/test3D_1",
+                "--NN=MobileNet3D2",
+                "--target3DIndex=1",
                 "--batchsize=30",
                 "--data-augmentation",
                 "--use-visibility",
                 "--useOneDrive",
                 "--out=${workspaceFolder}/result",
+                "--testout=C:/Users/aoyag/OneDrive/pytorch/image/",
                 "--opt=Adam",
                 "-e5000"
             ]
@@ -104,15 +108,18 @@
                 "pytorch",
                 "-g0",
                 "--Dataset3D",
-                "--train=${workspaceFolder}/data/train3D",
-                "--val=${workspaceFolder}/data/test3D",
-                "--NN=MobileNet3D",
-                "--batchsize=50",
+                "--train=D:/work/3D_dataset/train3D",
+                "--val=D:/work/3D_dataset/test3D",
+                "--test=D:/work/3D_dataset/test/test/test3D_1",
+                "--NN=MobileNet3D2",
+                "--target3DIndex=2",
+                "--batchsize=20",
                 "--data-augmentation",
                 "--use-visibility",
                 "--useOneDrive",
-                "--resume-model=${workspaceFolder}/result/pytorch/epoch-9.model",
+                "--resume-model=${workspaceFolder}/result/pytorch/epoch-4.model",
                 "--out=${workspaceFolder}/result",
+                "--testout=C:/Users/aoyag/OneDrive/pytorch/image/",
                 "--opt=Adam",
                 "-e5000"
             ]
@@ -150,15 +157,15 @@
             "program": "${workspaceFolder}/scripts/pytorch2onnx.py",
             "console": "none",
             "args": [
-                "--NN=MobileNetCoco14_5",
+                "--NN=MobileNet3D2",
                 "--image_size=224",
                 "--is_checkpoint=0",
-                "--NJ=17",
+                "--NJ=24",
                 "--Col=14",
-                "--input=result/pytorch/epoch-29.model",
-                "--onnx_output=result/MobileNetCoco14_5.onnx",
-                "--output=result/MobileNetCoco14_5.mlmodel",
-                "--onedrive=C:/Users/aoyag/OneDrive/pytorch/MobileNetCoco14_5.mlmodel"
+                "--input=result/pytorch/epoch-4.model",
+                "--onnx_output=result/MobileNet3D2.onnx",
+                "--output=result/MobileNet3D2.mlmodel",
+                "--onedrive=C:/Users/aoyag/OneDrive/pytorch/MobileNet3D2.mlmodel"
             ]
         },        
         {

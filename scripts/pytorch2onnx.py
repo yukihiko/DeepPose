@@ -15,7 +15,7 @@ sys.path.append("./")
 from onnx_coreml.converter import convert
 #from pytorch2keras.converter import pytorch_to_keras
 from modules.errors import FileNotFoundError, GPUNotFoundError, UnknownOptimizationMethodError, NotSupportedError
-from modules.models.pytorch import AlexNet, VGG19Net, Inceptionv3, Resnet, MobileNet, MobileNetV2, MobileNet_, MobileNet_2, MobileNet_3, MobileNet_4, MobileNet___, MnasNet, MnasNet_,MnasNet56_,MnasNet16_,MobileNet16_,MobileNet14_,MobileNet14_4,MobileNet14_5,MobileNet224HM, MobileNetCoco14_5
+from modules.models.pytorch import AlexNet, VGG19Net, Inceptionv3, Resnet, MobileNet, MobileNetV2, MobileNet_, MobileNet_2, MobileNet_3, MobileNet_4, MobileNet___, MnasNet, MnasNet_,MnasNet56_,MnasNet16_,MobileNet16_,MobileNet14_,MobileNet14_4,MobileNet14_5,MobileNet224HM, MobileNetCoco14_5,MobileNet3D,MobileNet3D2,MnasNet3D
 #from coremltools.converters.keras import convert
 from modules.dataset_indexing.pytorch import PoseDataset, Crop, RandomNoise, Scale
 from torchvision import transforms
@@ -158,7 +158,7 @@ scale = 1./ 255.
 print('converting coreml model')
 mlmodel = convert(
         onnx_model, 
-        preprocessing_args={'is_bgr':True, 'red_bias':0., 'green_bias':0., 'blue_bias':0., 'image_scale':scale},
+        preprocessing_args={'is_bgr':False, 'red_bias':0., 'green_bias':0., 'blue_bias':0., 'image_scale':scale},
         image_input_names='0')
 mlmodel.save(args.output)
 

@@ -36,6 +36,8 @@ def main():
     parser.add_argument(
         '--Dataset3D',  action='store_true')
     parser.add_argument(
+        '--data-augmentation', '-a', action='store_true', help='Crop randomly and add random noise for data augmentation.')
+    parser.add_argument(
         '--debug', action='store_true', help='Debug mode.')
     args = parser.parse_args()
     args_dict = vars(args)

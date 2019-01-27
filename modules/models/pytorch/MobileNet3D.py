@@ -9,7 +9,7 @@ class MobileNet3D(nn.Module):
     def __init__(self):
         super(MobileNet3D, self).__init__()
         self.col = 14
-        self.Nj = 23
+        self.Nj = 24
 
         def conv_bn(inp, oup, stride):
             return nn.Sequential(
