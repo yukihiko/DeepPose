@@ -9,6 +9,7 @@ import matplotlib.pyplot as plt
 import matplotlib.cm as cm
 import torch
 from mpl_toolkits.mplot3d import Axes3D
+import cv2
 
 from modules.evaluators import chainer, pytorch
 
@@ -342,7 +343,7 @@ class EstimatingTimeEvaluator(object):
                     fig = plt.figure(figsize=(2.24, 2.24))
 
                     img = image.numpy().transpose(1, 2, 0)
-                    plt.imshow(img, vmin=0., vmax=1.)
+                    plt.imshow(cv2.cvtColor(img, cv2.COLOR_BGR2RGB), vmin=0., vmax=1.)
                     for j in range(self.Nj):   
                         #if heatmap[0, j, int(yc[j]), int(xc[j])] > 0.5:
                         plt.scatter(dat_x[j], dat_y[j], color=cm.hsv(j/self.Nj),  s=10)

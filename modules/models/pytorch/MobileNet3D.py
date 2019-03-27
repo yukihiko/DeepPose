@@ -62,7 +62,8 @@ class MobileNet3D(nn.Module):
         self.model2_2 = conv_dw(1024, 1024, 1)
 
         self.heatmap = conv_last(1024, self.Nj, 1)
-        self.offset = conv_last(1024, self.Nj*3, 1)
+        self.offset2D = conv_last(1024, self.Nj*2, 1)
+        self.offset3D = conv_last(1024, self.Nj*3, 1)
 
     def forward(self, x):
         x1 = self.model(x)
@@ -86,6 +87,7 @@ class MobileNet3D(nn.Module):
 
         h = self.heatmap(x22)
         h = F.sigmoid(h)
-        o = self.offset(x22)
+        o2D = self.offset2D(x22)
+        o3D = self.offset3D(x22)
 
-        return o, h
+        return o2D, o3D, h

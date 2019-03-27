@@ -17,6 +17,13 @@ import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib.cm as cm
 from mpl_toolkits.mplot3d import Axes3D
+import cv2
+
+# Convert to Coreml
+from PIL import Image
+from onnx_tf.backend import prepare
+from onnx_coreml.converter import convert
+import onnx
 
 from modules.errors import FileNotFoundError, GPUNotFoundError, UnknownOptimizationMethodError, NotSupportedError
 from modules.models.pytorch import AlexNet, VGG19Net, Inceptionv3, Resnet
@@ -165,7 +172,7 @@ class TrainPoseNet(object):
             f = True
         return xi, yi, f
 
-    def _train(self, model, optimizer, train_iter, log_interval, logger, start_time, discriminator=None, optimizer_d=None, discriminator2=None, optimizer_d2=None):
+    def _train(self, model, optimizer, train_iter, log_interval, logger, start_time, discriminator=None, optimizer_d=None, discriminator2=None, optimizer_d2=None, test=None):
         model.train()
         if discriminator != None:
             discriminator.train()
@@ -176,8 +183,9 @@ class TrainPoseNet(object):
             discriminator2.train()
         lr = 0.1
 
+        testCounter = 0
         for iteration, batch in enumerate(tqdm(train_iter, desc='this epoch'), 1):
-            if self.NN == "MobileNet3D2":
+            if self.NN == "MobileNet3D2" or self.NN == "MobileNet3D":
                 image, dist, pose, pose3D, visibility = Variable(batch[0]), batch[1], Variable(batch[2]), Variable(batch[3]), Variable(batch[4])
                 pose3D = pose3D.cuda()
             else :
@@ -312,13 +320,17 @@ class TrainPoseNet(object):
                 heatmap = model(image)
                 loss = mean_squared_error224HM(heatmap, pose, visibility, self.use_visibility, col=224)
                 loss.backward()
-            elif self.NN == "MobileNet3D" or self.NN == "MnasNet3D":
+            elif self.NN == "MnasNet3D":
                 offset, heatmap = model(image)
-                loss = mean_squared_error3D(offset, heatmap, pose, visibility, self.use_visibility)
+                loss = mean_squared_error3D(offset, heatmap, dist, pose, pose3D, visibility, self.use_visibility)
+                loss.backward()
+            elif self.NN == "MobileNet3D":
+                offset, offset3D, heatmap = model(image)
+                loss = mean_squared_error3D(offset, offset3D, heatmap, dist, pose, pose3D, visibility, self.use_visibility)
                 loss.backward()
             elif self.NN == "MobileNet3D2":
                 offset, heatmap, offset3D, heatmap3D = model(image)
-                loss = mean_squared_error3D2(offset, heatmap, offset3D, heatmap3D, dist, pose, pose3D, visibility, self.use_visibility, batch[6])
+                loss = mean_squared_error3D2(offset, heatmap, offset3D, heatmap3D, dist, pose, pose3D, visibility, self.use_visibility, batch[5], batch[6])
                 loss.backward()
             else :
                 output = model(image)
@@ -367,22 +379,159 @@ class TrainPoseNet(object):
                     #log_d = 'elapsed_time: {0}, loss: {1}'.format(time.time() - start_time, loss)
                     logger.write(log_d, self.colab)
                 else:
-                    log = 'elapsed_time: {0}, loss: {1}'.format(time.time() - start_time, loss)
+                    log = 'iteration: {0}, elapsed_time: {1:.3f}, loss: {2:.4f}'.format(iteration, time.time() - start_time, loss)
                     logger.write(log, self.colab)
-                """
-                if loss.data[0] < 0.15 and lr > 0.001:
-                    lr = 0.001
-                    optimizer = optim.SGD(model.parameters(), lr=lr, momentum=0.9)
-                elif loss.data[0] < 0.05 and lr > 0.0005:
-                    lr = 0.0005
-                    optimizer = optim.SGD(model.parameters(), lr=lr, momentum=0.9)
-                elif loss.data[0] < 0.01 and lr > 0.0001:
-                    lr = 0.0001
-                    optimizer = optim.SGD(model.parameters(), lr=lr, momentum=0.9)
-                elif loss.data[0] < 0.005 and lr > 0.00001:
-                    lr = 0.00001
-                    optimizer = optim.SGD(model.parameters(), lr=lr, momentum=0.9)
-                """
+
+                    if test != None and iteration % 10000 == 0:
+                        index = 0
+                        outss="C:/Users/aoyag/OneDrive/pytorch/ss/"
+                        for item in test:
+                            index = index + 1
+                            image, dist, pose, pose3D, visibility = Variable(item[0]), item[1], Variable(item[2]), Variable(item[3]), Variable(item[4])
+                            v_image = Variable(image.unsqueeze(0))
+
+                            if self.gpu:
+                                v_image = v_image.cuda()
+                            #    image, pose, visibility = image.cuda(), pose.cuda(), visibility.cuda()
+                            
+                            if self.NN == "MobileNet3D":
+                                self.col = 14
+                                self.Nj = 24
+                                offset2D, offset3D, heatmap2D = model(v_image)
+                                imgSize = 224
+                                #scale = float(size)/float(self.col)
+                                reshaped = heatmap2D.view(-1, self.Nj, self.col*self.col)
+                                _, argmax = reshaped.max(-1)
+                                yCoords = argmax/self.col
+                                xCoords = argmax - yCoords*self.col
+                                xc = np.squeeze(xCoords.cpu().data.numpy())
+                                yc = np.squeeze(yCoords.cpu().data.numpy())
+                                dat_x = xc.astype(np.float32)
+                                dat_y = yc.astype(np.float32)
+                                # 最終
+                                offset_reshaped = offset2D.view(-1, self.Nj * 2, self.col,self.col)
+                                op = np.squeeze(offset_reshaped.cpu().data.numpy())
+                                for j in range(self.Nj):
+                                    #dat_x[j] = (dat_x[j]/float(self.col)) * imgSize
+                                    #dat_y[j] = (dat_y[j]/float(self.col)) * imgSize
+                                    dat_x[j] = (op[j, int(yc[j]), int(xc[j])] + dat_x[j]/float(self.col)) * imgSize
+                                    dat_y[j] = (op[j + self.Nj, int(yc[j]), int(xc[j])] + dat_y[j]/float(self.col)) * imgSize
+
+                                fig = plt.figure(figsize=(2.24, 2.24))
+
+                                plt.subplots_adjust(left=0, right=1, bottom=0, top=1)
+
+                                img = image.numpy().transpose(1, 2, 0)
+                                plt.imshow(cv2.cvtColor(img, cv2.COLOR_BGR2RGB), vmin=0., vmax=1.12)
+                                l = np.array([[0,1],[1,2],[2,3],[2,4],[5,6],[6,7],[7,8],[7,9],[10,11],[11,14],[14,13],[13,12],[15,16],[16,17],[17,18],[19,20],[20,21],[21,22],[10,0],[12,5],[0,23],[5,23],[15,23],[19,23],[0,15],[5,19],[0,5],[15,19]])
+                                for j in range(l.shape[0]):   
+                                    plt.plot([dat_x[l[j][0]], dat_x[l[j][1]]], [dat_y[l[j][0]], dat_y[l[j][1]]], "o", color=cm.hsv(j/l.shape[0]), linestyle='-', linewidth=1, ms=2)
+
+                                plt.axis("off")
+                                plt.savefig(os.path.join(outss, '{}_1.png'.format(index)))
+                                plt.close(fig)
+
+                                
+                                scale = 1.0
+                                dat_x = xc.astype(np.float32)
+                                dat_y = yc.astype(np.float32)
+                                dat_z = np.zeros(self.Nj, dtype=np.float32)
+                                offset_reshaped = offset3D.view(-1, self.Nj * 3, self.col,self.col)
+                                op = np.squeeze(offset_reshaped.cpu().data.numpy())
+
+                                for j in range(self.Nj):
+                                    dat_x[j] = (op[j, int(yc[j]), int(xc[j])] + dat_x[j]/float(self.col)) * imgSize
+                                    dat_y[j] = (op[j + self.Nj, int(yc[j]), int(xc[j])] + dat_y[j]/float(self.col)) * imgSize
+                                    dat_z[j] = (op[j + self.Nj*2, int(yc[j]), int(xc[j])]) * imgSize
+
+                                fig3D = plt.figure()
+                                ax = fig3D.add_subplot(111, projection='3d')
+                                for j in range(l.shape[0]):   
+                                    ax.plot([dat_x[l[j][0]], dat_x[l[j][1]]], [dat_z[l[j][0]], dat_z[l[j][1]]], [dat_y[l[j][0]], dat_y[l[j][1]]], "o", color=cm.hsv(j/l.shape[0]), linestyle='-', linewidth=1, ms=2)
+                                    ax.plot([dat_x[l[j][0]], dat_x[l[j][1]]], [112, 112], [dat_y[l[j][0]], dat_y[l[j][1]]], "o", color='gray', linestyle='-', linewidth=1, ms=2)
+                                    ax.plot([dat_x[l[j][0]], dat_x[l[j][1]]], [dat_z[l[j][0]], dat_z[l[j][1]]], [224, 224], "o", color='gray', linestyle='-', linewidth=1, ms=2)
+                                    ax.plot([0, 0], [dat_z[l[j][0]], dat_z[l[j][1]]], [dat_y[l[j][0]], dat_y[l[j][1]]], "o", color='gray', linestyle='-', linewidth=1, ms=2)
+
+                                ax.set_xlim(0, 224)
+                                ax.set_ylim(-112, 112)
+                                ax.set_zlim(224, 0)
+                                #plt.show()
+                                plt.savefig(os.path.join(outss, '{}_2.png'.format(index)))
+                                plt.close(fig3D)  
+                                
+                            
+                            elif self.NN == "MobileNet3D2":
+                                self.col = 14
+                                self.Nj = 24
+                                offset2D, heatmap2D, offset3D, heatmap3D = model(v_image)
+                                imgSize = 224
+                                #scale = float(size)/float(self.col)
+                                reshaped = heatmap2D.view(-1, self.Nj, self.col*self.col)
+                                _, argmax = reshaped.max(-1)
+                                yCoords = argmax/self.col
+                                xCoords = argmax - yCoords*self.col
+                                xc = np.squeeze(xCoords.cpu().data.numpy())
+                                yc = np.squeeze(yCoords.cpu().data.numpy())
+                                dat_x = xc.astype(np.float32)
+                                dat_y = yc.astype(np.float32)
+                                # 最終
+                                offset_reshaped = offset2D.view(-1, self.Nj * 2, self.col,self.col)
+                                op = np.squeeze(offset_reshaped.cpu().data.numpy())
+                                for j in range(self.Nj):
+                                    dat_x[j] = (op[j, int(yc[j]), int(xc[j])] + dat_x[j]/float(self.col)) * imgSize
+                                    dat_y[j] = (op[j + self.Nj, int(yc[j]), int(xc[j])] + dat_y[j]/float(self.col)) * imgSize
+
+                                fig = plt.figure(figsize=(2.24, 2.24))
+
+                                plt.subplots_adjust(left=0, right=1, bottom=0, top=1)
+
+                                img = image.numpy().transpose(1, 2, 0)
+                                plt.imshow(cv2.cvtColor(img, cv2.COLOR_BGR2RGB), vmin=0., vmax=1.12)
+                                l = np.array([[0,1],[1,2],[2,3],[2,4],[5,6],[6,7],[7,8],[7,9],[10,11],[11,14],[14,13],[13,12],[15,16],[16,17],[17,18],[19,20],[20,21],[21,22],[10,0],[12,5],[0,23],[5,23],[15,23],[19,23],[0,15],[5,19],[0,5],[15,19]])
+                                for j in range(l.shape[0]):   
+                                    plt.plot([dat_x[l[j][0]], dat_x[l[j][1]]], [dat_y[l[j][0]], dat_y[l[j][1]]], "o", color=cm.hsv(j/l.shape[0]), linestyle='-', linewidth=1, ms=2)
+
+                                plt.axis("off")
+                                plt.savefig(os.path.join(outss, '{}_1.png'.format(index)))
+                                plt.close(fig)
+
+                                #3D
+                                scale = 1.0
+                                dat_x = np.zeros(self.Nj, dtype=np.float32)
+                                dat_y = np.zeros(self.Nj, dtype=np.float32)
+                                dat_z = np.zeros(self.Nj, dtype=np.float32)
+                                offset_reshaped = offset3D.view(-1, self.Nj*self.col * 3, self.col,self.col)
+                                op = np.squeeze(offset_reshaped.cpu().data.numpy())
+
+                                for j in range(self.Nj):
+
+                                    jj = j * self.col
+                    
+                                    hp = heatmap3D[:, jj:jj+self.col].squeeze()
+                                    reshaped = hp.view(self.col*self.col*self.col)
+                                    _, argmax = reshaped.max(-1)
+                                    qrt = self.col*self.col
+                                    zCoords = argmax/qrt
+                                    yCoords = (argmax - zCoords*qrt)/self.col
+                                    xCoords = argmax - (zCoords*qrt + yCoords*self.col)
+
+                                    dat_x[j] = (op[jj + zCoords, yCoords, xCoords] + xCoords.float()/float(self.col))*imgSize
+                                    dat_y[j] = (op[jj + self.Nj*self.col + zCoords, yCoords, xCoords] + yCoords.float()/float(self.col))*imgSize
+                                    dat_z[j] = (op[jj + self.Nj*self.col*2 + zCoords, yCoords, xCoords] + (zCoords - 7).float()/float(self.col))*imgSize
+
+                                fig3D = plt.figure()
+                                ax = fig3D.add_subplot(111, projection='3d')
+                                for j in range(l.shape[0]):   
+                                    ax.plot([dat_x[l[j][0]], dat_x[l[j][1]]], [dat_z[l[j][0]], dat_z[l[j][1]]], [dat_y[l[j][0]], dat_y[l[j][1]]], "o", color=cm.hsv(j/l.shape[0]), linestyle='-', linewidth=1, ms=2)
+                                    ax.plot([dat_x[l[j][0]], dat_x[l[j][1]]], [112, 112], [dat_y[l[j][0]], dat_y[l[j][1]]], "o", color='gray', linestyle='-', linewidth=1, ms=2)
+                                    ax.plot([dat_x[l[j][0]], dat_x[l[j][1]]], [dat_z[l[j][0]], dat_z[l[j][1]]], [224, 224], "o", color='gray', linestyle='-', linewidth=1, ms=2)
+                                    ax.plot([0, 0], [dat_z[l[j][0]], dat_z[l[j][1]]], [dat_y[l[j][0]], dat_y[l[j][1]]], "o", color='gray', linestyle='-', linewidth=1, ms=2)
+
+                                ax.set_xlim(0, 224)
+                                ax.set_ylim(-112, 112)
+                                ax.set_zlim(224, 0)
+                                plt.savefig(os.path.join(outss, '{}_2.png'.format(index)))
+                                plt.close(fig3D)              
                 try:
                     torch.save(model, 'D:/github/DeepPose/result/pytorch/lastest.ptn.tar')
                     torch.save(model.state_dict(), 'D:/github/DeepPose/result/pytorch/lastest.model')
@@ -390,7 +539,7 @@ class TrainPoseNet(object):
                         if discriminator2 != None:
                             logger.write_oneDrive(log_d)
                         else:
-                            torch.save(model.state_dict(), 'C:/Users/aoyag/OneDrive/pytorch/lastest.model')
+                            #torch.save(model.state_dict(), 'C:/Users/aoyag/OneDrive/pytorch/lastest.model')
                             logger.write_oneDrive(log)
                     if discriminator != None:
                         torch.save(discriminator.state_dict(), 'D:/github/DeepPose/result/pytorch/lastest_d.model')
@@ -406,6 +555,9 @@ class TrainPoseNet(object):
         with torch.no_grad():
             for batch in test_iter:
                 if self.NN == "MobileNet3D2":
+                    image, dist, pose, pose3D, visibility = Variable(batch[0]), batch[1], Variable(batch[2]), Variable(batch[3]), Variable(batch[4])
+                    pose3D = pose3D.cuda()
+                elif self.NN == "MobileNet3D":
                     image, dist, pose, pose3D, visibility = Variable(batch[0]), batch[1], Variable(batch[2]), Variable(batch[3]), Variable(batch[4])
                     pose3D = pose3D.cuda()
                 else :
@@ -453,20 +605,24 @@ class TrainPoseNet(object):
                     heatmap = model(image)
                     loss = mean_squared_error224HM(heatmap, pose, visibility, self.use_visibility, col=224)
                     test_loss += loss.data
-                elif self.NN == "MobileNet3D" or self.NN == "MnasNet3D":
+                elif self.NN == "MnasNet3D":
                     offset, heatmap = model(image)
-                    loss = mean_squared_error3D(offset, heatmap, pose, visibility, self.use_visibility)
+                    loss = mean_squared_error3D(offset, heatmap, dist, pose, pose3D, visibility, self.use_visibility)
+                    test_loss += loss.data
+                elif self.NN == "MobileNet3D":
+                    offset, offset3D, heatmap = model(image)
+                    loss = mean_squared_error3D(offset, offset3D, heatmap, dist, pose, pose3D, visibility, self.use_visibility)
                     test_loss += loss.data
                 elif self.NN == "MobileNet3D2":
                     offset, heatmap, offset3D, heatmap3D = model(image)
-                    loss = mean_squared_error3D2(offset, heatmap, offset3D, heatmap3D, dist, pose, pose3D, visibility, self.use_visibility, batch[6])
+                    loss = mean_squared_error3D2(offset, heatmap, offset3D, heatmap3D, dist, pose, pose3D, visibility, self.use_visibility, batch[5], batch[6])
                     test_loss += loss.data
                 else :
                     output = model(image)
                     test_loss += mean_squared_error(output.view(-1, self.Nj, 2), pose, visibility, self.use_visibility)
 
         test_loss /= len(test_iter)
-        log = 'elapsed_time: {0}, validation/loss: {1}'.format(time.time() - start_time, test_loss)
+        log = 'elapsed_time: {0}, validation/loss: {1:.4f}'.format(time.time() - start_time, test_loss)
         logger.write(log, self.colab)
         if self.useOneDrive == True:
             logger.write_oneDrive(log)
@@ -503,16 +659,20 @@ class TrainPoseNet(object):
                     op = np.squeeze(offset_reshaped.cpu().data.numpy())
                     for j in range(self.Nj):
                         dat_x[j] = (op[j, int(yc[j]), int(xc[j])] + dat_x[j]/float(self.col)) * imgSize
-                        dat_y[j] = (op[j + 14, int(yc[j]), int(xc[j])] + dat_y[j]/float(self.col)) * imgSize
+                        dat_y[j] = (op[j + self.Nj, int(yc[j]), int(xc[j])] + dat_y[j]/float(self.col)) * imgSize
 
                     fig = plt.figure(figsize=(2.24, 2.24))
 
                     plt.subplots_adjust(left=0, right=1, bottom=0, top=1)
 
                     img = image.numpy().transpose(1, 2, 0)
-                    plt.imshow(img, vmin=0., vmax=1.12)
-                    for j in range(self.Nj):   
-                        plt.scatter(dat_x[j], dat_y[j], color=cm.hsv(j/self.Nj),  s=10)
+                    plt.imshow(cv2.cvtColor(img, cv2.COLOR_BGR2RGB), vmin=0., vmax=1.12)
+                    l = np.array([[0,1],[1,2],[2,3],[2,4],[5,6],[6,7],[7,8],[7,9],[10,11],[11,14],[14,13],[13,12],[15,16],[16,17],[17,18],[19,20],[20,21],[21,22],[10,0],[12,5],[0,23],[5,23],[15,23],[19,23],[0,15],[5,19],[0,5],[15,19]])
+                    for j in range(l.shape[0]):   
+                        plt.plot([dat_x[l[j][0]], dat_x[l[j][1]]], [dat_y[l[j][0]], dat_y[l[j][1]]], "o", color=cm.hsv(j/l.shape[0]), linestyle='-', linewidth=1, ms=2)
+                        #plt.scatter(dat_x[j], dat_y[j], color=cm.hsv(j/self.Nj),  s=10)
+                    #for j in range(self.Nj):   
+                    #    plt.scatter(dat_x[j], dat_y[j], color=cm.hsv(j/self.Nj),  s=10)
 
                     plt.axis("off")
                     plt.savefig(os.path.join(self.testout, '{}_1.png'.format(index)))
@@ -558,9 +718,11 @@ class TrainPoseNet(object):
 
                     fig3D = plt.figure()
                     ax = fig3D.add_subplot(111, projection='3d')
-                    l = np.array([[0,1],[1,2],[2,3],[2,4],[5,6],[6,7],[7,8],[7,9],[10,11],[11,14],[14,13],[13,12],[15,16],[16,17],[17,18],[19,20],[20,21],[21,22],[10,0],[12,5],[0,23],[5,23],[15,23],[19,23],[0,15],[5,19],[0,5],[15,19]])
                     for j in range(l.shape[0]):   
                         ax.plot([dat_x[l[j][0]], dat_x[l[j][1]]], [dat_z[l[j][0]], dat_z[l[j][1]]], [dat_y[l[j][0]], dat_y[l[j][1]]], "o", color=cm.hsv(j/l.shape[0]), linestyle='-', linewidth=1, ms=2)
+                        ax.plot([dat_x[l[j][0]], dat_x[l[j][1]]], [112, 112], [dat_y[l[j][0]], dat_y[l[j][1]]], "o", color='gray', linestyle='-', linewidth=1, ms=2)
+                        ax.plot([dat_x[l[j][0]], dat_x[l[j][1]]], [dat_z[l[j][0]], dat_z[l[j][1]]], [224, 224], "o", color='gray', linestyle='-', linewidth=1, ms=2)
+                        ax.plot([0, 0], [dat_z[l[j][0]], dat_z[l[j][1]]], [dat_y[l[j][0]], dat_y[l[j][1]]], "o", color='gray', linestyle='-', linewidth=1, ms=2)
 
                     ax.set_xlim(0, 224)
                     ax.set_ylim(-112, 112)
@@ -569,7 +731,74 @@ class TrainPoseNet(object):
                     plt.savefig(os.path.join(self.testout, '{}_2.png'.format(index)))
                     plt.close(fig3D)
 
-                elif self.NN == "MobileNet3D" or self.NN == "MnasNet3D":
+                elif self.NN == "MobileNet3D":
+                    self.col = 14
+                    self.Nj = 24
+                    offset2D, offset3D, heatmap2D = model(v_image)
+                    imgSize = 224
+                    #scale = float(size)/float(self.col)
+                    reshaped = heatmap2D.view(-1, self.Nj, self.col*self.col)
+                    _, argmax = reshaped.max(-1)
+                    yCoords = argmax/self.col
+                    xCoords = argmax - yCoords*self.col
+                    xc = np.squeeze(xCoords.cpu().data.numpy())
+                    yc = np.squeeze(yCoords.cpu().data.numpy())
+                    dat_x = xc.astype(np.float32)
+                    dat_y = yc.astype(np.float32)
+                    # 最終
+                    offset_reshaped = offset2D.view(-1, self.Nj * 2, self.col,self.col)
+                    op = np.squeeze(offset_reshaped.cpu().data.numpy())
+                    for j in range(self.Nj):
+                        #dat_x[j] = ( dat_x[j]/float(self.col)) * imgSize
+                        #dat_y[j] = ( dat_y[j]/float(self.col)) * imgSize
+                        dat_x[j] = (op[j, int(yc[j]), int(xc[j])] + dat_x[j]/float(self.col)) * imgSize
+                        dat_y[j] = (op[j + self.Nj, int(yc[j]), int(xc[j])] + dat_y[j]/float(self.col)) * imgSize
+
+                    fig = plt.figure(figsize=(2.24, 2.24))
+
+                    plt.subplots_adjust(left=0, right=1, bottom=0, top=1)
+
+                    img = image.numpy().transpose(1, 2, 0)
+                    plt.imshow(cv2.cvtColor(img, cv2.COLOR_BGR2RGB), vmin=0., vmax=1.12)
+                    l = np.array([[0,1],[1,2],[2,3],[2,4],[5,6],[6,7],[7,8],[7,9],[10,11],[11,14],[14,13],[13,12],[15,16],[16,17],[17,18],[19,20],[20,21],[21,22],[10,0],[12,5],[0,23],[5,23],[15,23],[19,23],[0,15],[5,19],[0,5],[15,19]])
+                    for j in range(l.shape[0]):   
+                        plt.plot([dat_x[l[j][0]], dat_x[l[j][1]]], [dat_y[l[j][0]], dat_y[l[j][1]]], "o", color=cm.hsv(j/l.shape[0]), linestyle='-', linewidth=1, ms=2)
+
+                    plt.axis("off")
+                    plt.savefig(os.path.join(self.testout, '{}_1.png'.format(index)))
+                    plt.close(fig)
+
+                    #3D
+                    
+                    scale = 1.0
+                    dat_x = xc.astype(np.float32)
+                    dat_y = yc.astype(np.float32)
+                    dat_z = np.zeros(self.Nj, dtype=np.float32)
+                    offset_reshaped = offset3D.view(-1, self.Nj * 3, self.col,self.col)
+                    op = np.squeeze(offset_reshaped.cpu().data.numpy())
+
+                    for j in range(self.Nj):
+                        dat_x[j] = (op[j, int(yc[j]), int(xc[j])] + dat_x[j]/float(self.col)) * imgSize
+                        dat_y[j] = (op[j + self.Nj, int(yc[j]), int(xc[j])] + dat_y[j]/float(self.col)) * imgSize
+                        dat_z[j] = (op[j + self.Nj*2, int(yc[j]), int(xc[j])]) * imgSize
+
+                    fig3D = plt.figure()
+                    ax = fig3D.add_subplot(111, projection='3d')
+                    for j in range(l.shape[0]):   
+                        ax.plot([dat_x[l[j][0]], dat_x[l[j][1]]], [dat_z[l[j][0]], dat_z[l[j][1]]], [dat_y[l[j][0]], dat_y[l[j][1]]], "o", color=cm.hsv(j/l.shape[0]), linestyle='-', linewidth=1, ms=2)
+                        ax.plot([dat_x[l[j][0]], dat_x[l[j][1]]], [112, 112], [dat_y[l[j][0]], dat_y[l[j][1]]], "o", color='gray', linestyle='-', linewidth=1, ms=2)
+                        ax.plot([dat_x[l[j][0]], dat_x[l[j][1]]], [dat_z[l[j][0]], dat_z[l[j][1]]], [224, 224], "o", color='gray', linestyle='-', linewidth=1, ms=2)
+                        ax.plot([0, 0], [dat_z[l[j][0]], dat_z[l[j][1]]], [dat_y[l[j][0]], dat_y[l[j][1]]], "o", color='gray', linestyle='-', linewidth=1, ms=2)
+
+                    ax.set_xlim(0, 224)
+                    ax.set_ylim(-112, 112)
+                    ax.set_zlim(224, 0)
+                    #plt.show()
+                    plt.savefig(os.path.join(self.testout, '{}_2.png'.format(index)))
+                    plt.close(fig3D)  
+                    
+
+                elif self.NN == "MnasNet3D":
                     offset, heatmap = model(image)
                     loss = mean_squared_error3D(offset, heatmap, pose, visibility, self.use_visibility)
                     test_loss += loss.data
@@ -577,17 +806,49 @@ class TrainPoseNet(object):
                     output = model(image)
                     test_loss += mean_squared_error(output.view(-1, self.Nj, 2), pose, visibility, self.use_visibility)
 
-        log = 'Test epoch: {0}'.format(epoch)
-        logger.write(log, self.colab)
+        if epoch != 0:
+            log = 'Test epoch: {0}'.format(epoch)
+            logger.write(log, self.colab)
+            if self.useOneDrive == True:
+                logger.write_oneDrive(log)
+                
+        ##################
+        # export to ONNF
+        #img_path = "im07276.jpg"
+        #img = Image.open(img_path).convert('RGB')
+        #img = img.resize((224, 224))
+        #arr = np.asarray(img, dtype=np.float32)[np.newaxis, :, :, :]
+        #dummy_input = Variable(torch.from_numpy(arr.transpose(0, 3, 1, 2)/255.)).cuda()
+        ################
+        #_ = model.forward(dummy_input)
+        
+        print('converting to ONNX')
+        fileNum = epoch + 1
+        onnx_output = os.path.join(self.out, 'MobileNet3D2_ep{}.onnx'.format(fileNum))
+        torch.onnx.export(model,v_image , onnx_output)
+        onnx_model = onnx.load(onnx_output)
+        onnx.checker.check_model(onnx_model)
+        scale = 1./ 255.
+        print('converting coreml model')
+        mlmodel = convert(
+                onnx_model, 
+                preprocessing_args={'is_bgr':True, 'red_bias':0., 'green_bias':0., 'blue_bias':0., 'image_scale':scale},
+                image_input_names='0')
+        mlmodel.save(os.path.join(self.out, '{0}_ep{1}.mlmodel'.format(self.NN, fileNum)))
+
         if self.useOneDrive == True:
-            logger.write_oneDrive(log)
+            print('save  onedrive')
+            mlmodel.save(os.path.join(self.testout, '{0}_ep{1}.mlmodel'.format(self.NN, fileNum)))
 
     def _checkpoint(self, epoch, model, optimizer, logger, discriminator=None, discriminator2=None):
         filename = os.path.join(self.out, 'pytorch', 'epoch-{0}'.format(epoch + 1))
         torch.save({'epoch': epoch + 1, 'logger': logger.state_dict()}, filename + '.iter')
         torch.save(model.state_dict(), filename + '.model')
         torch.save(optimizer.state_dict(), filename + '.state')
-                            
+        if self.useOneDrive == True:
+            print('save model to onedrive')
+            torch.save(model.state_dict(), os.path.join(self.testout, 'epoch-{0}'.format(epoch + 1)) + '.model')
+     
         if discriminator != None:
             torch.save(discriminator.state_dict(), filename + '_d.model')
                             
@@ -797,10 +1058,10 @@ class TrainPoseNet(object):
             for epoch in trange(start_epoch, self.epoch, initial=start_epoch, total=self.epoch, desc='     total'):
             
                 if target3D == 1:
-                    fileP = "_1"
+                    fileP = "_1_2"
                     if cnt == 0:
                         cnt = 0
-                        target3D = 2
+                        #target3D = 2
                     else:
                         cnt = cnt + 1
                 elif target3D == 2:
@@ -814,31 +1075,42 @@ class TrainPoseNet(object):
                     fileP = "_3"
                     if cnt == 0:
                         cnt = 0
-                        target3D = 1
+                        #target3D = 1
                     else:
                         cnt = cnt + 1
+        
+                test = PoseDataset3D(
+                    self.test,
+                    input_transform=transforms.Compose([transforms.ToTensor()]),
+                    affine=False, clop=False)
+                #self._test(model, test, logger, start_time, epoch)
 
                 train = PoseDataset3D(
                     self.train + fileP,
                     #input_transform=transforms.Compose(input_transforms),
                     input_transform=transforms.Compose(input_transforms),
                     output_transform=Scale(),
-                    transform=Crop(data_augmentation=True))
+                    transform=Crop(data_augmentation=True),
+                    lsp=True)
                 val = PoseDataset3D(
                     self.val + fileP,
                     #input_transform=transforms.Compose(input_transforms),
-                    input_transform=transforms.Compose([transforms.ToTensor()]))
-                test = PoseDataset3D(
-                    self.test,
                     input_transform=transforms.Compose([transforms.ToTensor()]))
                 
                 # training/validation iterators.
                 train_iter = torch.utils.data.DataLoader(train, batch_size=self.batchsize, shuffle=True)
                 val_iter = torch.utils.data.DataLoader(val, batch_size=self.batchsize, shuffle=False)
+                
+                #self._test(model, test, logger, start_time, epoch)
 
-                self._train(model, optimizer, train_iter, log_interval, logger, start_time, discriminator, optimizer_d, discriminator2, optimizer_d2)
+                self._train(model, optimizer, train_iter, log_interval, logger, start_time, discriminator, optimizer_d, discriminator2, optimizer_d2, test)
                 if (epoch + 1) % val_interval == 0:
                     self._val(model, val_iter, logger, start_time)
+
+                    test = PoseDataset3D(
+                        self.test,
+                        input_transform=transforms.Compose([transforms.ToTensor()]),
+                        affine=False, clop=False)
                     self._test(model, test, logger, start_time, epoch)
                 if (epoch + 1) % resume_interval == 0:
                     self._checkpoint(epoch, model, optimizer, logger, discriminator, discriminator2)

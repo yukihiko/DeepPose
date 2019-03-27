@@ -18,6 +18,19 @@ class MeanSquaredError3D(nn.Module):
         self.tmp_size = 3.0
         self.gaussian = 1.0
 
+        self.lengs = np.array([[[0,1],[5,6]], [[1,2],[6,7]], [[2,3],[7,8]],[[2,4],[7,9]], [[15,16],[19,20]], [[16,17],[20,21]], [[17,18],[21,22]], [[0,23],[5,23]], [[15,23],[19,23]] ])
+
+        # # 3D Generate gaussian
+        self.gaussianM = torch.zeros((7,7,7), dtype=torch.float64)
+        gx = np.arange(0, 7, 1, np.float32)
+        gy = gx[:, np.newaxis]
+        x0 = y0 = z0 = 3
+        self.gaussian2DM = np.exp(- ((gx - x0) ** 2 + (gy - y0) ** 2) / 2)
+        
+        for z in range(7):
+            #print(np.exp(- ((gx - x0) ** 2 + (gy - y0) ** 2 + (z - z0) ** 2) / 2))
+            self.gaussianM[z, :, :] = torch.Tensor(np.exp(- ((gx - x0) ** 2 + (gy - y0) ** 2 + (z - z0) ** 2) / 2))
+
     def min_max(self, x, axis=None):
         min = x.min(axis=axis, keepdims=True)
         max = x.max(axis=axis, keepdims=True)
@@ -32,7 +45,7 @@ class MeanSquaredError3D(nn.Module):
         return xi, yi, f
 
     def forward(self, *inputs):
-        o, h, t, v = inputs
+        o2D, o3D, h, d, t2D, t3D, v = inputs
         
         #最終
         scale = 1./float(self.col)
@@ -41,42 +54,39 @@ class MeanSquaredError3D(nn.Module):
         yCoords = argmax/self.col
         xCoords = argmax - yCoords*self.col
 
-        x = Variable(torch.zeros(t.size()).float(), requires_grad=True).cuda()
+        x2D = Variable(torch.zeros(t2D.size()).float(), requires_grad=True).cuda()
+        x3D = Variable(torch.zeros(t3D.size()).float(), requires_grad=True).cuda()
 
         s = h.size()
         tt = torch.zeros(s).float()
-        ti = t*self.col
-
-        feat_stride = 224. / float(self.col)
+        v3D = v.clone()
 
         for i in range(s[0]):
             for j in range(self.Nj):
                 #if h[i, j, yCoords[i, j], xCoords[i, j]] > 0.5:
-                x[i, j, 0] = o[i, j, yCoords[i, j], xCoords[i, j]] + xCoords[i, j].float() * scale
-                x[i, j, 1] = o[i, j + self.Nj, yCoords[i, j], xCoords[i, j]] + yCoords[i, j].float() * scale
-                x[i, j, 2] = o[i, j + self.Nj*2, yCoords[i, j], xCoords[i, j]]
-
+                x2D[i, j, 0] = o2D[i, j, yCoords[i, j], xCoords[i, j]] + xCoords[i, j].float() * scale
+                x2D[i, j, 1] = o2D[i, j + self.Nj, yCoords[i, j], xCoords[i, j]] + yCoords[i, j].float() * scale
+                
+                if d[i] <= -990:
+                    v3D[i, :, :] = 0
+                else:
+                    x3D[i, j, 0] = o3D[i, j, yCoords[i, j], xCoords[i, j]] + xCoords[i, j].float() * scale
+                    x3D[i, j, 1] = o3D[i, j + self.Nj, yCoords[i, j], xCoords[i, j]] + yCoords[i, j].float() * scale
+                    x3D[i, j, 2] = o3D[i, j + self.Nj*2, yCoords[i, j], xCoords[i, j]]
+                
                 if int(v[i, j, 0]) == 1:
-                    mu_x = int(t[i, j, 0]*self.col + 0.5)
-                    mu_y = int(t[i, j, 1]*self.col + 0.5)
+                    mu_x = int(t2D[i, j, 0]*self.col + 0.5)
+                    mu_y = int(t2D[i, j, 1]*self.col + 0.5)
                     # Check that any part of the gaussian is in-bounds
                     ul = [int(mu_x - self.tmp_size), int(mu_y - self.tmp_size)]
                     br = [int(mu_x + self.tmp_size + 1), int(mu_y + self.tmp_size + 1)]
-                    if ul[0] >= self.col or ul[1] >= self.col or br[0] < 0 or br[1] < 0:
+                    if ul[0] >= self.col or ul[1] >= self.col or br[0] <= 0 or br[1] <= 0:
                         # If not, just return the image as is
                         v[i, j, 0] = 0
                         v[i, j, 1] = 0
                         v[i, j, 2] = 0
+                        v3D[i, :, :] = 0
                         continue
-
-                    # # Generate gaussian
-                    gsize = 2 * self.tmp_size + 1
-                    gx = np.arange(0, gsize, 1, np.float32)
-                    gy = gx[:, np.newaxis]
-                    x0 = y0 = gsize // 2
-                    # The gaussian is not normalized, we want the center value to equal 1
-                    #g = np.exp(- ((gx - x0) ** 2 + (gy - y0) ** 2) / (2 * 1. ** 2))
-                    g = np.exp(- ((gx - x0) ** 2 + (gy - y0) ** 2) / 2)
 
                     # Usable gaussian range
                     g_x = max(0, -ul[0]), min(br[0], self.col) - ul[0]
@@ -85,21 +95,8 @@ class MeanSquaredError3D(nn.Module):
                     img_x = max(0, ul[0]), min(br[0], self.col)
                     img_y = max(0, ul[1]), min(br[1], self.col)
 
-                    tt[i, j][img_y[0]:img_y[1], img_x[0]:img_x[1]] = torch.Tensor(g[g_y[0]:g_y[1], g_x[0]:g_x[1]]) 
-                        
-                    '''
-                    xi, yi, f = self.checkMatrix(int(ti[i, j, 0]), int(ti[i, j, 1]))
-                    
-                    if f == True:
-                        # 正規分布に近似したサンプルを得る
-                        # 平均は 100 、標準偏差を 1 
-                        tt[i, j, yi, xi]  = 1
-                        tt[i, j] = self.min_max(fi.gaussian_filter(tt[i, j], self.gaussian))
-                    else:
-                        v[i, j, 0] = 0
-                        v[i, j, 1] = 0
-                        v[i, j, 2] = 0
-                    '''
+                    tt[i, j][img_y[0]:img_y[1], img_x[0]:img_x[1]] = torch.Tensor(self.gaussian2DM[g_y[0]:g_y[1], g_x[0]:g_x[1]]) 
+
         tt = Variable(tt).cuda()
 
         diff1 = h - tt
@@ -114,17 +111,61 @@ class MeanSquaredError3D(nn.Module):
         d1 = diff1.dot(diff1) / cnt
         #return d1
 
-        diff2 = x - t
-        diff2 = diff2*v
+        vv = v[:,:,:2]
+        diff2 = x2D - t2D
+        diff2 = diff2*vv
         N2 = (v.sum()/3)
         diff2 = diff2.view(-1)
         d2 = diff2.dot(diff2)/N2
+        #return d1 + d2
 
-        return d1 + d2
+        diff3 = x3D - t3D
+        diff3 = diff3*v3D
+        N3 = (v3D.sum()/3)
+        diff3 = diff3.view(-1)
+        d3 = diff3.dot(diff3)/N3
+
+        #return d1 + d2 + d3
         
 
+        lengV = 0
+        ll = 0
 
-def mean_squared_error3D(o, h, t, v, use_visibility=False, col=14):
+        for i in range(self.lengs.shape[0]): 
+            idx00 = self.lengs[i][0][0]
+            idx01 = self.lengs[i][0][1]
+            idx10 = self.lengs[i][1][0]
+            idx11 = self.lengs[i][1][1]
+            vv = v[:, idx00] * v[: , idx01] * v[:, idx10] * v[:, idx11]
+            le0 = (x3D[:, idx00] - x3D[:, idx01])*vv
+            le1 = (x3D[:, idx10] - x3D[:, idx11])*vv
+            le0 = le0.view(-1)
+            le1 = le1.view(-1)
+            le0s = torch.sqrt(le0.dot(le0))
+            le1s = torch.sqrt(le1.dot(le1))
+            dleng = le0s - le1s
+            lengV = lengV + (vv.sum()/3)
+
+            #ll = ll + torch.sqrt(dleng*dleng)
+            ll = ll + dleng*dleng
+            
+            '''
+            lt0 = (t3D[:, idx00] - t3D[:, idx01])*vv
+            lt1 = (t3D[:, idx10] - t3D[:, idx11])*vv
+            lt0 = lt0.view(-1)
+            lt1 = lt1.view(-1)
+            tleng0 = (le0s - torch.sqrt(lt0.dot(lt0)))
+            tleng1 = (le1s - torch.sqrt(lt1.dot(lt1)))
+            ll = ll + torch.sqrt(dleng*dleng) + torch.sqrt(tleng0*tleng0) + torch.sqrt(tleng1*tleng1)
+            '''
+
+        #seiyaku
+        
+        d4 = ll/lengV
+
+        return d1 + d2 + d3 + d4
+
+def mean_squared_error3D(o, o3D, h, d, t, t3D, v, use_visibility=False, col=14):
     """ Computes mean squared error over the minibatch.
 
     Args:
@@ -137,4 +178,4 @@ def mean_squared_error3D(o, h, t, v, use_visibility=False, col=14):
     Returns:
         Variable: A variable holding a scalar of the mean squared error loss.
     """
-    return MeanSquaredError3D(use_visibility, col=col)(o, h, t, v)
+    return MeanSquaredError3D(use_visibility, col=col)(o, o3D, h, d, t, t3D, v)

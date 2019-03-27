@@ -18,7 +18,7 @@ class MeanSquaredError3D2(nn.Module):
         self.tmp_size = 3.0
         self.gaussian = 1.0
 
-        self.lengs = np.array([[[0,1],[5,6]], [[1,2],[6,7]], [[2,3],[7,8]],[[2,4],[7,9]], [[15,16],[19,20]], [[16,17],[20,21]], [[17,18],[21,22]], [[0,23],[5,23]], [[15,23],[19,23]], [[0,1],[0,5]], [[6,7],[15,19]] ])
+        self.lengs = np.array([[[0,1],[5,6]], [[1,2],[6,7]], [[2,3],[7,8]],[[2,4],[7,9]], [[15,16],[19,20]], [[16,17],[20,21]], [[17,18],[21,22]], [[0,23],[5,23]], [[15,23],[19,23]], [[10,11],[12,13]], [[11,14],[13,14]] ])
 
         # # 3D Generate gaussian
         self.gaussianM = torch.zeros((7,7,7), dtype=torch.float64)
@@ -45,7 +45,7 @@ class MeanSquaredError3D2(nn.Module):
         return xi, yi, f
 
     def forward(self, *inputs):
-        o, h, o3D, h3D, d, t, t3D, v, path = inputs
+        o, h, o3D, h3D, d, t, t3D, v, i_type, path = inputs
         
         #最終
         scale = 1./float(self.col)
@@ -63,6 +63,7 @@ class MeanSquaredError3D2(nn.Module):
         x3D = Variable(torch.zeros(t3D.size()).float(), requires_grad=True).cuda()
         s3D = h3D.size()
         tt3D = torch.zeros(s3D).float()
+        v3D = v.clone()
 
         for i in range(s3D[0]):
             for j in range(self.Nj):
@@ -83,6 +84,7 @@ class MeanSquaredError3D2(nn.Module):
                         v[i, j, 0] = 0
                         v[i, j, 1] = 0
                         v[i, j, 2] = 0
+                        v3D[i, j, :] = 0
                         continue
 
                     # Usable gaussian range
@@ -94,9 +96,10 @@ class MeanSquaredError3D2(nn.Module):
 
                     tt[i, j][img_y[0]:img_y[1], img_x[0]:img_x[1]] = torch.Tensor(self.gaussian2DM[g_y[0]:g_y[1], g_x[0]:g_x[1]]) 
 
-                if d <= -990:
+                if d[i] <= -990:
+                    v3D[i, j, :] = 0.0
                     continue
-                
+
                 # 3D判定
                 jj = j * self.col
     
@@ -121,7 +124,12 @@ class MeanSquaredError3D2(nn.Module):
 
                 if  t3D[i,j, 0] == float('inf') or t3D[i,j, 0] == float('-inf')  :
                     v[i, j] = 0
+                    v3D[i, j] = 0
                     tt3D[i, j] = 0
+                    continue
+
+                if d[i] <= -990:
+                    v3D[i, j, :] = 0
                     continue
 
                 if int(v[i, j, 0]) == 1 :
@@ -138,6 +146,7 @@ class MeanSquaredError3D2(nn.Module):
                         v[i, j, 0] = 0
                         v[i, j, 1] = 0
                         v[i, j, 2] = 0
+                        v3D[i, j, :] = 0
                         continue
 
                     # Usable gaussian range
@@ -167,60 +176,88 @@ class MeanSquaredError3D2(nn.Module):
                 else:
                     cnt = cnt + 1
         diff1 = diff1.view(-1)
-        d1 = torch.sqrt(diff1.dot(diff1)) / cnt
+        d1 = diff1.dot(diff1) / cnt
 
         vv = v[:,:,:2]
         diff2 = x - t
         diff2 = diff2*vv
         N2 = (v.sum()/3)
         diff2 = diff2.view(-1)
-        d2 = torch.sqrt(diff2.dot(diff2))/N2
+        d2 = diff2.dot(diff2)/N2
 
-        if d <= -990:
-            return d1 + d2
+        #return d1 + d2
 
         #3D
-
+        '''
+        for i in range(s3D[0]):
+            if d[i] < -990:
+                v[i, :, :] = 0
+        '''
         tt3D = Variable(tt3D).cuda()
 
         diff3 = h3D - tt3D
         cnt = 0
         for i in range(s3D[0]):
             for j in range(self.Nj):
-                if int(v[i, j, 0]) == 0:
+                if int(v3D[i, j, 0]) == 0:
                     jj = j * self.col
                     diff3[i, jj:jj+self.col] = diff3[i, jj:jj+self.col]*0
                 else:
                     cnt = cnt + 1
+        if cnt == 0:
+            return d1 + d2
         diff3 = diff3.view(-1)
-        d3 = torch.sqrt(diff3.dot(diff3)) / cnt
+        d3 = diff3.dot(diff3) / cnt
 
         diff4 = x3D - t3D
-        diff4 = diff4*v
-        N4 = (v.sum()/3)
+        diff4 = diff4*v3D
+        N4 = (v3D.sum()/3)
         diff4 = diff4.view(-1)
-        d4 = torch.sqrt(diff4.dot(diff4))/N4
+        d4 = diff4.dot(diff4)/N4
 
         return d1 + d2 + d3 + d4
 
-        le = x3D[:, 0]*v[:, 0] - x3D[:, 1]*v[:, 1]
-        le = le.view(-1)
-        ll = torch.sqrt(le.dot(le))
+        vl = v.clone()
+        '''
+        # 2Dは全身が入っている画像なので
+        for i in range(s[0]):
+            if i_type[i] != "N":
+                vl[i] = 1
+        '''
+        lengV = 0
+        ll = 0
 
         for i in range(self.lengs.shape[0]): 
             idx00 = self.lengs[i][0][0]
             idx01 = self.lengs[i][0][1]
             idx10 = self.lengs[i][1][0]
             idx11 = self.lengs[i][1][1]
-            vv = v[:, idx00] * v[: , idx01] * v[:, idx10] * v[:, idx11]
+            vv = vl[:, idx00] * vl[: , idx01] * vl[:, idx10] * vl[:, idx11]
             le0 = (x3D[:, idx00] - x3D[:, idx01])*vv
             le1 = (x3D[:, idx10] - x3D[:, idx11])*vv
             le0 = le0.view(-1)
             le1 = le1.view(-1)
-            dleng = (torch.sqrt(le0.dot(le0)) - torch.sqrt(le1.dot(le1)))
-            ll = ll + torch.sqrt(dleng*dleng)
+            le0s = torch.sqrt(le0.dot(le0))
+            le1s = torch.sqrt(le1.dot(le1))
+            dleng = le0s - le1s
+            lengV = lengV + (vv.sum()/3)
 
-        return d1 + d2 + d3 + d4 + ll/self.lengs.shape[0]
+            #ll = ll + torch.sqrt(dleng*dleng)
+            ll = ll + dleng*dleng
+
+            '''
+            lt0 = (t3D[:, idx00] - t3D[:, idx01])*vv
+            lt1 = (t3D[:, idx10] - t3D[:, idx11])*vv
+            lt0 = lt0.view(-1)
+            lt1 = lt1.view(-1)
+            tleng0 = (le0s - torch.sqrt(lt0.dot(lt0)))
+            tleng1 = (le1s - torch.sqrt(lt1.dot(lt1)))
+            ll = ll + torch.sqrt(dleng*dleng) + torch.sqrt(tleng0*tleng0) + torch.sqrt(tleng1*tleng1)
+            '''
+
+        d5 = ll/lengV
+
+        return d1 + d2 + d3 + d4 + d5
 
         vecX = x3D[:, :23, 0] - x[:, :23, 0]
         vecY = x3D[:, :23, 1] - x[:, :23, 1]
@@ -247,12 +284,12 @@ class MeanSquaredError3D2(nn.Module):
 
         lx = lx.view(-1)
         ly = ly.view(-1)
-        d5 = torch.sqrt((lx.dot(lx) + ly.dot(ly))) / (cnt * 2)
+        d6 = torch.sqrt((lx.dot(lx) + ly.dot(ly))) / (cnt * 2)
 
-        return d1 + d2 + d3 + d4 + d5
+        return d1 + d2 + d3 + d4 + d5 + d6
         
 
-def mean_squared_error3D2(o, h, o3D, h3D, d, t, t3D, v, use_visibility=False, path = None,col=14):
+def mean_squared_error3D2(o, h, o3D, h3D, d, t, t3D, v, use_visibility=False, i_type = "N", path = None,col=14):
     """ Computes mean squared error over the minibatch.
 
     Args:
@@ -265,4 +302,4 @@ def mean_squared_error3D2(o, h, o3D, h3D, d, t, t3D, v, use_visibility=False, pa
     Returns:
         Variable: A variable holding a scalar of the mean squared error loss.
     """
-    return MeanSquaredError3D2(use_visibility, col=col)(o, h, o3D, h3D, d, t, t3D, v, path)
+    return MeanSquaredError3D2(use_visibility, col=col)(o, h, o3D, h3D, d, t, t3D, v, i_type, path)
